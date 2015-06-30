@@ -1,8 +1,9 @@
 #include <string>
-#include <istream>
+#include <iostream>
 #include <fstream>
 namespace circos
 {
+	using std::ostream;
 	struct color
 	{
 		int r;
@@ -16,7 +17,13 @@ namespace circos
 		{
 			
 		}
+		
 	};
+	ostream& operator<<(ostream& in_stream,const color& in_color)
+	{
+		in_stream << "rgb(" << in_color.r << "," << in_color.g << "," << in_color.b << ")";
+		return in_stream;
+	}
 	struct gradient
 	{
 		color color_begin;

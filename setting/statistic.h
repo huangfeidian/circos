@@ -5,11 +5,11 @@ namespace circos
 	struct statistic_setting
 	{
 		color statistic_color;
-		int begin;
-		int end;
+		float begin_angle;
+		float end_angle;
 		float opacity;
 		float value;
-		statistic_setting() :statistic_color(), begin(0), end(0), opacity(1)
+		statistic_setting() :statistic_color(), begin_angle(0), end_angle(0), opacity(1)
 		{
 
 		}
