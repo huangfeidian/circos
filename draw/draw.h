@@ -65,8 +65,22 @@ namespace circos
 		{
 
 		}
+	};
+	struct Track
+	{
+		bool cross;
+		int on_radius;
+		int control_radius;
+		float begin_from_angle;
+		float end_from_angle;
+		float begin_to_angle;
+		float end_to_angle;
+		color track_color;
+		float opacity;
+		Track() :cross(false),on_radius(0), control_radius(0), begin_from_angle(0), end_from_angle(0), begin_to_angle(0), end_to_angle(0)
+		{
 
-
+		}
 	};
 	ostream& operator<<(ostream& in_stream, SvgPoint in_point)
 	{
@@ -97,9 +111,9 @@ namespace circos
 			control_point = polar_to_catersian(in_link.control_radius, (in_link.begin_angle + in_link.end_angle) / 2-PI/2);
 		}
 		in_stream << "<path d=\" ";
-		in_stream << "M " << from_point<<" ";
-		in_stream << "Q" << control_point << " ";
-		in_stream << to_point << " ";
+		in_stream << "M " << from_point;
+		in_stream << "Q" << control_point ;
+		in_stream << to_point ;
 		in_stream << "fill= \"none\"" << " ";
 		in_stream << "stroke=\"" << in_link.link_color << "\" ";
 		in_stream << "stroke-width=\"" << in_link.stroke_width << "\" ";
@@ -107,6 +121,45 @@ namespace circos
 		in_stream << "/>" << endl;
 
 	}
+	ostream& operator<<(ostream& in_stream, Track in_track)
+	{
+		SvgPoint begin_from;
+		SvgPoint end_from;
+		SvgPoint begin_to;
+		SvgPoint end_to;
+		SvgPoint control_point;
+		begin_from = polar_to_catersian(in_track.on_radius, in_track.begin_from_angle);
+		end_from = polar_to_catersian(in_track.on_radius, in_track.end_from_angle);
+		begin_to = polar_to_catersian(in_track.on_radius, in_track.begin_to_angle);
+		end_to = polar_to_catersian(in_track.on_radius, in_track.end_to_angle);
+		control_point = polar_to_catersian(in_track.control_radius, (in_track.begin_from_angle + in_track.end_to_angle) / 2);
+		if (in_track.cross)
+		{
+
+			in_stream << "path d=\" M" << begin_from;
+			in_stream << "Q " << control_point <<begin_to;
+			in_stream << CircularArc(end_to, in_track.on_radius, 0, 1);
+			in_stream << "Q " << control_point << end_from;
+			in_stream << CircularArc(begin_from, in_track.on_radius, 0, 0);
+			in_stream << "fill= \"" << in_track.track_color << "\" ";
+			in_stream << "opacity=\"" << in_track.opacity << "\"";
+			in_stream << "/>" << endl;
+		}
+		else
+		{
+			in_stream << "path d=\" M" << begin_from;
+			in_stream << CircularArc(end_from, in_track.on_radius, 0, 1);
+			in_stream << "Q " << control_point << begin_to;
+			in_stream << CircularArc(end_to, in_track.on_radius, 0, 1);
+			in_stream << "Q " << control_point << begin_from;
+			in_stream << "fill= \"" << in_track.track_color << "\" ";
+			in_stream << "opacity=\"" << in_track.opacity << "\"";
+			in_stream << "/>" << endl;
+		}
+		return in_stream;
+
+	}
+
 	void draw(std::stringstream& output, const vector<circle_setting>& circles)
 	{
 		//<circle cx = "50" cy = "50" r = "40" stroke = "black" stroke - width = "3" fill = "red" / >
@@ -167,13 +220,19 @@ namespace circos
 
 		}
 	}
-	void draw(std::stringstream& output, const circle_setting& on_circle, const vector<arc_setting>& arcs)
+	void draw(std::stringstream& output, const circle_setting& on_circle, const vector<BesielLink>& BesielLinks)
 	{
-
+		for (auto i : BesielLinks)
+		{
+			output << i;
+		}
 	}
-	void draw(std::stringstream& output, const circle_setting& on_circle, const vector<track_setting>& tracks)
+	void draw(std::stringstream& output, const circle_setting& on_circle, const vector<Track>& tracks)
 	{
-
+		for (auto i : tracks)
+		{
+			output << i;
+		}
 	}
 	void draw(std::stringstream& output, const circle_setting& on_cicle, const vector<statistic_setting> statistics)
 	{
