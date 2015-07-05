@@ -22,7 +22,7 @@ namespace circos
 		CircularArc(int in_radius, float begin_angle, float end_angle,int in_sweep_flag=1) 
 			:from_point(in_radius, begin_angle), to_point(in_radius, end_angle), sweep_flag(in_sweep_flag)
 		{
-			if (end_angle - begin_angle > PI / 2)
+			if (abs(end_angle - begin_angle )> PI / 2)
 			{
 				large_flag = 1;
 			}
@@ -65,36 +65,39 @@ namespace circos
 		{
 
 		}
+		friend ostream& operator<<(ostream& in_stream, BesielLink in_link)
+		{
+			//<path d="M200,300 Q400,50 600,300 " fill = "none" stroke = "red" stroke - width = "5" / >
+			SvgPoint from_point;
+			SvgPoint to_point;
+			SvgPoint control_point;
+			from_point = SvgPoint(in_link.on_radius, in_link.begin_angle);
+			to_point = SvgPoint(in_link.on_radius, in_link.end_angle);
+			if (abs(in_link.end_angle - in_link.begin_angle) < PI / 2)
+			{
+				control_point = SvgPoint(in_link.control_radius, (in_link.begin_angle + in_link.end_angle) / 2);
+			}
+			else
+			{
+				control_point = SvgPoint(in_link.control_radius, (in_link.begin_angle + in_link.end_angle) / 2 - PI / 2);
+			}
+			in_stream << "<path d=\" ";
+			in_stream << "M " << from_point;
+			in_stream << "Q" << control_point;
+			in_stream << to_point;
+			in_stream << "fill= \"none\"" << " ";
+			in_stream << "stroke=\"" << in_link.link_color << "\" ";
+			in_stream << "stroke-width=\"" << in_link.stroke_width << "\" ";
+			in_stream << "opacity=\"" << in_link.opacity << "\" ";
+			in_stream << "/>" << endl;
+
+		}
 	};
-
-
-
-	ostream& operator<<(ostream& in_stream, BesielLink in_link)
+	void draw(ostream& output, const circle& on_circle, const vector<BesielLink>& BesielLinks)
 	{
-		//<path d="M200,300 Q400,50 600,300 " fill = "none" stroke = "red" stroke - width = "5" / >
-		SvgPoint from_point;
-		SvgPoint to_point;
-		SvgPoint control_point;
-		from_point = SvgPoint(in_link.on_radius, in_link.begin_angle);
-		to_point = SvgPoint(in_link.on_radius, in_link.end_angle);
-		if (abs(in_link.end_angle - in_link.begin_angle) < PI / 2)
+		for (auto i : BesielLinks)
 		{
-			control_point = SvgPoint(in_link.control_radius, (in_link.begin_angle + in_link.end_angle) / 2);
+			output << i;
 		}
-		else
-		{
-			control_point = SvgPoint(in_link.control_radius, (in_link.begin_angle + in_link.end_angle) / 2 - PI / 2);
-		}
-		in_stream << "<path d=\" ";
-		in_stream << "M " << from_point;
-		in_stream << "Q" << control_point;
-		in_stream << to_point;
-		in_stream << "fill= \"none\"" << " ";
-		in_stream << "stroke=\"" << in_link.link_color << "\" ";
-		in_stream << "stroke-width=\"" << in_link.stroke_width << "\" ";
-		in_stream << "opacity=\"" << in_link.opacity << "\" ";
-		in_stream << "/>" << endl;
-
 	}
-
 }

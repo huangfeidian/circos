@@ -67,7 +67,7 @@ namespace circos
 			line_color = other_line.line_color;
 			opacity = other_line.opacity;
 		}
-		SvgLine(const SvgPoint& in_from, const SvgPoint& in_to, const color& in_color,int in_width=0)
+		SvgLine(const SvgPoint& in_from, const SvgPoint& in_to, const color& in_color,int in_width)
 			:from(in_from), to(in_to), line_color(in_color), width(in_width)
 		{
 			opacity = 1;

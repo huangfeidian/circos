@@ -3,10 +3,16 @@
 #include "point.h"
 #include <string>
 #include <type_traits>
+#include <sstream>
+#include <streambuf>
 using std::string;
 using std::vector;
 using std::is_base_of;
 using std::enable_if;
+using std::stringbuf;
+using std::endl;
+using std::stoi;
+using std::stof;
 namespace circos
 {
 
@@ -19,11 +25,104 @@ namespace circos
 		float angle_end;
 		float angle_per_unit;
 		float opacity;
+		int on_circle;
+		string band_label;
 		band() :band_color(), begin(0), end(0), opacity(1)
 		{
 
 		}
+		band(const string& input)
+		{
+			stringstream input_buf(input);
+			string head;
+			input_buf >> head;
+			if (head.compare("band") != 0)
+			{
+				std::cout << "error while parse " << input << " to band\n";
+				std::cout << "the head is " << head << endl;
+				exit(1);
+			}
+			string circle_id;
+			input_buf >> circle_id;
+			auto circle_position = circle_to_index.find(circle_id);
+			if ( circle_position== circle_to_index.end())
+			{
+				std::cout << "error while lookup circle label " << circle_id;
+				exit(1);
+			}
+			on_circle = circle_position->second;
+			input_buf >> band_label;
+			int begin;
+			input_buf >> begin;
+			int end;
+			input_buf >> end;
+			string colorful;
+			input_buf >> colorful;
+			band_color = color(colorful);
+			string optional;
+			input_buf >> optional;
+			
+			while( optional.length()>0)
+			{
+				auto delimiter = optional.find('=');
+				string option_label = optional.substr(0, delimiter);
+				string option_value = optional.substr(delimiter + 1);
+				if (option_label.compare("opacity") == 0)
+				{
+					opacity = stof(option_value);
+				}
+				else
+				{
+					std::cout << "unknown optional value " << optional<<std::endl;
+					exit(1);
+				}
+				input_buf >> optional;
+			}
+		}
 	};
+	void draw_band(ostream& output, const circle& on_circle, const vector<band>& bands)
+	{
+		//<path d="M300,200 h-150 a150,150 0 1,0 150,-150 z" fill = "red" stroke = "blue" stroke - width = "5" / >
+		int band_number = bands.size();
+		int band_size = 0;
+		for (auto i : bands)
+		{
+			band_size += i.end - i.begin;
+		}
+		float pixel_per_unit = (2 * PI*on_circle.inner_radius - band_number*on_circle.gap) / band_size;
+		SvgPoint p_1, p_2, p_3, p_4;
+		int band_begin, band_end;
+		band_begin = 0;
+		int sweep_flag = 1;
+		int large_arc = 0;
+		CircularArc arc_to_draw;
+		for (auto i : bands)
+		{
+			//对于这个band 我们需要先向上，然后顺时针，然后向下，然后逆时针
+			float angle_begin = band_begin / on_circle.inner_radius;
+			float angle_end = angle_begin + ((i.end - i.begin)*pixel_per_unit) / on_circle.inner_radius;
+			p_1 = SvgPoint(on_circle.inner_radius, angle_begin);
+			p_2 = SvgPoint(on_circle.outer_radius, angle_begin);
+			p_3 = SvgPoint(on_circle.outer_radius, angle_end);
+			p_4 = SvgPoint(on_circle.inner_radius, angle_end);
+			if (angle_end - angle_begin > PI / 2)//这个圆弧超过了半个圆，需要考虑large_arc的问题
+			{
+				large_arc = 1;
+			}
+			output << "<path d=\"";
+			//output << " M " << p_1.x << "," << p_1.y;
+			output << " M " << p_2;
+			output << CircularArc(on_circle.outer_radius,angle_begin,angle_end, 1);
+			output << "L " << p_4;
+			output << CircularArc( on_circle.inner_radius, angle_end,angle_begin, 0);
+			output << "z\" ";
+			output << "fill=\"" << i.band_color << "\" ";
+			output << "opacity=\"" << i.opacity << "\"";
+			output << "/>" << endl;
+			band_begin += on_circle.gap + (i.end - i.begin)*pixel_per_unit;
+
+		}
+	}
 	struct onband
 	{
 		color band_color;
@@ -32,6 +131,7 @@ namespace circos
 		float angle_begin;
 		float angle_end;
 		float opacity;
+		int on_this_band;
 		onband() :band_color(), begin(0), end(0), opacity(1)
 		{
 
@@ -40,7 +140,6 @@ namespace circos
 	template<typename T> enable_if<is_base_of<onband, T>::value,void>
 		normalize_onbands(const band& in_band, vector<T>& onbands)//这里只针对onband类型
 	{
-		static_assert ( is_base_of<onband, T>::value, "type is not extended from onband\n" ) ;
 		float angle_offset;
 		float end_angle;
 		for (auto& i : onbands)
@@ -58,6 +157,53 @@ namespace circos
 		fill_onband() :onband()
 		{
 
+		}
+		fill_onband(string input) 
+		{
+			stringstream input_buf(input);
+			string head;
+			input_buf >> head;
+			if (head.compare("onband") != 0)
+			{
+				std::cout << "error while parse " << input << " to onband\n";
+				std::cout << "the head is " << head << endl;
+				exit(1);
+			}
+			string band_id;
+			input_buf >> band_id;
+			auto band_position = band_to_index.find(band_id);
+			if (band_position == band_to_index.end())
+			{
+				std::cout << "error while lookup band label " << band_id;
+				exit(1);
+			}
+			on_this_band = band_position->second;
+			int begin;
+			input_buf >> begin;
+			int end;
+			input_buf >> end;
+			string colorful;
+			input_buf >> colorful;
+			band_color = color(colorful);
+			string optional;
+			input_buf >> optional;
+
+			while (optional.length()>0)
+			{
+				auto delimiter = optional.find('=');
+				string option_label = optional.substr(0, delimiter);
+				string option_value = optional.substr(delimiter + 1);
+				if (option_label.compare("opacity") == 0)
+				{
+					opacity = stof(option_value);
+				}
+				else
+				{
+					std::cout << "unknown optional value " << optional << std::endl;
+					exit(1);
+				}
+				input_buf >> optional;
+			}
 		}
 	};
 	template<>
@@ -101,6 +247,52 @@ namespace circos
 		label_onband() :onband(), align(1), font_size(30), text("0")
 		{
 
+		}
+		label_onband(const string& input)
+		{
+			stringstream input_buf(input);
+			string head;
+			input_buf >> head;
+			if (head.compare("onband") != 0)
+			{
+				std::cout << "error while parse " << input << " to onband\n";
+				std::cout << "the head is " << head << endl;
+				exit(1);
+			}
+			string band_id;
+			input_buf >> band_id;
+			auto band_position = band_to_index.find(band_id);
+			if (band_position == band_to_index.end())
+			{
+				std::cout << "error while lookup band label " << band_id;
+				exit(1);
+			}
+			on_this_band = band_position->second;
+			input_buf >> begin;
+			input_buf >> end;
+			input_buf >> font_size;
+			input_buf >> align;
+			input_buf >> text;
+			input_buf >> band_color;
+			string optional;
+			input_buf >> optional;
+
+			while (optional.length() > 0)
+			{
+				auto delimiter = optional.find('=');
+				string option_label = optional.substr(0, delimiter);
+				string option_value = optional.substr(delimiter + 1);
+				if (option_label.compare("opacity") == 0)
+				{
+					opacity = stof(option_value);
+				}
+				else
+				{
+					std::cout << "unknown optional value " << optional << std::endl;
+					exit(1);
+				}
+				input_buf >> optional;
+			}
 		}
 	};
 	template<>
@@ -168,6 +360,53 @@ namespace circos
 		{
 
 		}
+		tick_onband(const string& input)
+		{
+			stringstream input_buf(input);
+			string head;
+			input_buf >> head;
+			if (head.compare("onband") != 0)
+			{
+				std::cout << "error while parse " << input << " to onband\n";
+				std::cout << "the head is " << head << endl;
+				exit(1);
+			}
+			string band_id;
+			input_buf >> band_id;
+			auto band_position = band_to_index.find(band_id);
+			if (band_position == band_to_index.end())
+			{
+				std::cout << "error while lookup band label " << band_id;
+				exit(1);
+			}
+			on_this_band = band_position->second;
+			input_buf >> begin;
+			input_buf >> end;
+			input_buf >> width;
+			input_buf >> height;
+			string colorful;
+			input_buf >> colorful;
+			band_color = color(colorful);
+			string optional;
+			input_buf >> optional;
+
+			while (optional.length()>0)
+			{
+				auto delimiter = optional.find('=');
+				string option_label = optional.substr(0, delimiter);
+				string option_value = optional.substr(delimiter + 1);
+				if (option_label.compare("opacity") == 0)
+				{
+					opacity = stof(option_value);
+				}
+				else
+				{
+					std::cout << "unknown optional value " << optional << std::endl;
+					exit(1);
+				}
+				input_buf >> optional;
+			}
+		}
 	};
 	template<>
 	void draw_onbands<tick_onband>(ostream& output, const circle& on_circle, const tick_onband& onbands)
@@ -185,6 +424,49 @@ namespace circos
 		value_onband() :onband(), draw_type(stat_type::histogram), value(0)
 		{
 
+		}
+		value_onband(const string& input)
+		{
+			stringstream input_buf(input);
+			string head;
+			input_buf >> head;
+			if (head.compare("onband") != 0)
+			{
+				std::cout << "error while parse " << input << " to onband\n";
+				std::cout << "the head is " << head << endl;
+				exit(1);
+			}
+			string band_id;
+			input_buf >> band_id;
+			auto band_position = band_to_index.find(band_id);
+			if (band_position == band_to_index.end())
+			{
+				std::cout << "error while lookup band label " << band_id;
+				exit(1);
+			}
+			on_this_band = band_position->second;
+			input_buf >> begin;
+			input_buf >> end;
+			input_buf >> value;
+			input_buf>>band_color;
+			string optional;
+			input_buf >> optional;
+			while (optional.length()>0)
+			{
+				auto delimiter = optional.find('=');
+				string option_label = optional.substr(0, delimiter);
+				string option_value = optional.substr(delimiter + 1);
+				if (option_label.compare("opacity") == 0)
+				{
+					opacity = stof(option_value);
+				}
+				else
+				{
+					std::cout << "unknown optional value " << optional << std::endl;
+					exit(1);
+				}
+				input_buf >> optional;
+			}
 		}
 	};
 	template<>
@@ -265,6 +547,33 @@ namespace circos
 		output << "transform=\"rotate(" << angle << " " << p.x << " " << p.y << ")\"";
 		output << "/>\n";
 
+	}
+	template<typename T>
+	void draw_onbands(ostream& output, const circle& on_circle, const vector<T>& onbands_vector)
+	{
+		for (const auto i : onbands_vector)
+		{
+			output << i;
+		}
+	}
+	template<>
+	void draw_onbands<value_onband>(ostream& output, const circle& on_circle, const vector<value_onband>& onbands_vector)
+	{
+		switch (onbands_vector[0].draw_type)
+		{
+		case stat_type::heatmap:
+		case stat_type::histogram:
+			for (const auto i : onbands_vector)
+			{
+				draw_heatmap(output, on_circle, i);
+			}
+			break;
+		case stat_type::linechart:
+			draw_linechart(output, on_circle, onbands_vector);
+			break;
+		default:
+			break;
+		}
 	}
 
 }
