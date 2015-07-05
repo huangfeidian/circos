@@ -4,259 +4,34 @@
 #include "../setting/band.h"
 #include "../setting/statistic.h"
 #include "../setting/enum.h"
+
 #include <sstream>
 #include <string>
 #include <vector>
 #include <math.h>
+using std::vector;
+using std::endl;
 namespace circos
 {
-#define PI 3.14159
-	using std::vector;
-	using std::endl;
+
 	int background_radius;
 	color backgroud_color;
-	struct SvgPoint
-	{
-		int x;
-		int y;
-		SvgPoint():x(0),y(0)
-		{
+	
+	
+	
+	
+	
 
-		}
-		SvgPoint(int in_x, int in_y) :x(in_x), y(in_y)
-		{
-
-		}
-	};
-	SvgPoint polar_to_catersian(int radius, float angle)
-	{
-		int dx, dy;
-		dx = radius*sin(angle);
-		dy = -radius*cos(angle);
-		return SvgPoint(dx+background_radius, dy+background_radius);
-
-	}
-	struct CircularArc
-	{
-		SvgPoint to_point;
-		int radius;
-		int large_flag;
-		int sweep_flag;
-		CircularArc() :radius(0), large_flag(0), sweep_flag(0)
-		{
-
-		}
-		CircularArc(SvgPoint point, int in_radius,int in_large, int in_sweep)
-			:to_point(point), radius(in_radius),large_flag(in_large), sweep_flag(in_sweep)
-		{
-
-		}
-	};
-	struct BesielLink
-	{
-		int on_radius;
-		int control_radius;
-		float begin_angle;
-		float end_angle;
-		int stroke_width;
-		color link_color;
-		float opacity;
-		BesielLink() :on_radius(0), control_radius(0), begin_angle(0), end_angle(0), stroke_width(0), opacity(0)
-		{
-
-		}
-	};
-	struct Track
-	{
-		bool cross;
-		int on_radius;
-		int control_radius;
-		float begin_from_angle;
-		float end_from_angle;
-		float begin_to_angle;
-		float end_to_angle;
-		color track_color;
-		float opacity;
-		Track() :cross(false),on_radius(0), control_radius(0), begin_from_angle(0), end_from_angle(0), begin_to_angle(0), end_to_angle(0)
-		{
-
-		}
-	};
-	ostream& operator<<(ostream& in_stream, SvgPoint in_point)
-	{
-		in_stream << in_point.x << "," << in_point.y << " ";
-		return in_stream;
-	}
-	ostream& operator<<(ostream& in_stream, CircularArc in_arc)
-	{
-		in_stream <<  " A " << in_arc.radius << "," << in_arc.radius << " ";
-		in_stream << 0 << " " << in_arc.large_flag << "," << in_arc.sweep_flag << " ";
-		in_stream << in_arc.to_point;
-		return in_stream;
-	}
-	ostream& operator<<(ostream& in_stream, BesielLink in_link)
-	{
-		//<path d="M200,300 Q400,50 600,300 " fill = "none" stroke = "red" stroke - width = "5" / >
-		SvgPoint from_point;
-		SvgPoint to_point;
-		SvgPoint control_point;
-		from_point = polar_to_catersian(in_link.on_radius, in_link.begin_angle);
-		to_point = polar_to_catersian(in_link.on_radius, in_link.end_angle);
-		if (abs(in_link.end_angle - in_link.begin_angle) < PI / 2)
-		{
-			control_point = polar_to_catersian(in_link.control_radius, (in_link.begin_angle + in_link.end_angle) / 2);
-		}
-		else
-		{
-			control_point = polar_to_catersian(in_link.control_radius, (in_link.begin_angle + in_link.end_angle) / 2-PI/2);
-		}
-		in_stream << "<path d=\" ";
-		in_stream << "M " << from_point;
-		in_stream << "Q" << control_point ;
-		in_stream << to_point ;
-		in_stream << "fill= \"none\"" << " ";
-		in_stream << "stroke=\"" << in_link.link_color << "\" ";
-		in_stream << "stroke-width=\"" << in_link.stroke_width << "\" ";
-		in_stream << "opacity=\"" << in_link.opacity << "\" ";
-		in_stream << "/>" << endl;
-
-	}
-	void draw_linechart(ostream& output,const circle_setting& on_circle, const vector<value_region>& in_statistics)
-	{
-		SvgPoint p[2];
-		int stroke_width = (on_circle.outer_radius - on_circle.inner_radius) / 20;//we make the width to 1/20 of circle width
-		int on_radius = in_statistics[0].value*(on_circle.outer_radius - on_circle.inner_radius) + on_circle.inner_radius;
-		p[0] = polar_to_catersian( on_radius,in_statistics[0].begin_angle);
-		on_radius = in_statistics[1].value*(on_circle.outer_radius - on_circle.inner_radius) + on_circle.inner_radius;
-		p[1] = polar_to_catersian(on_radius, in_statistics[1].begin_angle);
-		output << "<line ";
-		output << "x1=\"" << p[0].x << "\" " << "y1=\"" << p[0].y << "\" ";
-		output << "x2=\"" << p[1].x << "\" " << "y2=\"" << p[1].y << "\" ";
-		output << "stroke-width=\"" << stroke_width << "\" ";
-		output << "stroke=\"" << in_statistics[0].statistic_color<<"\"";
-		output << "opacity=\"" << in_statistics[0].opacity << "\"";
-		output << "/>\n";
-		for (int i = 2; i < in_statistics.size(); i++)
-		{
-			on_radius = in_statistics[i].value*(on_circle.outer_radius - on_circle.inner_radius) + on_circle.inner_radius;
-			p[i % 2] = polar_to_catersian(on_radius, in_statistics[i].begin_angle);
-			output << "<line ";
-			output << "x1=\"" << p[i%2].x << "\" " << "y1=\"" << p[i%2].y << "\" ";
-			output << "x2=\"" << p[(i - 1) % 2].x << "\" " << "y2=\"" << p[(i - 1) % 2].y << "\" ";
-			output << "stroke-width=\"" << stroke_width << "\" ";
-			output << "stroke=\"" << in_statistics[i-1].statistic_color << "\"";
-			output << "opacity=\"" << in_statistics[i-1].opacity << "\"";
-			output << "/>\n";
-		}
-		
-	}
-	void draw_histogram(ostream& output, const circle_setting& on_circle, const vector<value_region>& in_statistics)
-	{
-		SvgPoint p;
-		int width;
-		int height;
-		int angle;
-		for (auto i : in_statistics)
-		{
-			height = (i.end_angle - i.begin_angle)*on_circle.inner_radius;
-			width = i.value*(on_circle.outer_radius - on_circle.inner_radius);
-			angle = (270 + (i.begin_angle * 360 / PI));
-			p = polar_to_catersian(on_circle.inner_radius, i.begin_angle);
-			output << "<rect x=\"" << p.x << "\" " << "y=\"" << p.y << "\" ";
-			output << "width=\"" << width << "\" ";
-			output << "height=\"" << height << "\" ";
-			output << "fill=\"" << i.statistic_color << "\"";
-			output << "transform=\"rotate(" << angle << " " << p.x << " " << p.y << ")\"";
-			output << "/>\n";
-		}
-	}
-	void draw_heatmap(ostream& output, const circle_setting& on_circle, const vector<value_region>& in_statistics)
-	{
-		SvgPoint p;
-		int width;
-		int height;
-		int angle;
-		color current_color;
-		for (auto i : in_statistics)
-		{
-			height = (i.end_angle - i.begin_angle)*on_circle.inner_radius;
-			width = i.value*(on_circle.outer_radius - on_circle.inner_radius);
-			angle = (270 + (i.begin_angle * 360 / PI));
-			p = polar_to_catersian(on_circle.inner_radius, i.begin_angle);
-			current_color.set_gradient(on_circle.heat_color[0], on_circle.heat_color[0], i.value);
-			output << "<rect x=\"" << p.x << "\" " << "y=\"" << p.y << "\" ";
-			output << "width=\"" << width << "\" ";
-			output << "height=\"" << height << "\" ";
-			output << "fill=\"" << current_color << "\"";
-			output << "transform=\"rotate(" << angle << " " << p.x << " " << p.y << ")\"";
-			output << "/>\n";
-		}
-	}
-	ostream& operator<<(ostream& in_stream, Track in_track)
-	{
-		SvgPoint begin_from;
-		SvgPoint end_from;
-		SvgPoint begin_to;
-		SvgPoint end_to;
-		SvgPoint control_point;
-		begin_from = polar_to_catersian(in_track.on_radius, in_track.begin_from_angle);
-		end_from = polar_to_catersian(in_track.on_radius, in_track.end_from_angle);
-		begin_to = polar_to_catersian(in_track.on_radius, in_track.begin_to_angle);
-		end_to = polar_to_catersian(in_track.on_radius, in_track.end_to_angle);
-		control_point = polar_to_catersian(in_track.control_radius, (in_track.begin_from_angle + in_track.end_to_angle) / 2);
-		if (in_track.cross)
-		{
-
-			in_stream << "path d=\" M" << begin_from;
-			in_stream << "Q " << control_point <<begin_to;
-			in_stream << CircularArc(end_to, in_track.on_radius, 0, 1);
-			in_stream << "Q " << control_point << end_from;
-			in_stream << CircularArc(begin_from, in_track.on_radius, 0, 0);
-			in_stream << "fill= \"" << in_track.track_color << "\" ";
-			in_stream << "opacity=\"" << in_track.opacity << "\"";
-			in_stream << "/>" << endl;
-		}
-		else
-		{
-			in_stream << "path d=\" M" << begin_from;
-			in_stream << CircularArc(end_from, in_track.on_radius, 0, 1);
-			in_stream << "Q " << control_point << begin_to;
-			in_stream << CircularArc(end_to, in_track.on_radius, 0, 1);
-			in_stream << "Q " << control_point << begin_from;
-			in_stream << "fill= \"" << in_track.track_color << "\" ";
-			in_stream << "opacity=\"" << in_track.opacity << "\"";
-			in_stream << "/>" << endl;
-		}
-		return in_stream;
-
-	}
-
-	void draw(std::stringstream& output, const vector<circle_setting>& circles)
-	{
-		//<circle cx = "50" cy = "50" r = "40" stroke = "black" stroke - width = "3" fill = "red" / >
-		int cx, cy;
-		cx = cy = background_radius;
-		int r;
-		int stroke_breadth;
-		for (auto i : circles)//我们以画边框的形式来画圆弧
-		{
-			r = i.inner_radius;
-			stroke_breadth = i.outer_radius - i.inner_radius;
-			if (i.circle_color.b > 0)
-			{
-				output << "circle cx =\"" << cx << "\" cy=\"" << cy << "\" r=" << r << " stroke=\"" << i.circle_color << "\" stroke-width=\"" << stroke_breadth << "\" opacity=\"" << 0 << "\"/>" << endl;
-			}
-		}
-	}
-	void draw_label_band(std::stringstream& output, const circle_setting& on_circle, const vector<onband>& bands)
+	
+	void draw_label_band(ostream& output, const circle& on_circle, const vector<band>& bands)
 	{
 
 	}
-	void draw_tick_band(std::stringstream& output, const circle_setting& on_circle, const vector<onband>& bands)
+	void draw_tick_band(ostream& output, const circle& on_circle, const vector<band>& bands)
 	{
 
 	}
-	void draw_fill_band(std::stringstream& output, const circle_setting& on_circle, const vector<onband>& bands)
+	void draw_fill_band(ostream& output, const circle& on_circle, const vector<band>& bands)
 	{
 		//<path d="M300,200 h-150 a150,150 0 1,0 150,-150 z" fill = "red" stroke = "blue" stroke - width = "5" / >
 		int band_number = bands.size();
@@ -277,10 +52,10 @@ namespace circos
 			//对于这个band 我们需要先向上，然后顺时针，然后向下，然后逆时针
 			float angle_begin = band_begin / on_circle.inner_radius;
 			float angle_end = angle_begin+((i.end-i.begin)*pixel_per_unit)/on_circle.inner_radius;
-			p_1 = polar_to_catersian(on_circle.inner_radius, angle_begin);
-			p_2 = polar_to_catersian(on_circle.outer_radius, angle_begin);
-			p_3 = polar_to_catersian(on_circle.outer_radius, angle_end);
-			p_4 = polar_to_catersian(on_circle.inner_radius, angle_end);
+			p_1 = SvgPoint(on_circle.inner_radius, angle_begin);
+			p_2 = SvgPoint(on_circle.outer_radius, angle_begin);
+			p_3 = SvgPoint(on_circle.outer_radius, angle_end);
+			p_4 = SvgPoint(on_circle.inner_radius, angle_end);
 			if (angle_end - angle_begin > PI / 2)//这个圆弧超过了半个圆，需要考虑large_arc的问题
 			{
 				large_arc = 1;
@@ -299,21 +74,21 @@ namespace circos
 
 		}
 	}
-	void draw(std::stringstream& output, const circle_setting& on_circle, const vector<BesielLink>& BesielLinks)
+	void draw(ostream& output, const circle& on_circle, const vector<BesielLink>& BesielLinks)
 	{
 		for (auto i : BesielLinks)
 		{
 			output << i;
 		}
 	}
-	void draw(std::stringstream& output, const circle_setting& on_circle, const vector<Track>& tracks)
+	void draw(ostream& output, const circle& on_circle, const vector<Track>& tracks)
 	{
 		for (auto i : tracks)
 		{
 			output << i;
 		}
 	}
-	void draw(std::stringstream& output, const circle_setting& on_cicle, const vector<value_region> statistics)
+	void draw(ostream& output, const circle& on_cicle, const vector<value_onband> statistics)
 	{
 		stat_type type = statistics[0].draw_type;
 		switch (type)

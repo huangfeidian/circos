@@ -1,9 +1,10 @@
 #include "colors.h"
 #include "stroke.h"
 #include <vector>
+using std::vector;
 namespace circos
 {
-	using std::vector;
+
 	struct value_region
 	{
 		color statistic_color;

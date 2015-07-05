@@ -1,9 +1,10 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+using std::ostream;
 namespace circos
 {
-	using std::ostream;
+
 	struct color
 	{
 		int r;
@@ -12,10 +13,6 @@ namespace circos
 		color():r(-1),g(-1),b(-1)
 		{
 
-		}
-		color(std::ifstream input)
-		{
-			
 		}
 		void set_gradient(color begin_color, color end_color, float percentage)
 		{
