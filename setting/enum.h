@@ -1,22 +1,16 @@
 namespace circos
 {
-	enum circle_type_with_value
+	enum stat_type//statistic map
 	{
-
 		linechart,
 		histogram,
-		glyphmap,
 		heatmap
-
 	};
-	enum circle_type_without_value
+	enum band_type
 	{
 		tick,
-		band
+		fill,
+		text
 	};
-	enum glyph_type
-	{
-		circle,
-		square
-	};
+
 }

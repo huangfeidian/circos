@@ -1,9 +1,9 @@
 #include "../setting/track.h"
 #include "../setting/circle.h"
 #include "../setting/arc.h"
-#include "../setting/glyph.h"
 #include "../setting/band.h"
 #include "../setting/statistic.h"
+#include "../setting/enum.h"
 #include <sstream>
 #include <string>
 #include <vector>
@@ -121,6 +121,77 @@ namespace circos
 		in_stream << "/>" << endl;
 
 	}
+	void draw_linechart(ostream& output,const circle_setting& on_circle, const vector<value_region>& in_statistics)
+	{
+		SvgPoint p[2];
+		int stroke_width = (on_circle.outer_radius - on_circle.inner_radius) / 20;//we make the width to 1/20 of circle width
+		int on_radius = in_statistics[0].value*(on_circle.outer_radius - on_circle.inner_radius) + on_circle.inner_radius;
+		p[0] = polar_to_catersian( on_radius,in_statistics[0].begin_angle);
+		on_radius = in_statistics[1].value*(on_circle.outer_radius - on_circle.inner_radius) + on_circle.inner_radius;
+		p[1] = polar_to_catersian(on_radius, in_statistics[1].begin_angle);
+		output << "<line ";
+		output << "x1=\"" << p[0].x << "\" " << "y1=\"" << p[0].y << "\" ";
+		output << "x2=\"" << p[1].x << "\" " << "y2=\"" << p[1].y << "\" ";
+		output << "stroke-width=\"" << stroke_width << "\" ";
+		output << "stroke=\"" << in_statistics[0].statistic_color<<"\"";
+		output << "opacity=\"" << in_statistics[0].opacity << "\"";
+		output << "/>\n";
+		for (int i = 2; i < in_statistics.size(); i++)
+		{
+			on_radius = in_statistics[i].value*(on_circle.outer_radius - on_circle.inner_radius) + on_circle.inner_radius;
+			p[i % 2] = polar_to_catersian(on_radius, in_statistics[i].begin_angle);
+			output << "<line ";
+			output << "x1=\"" << p[i%2].x << "\" " << "y1=\"" << p[i%2].y << "\" ";
+			output << "x2=\"" << p[(i - 1) % 2].x << "\" " << "y2=\"" << p[(i - 1) % 2].y << "\" ";
+			output << "stroke-width=\"" << stroke_width << "\" ";
+			output << "stroke=\"" << in_statistics[i-1].statistic_color << "\"";
+			output << "opacity=\"" << in_statistics[i-1].opacity << "\"";
+			output << "/>\n";
+		}
+		
+	}
+	void draw_histogram(ostream& output, const circle_setting& on_circle, const vector<value_region>& in_statistics)
+	{
+		SvgPoint p;
+		int width;
+		int height;
+		int angle;
+		for (auto i : in_statistics)
+		{
+			height = (i.end_angle - i.begin_angle)*on_circle.inner_radius;
+			width = i.value*(on_circle.outer_radius - on_circle.inner_radius);
+			angle = (270 + (i.begin_angle * 360 / PI));
+			p = polar_to_catersian(on_circle.inner_radius, i.begin_angle);
+			output << "<rect x=\"" << p.x << "\" " << "y=\"" << p.y << "\" ";
+			output << "width=\"" << width << "\" ";
+			output << "height=\"" << height << "\" ";
+			output << "fill=\"" << i.statistic_color << "\"";
+			output << "transform=\"rotate(" << angle << " " << p.x << " " << p.y << ")\"";
+			output << "/>\n";
+		}
+	}
+	void draw_heatmap(ostream& output, const circle_setting& on_circle, const vector<value_region>& in_statistics)
+	{
+		SvgPoint p;
+		int width;
+		int height;
+		int angle;
+		color current_color;
+		for (auto i : in_statistics)
+		{
+			height = (i.end_angle - i.begin_angle)*on_circle.inner_radius;
+			width = i.value*(on_circle.outer_radius - on_circle.inner_radius);
+			angle = (270 + (i.begin_angle * 360 / PI));
+			p = polar_to_catersian(on_circle.inner_radius, i.begin_angle);
+			current_color.set_gradient(on_circle.heat_color[0], on_circle.heat_color[0], i.value);
+			output << "<rect x=\"" << p.x << "\" " << "y=\"" << p.y << "\" ";
+			output << "width=\"" << width << "\" ";
+			output << "height=\"" << height << "\" ";
+			output << "fill=\"" << current_color << "\"";
+			output << "transform=\"rotate(" << angle << " " << p.x << " " << p.y << ")\"";
+			output << "/>\n";
+		}
+	}
 	ostream& operator<<(ostream& in_stream, Track in_track)
 	{
 		SvgPoint begin_from;
@@ -177,7 +248,15 @@ namespace circos
 			}
 		}
 	}
-	void draw(std::stringstream& output, const circle_setting& on_circle, const vector<band_setting>& bands)
+	void draw_label_band(std::stringstream& output, const circle_setting& on_circle, const vector<onband>& bands)
+	{
+
+	}
+	void draw_tick_band(std::stringstream& output, const circle_setting& on_circle, const vector<onband>& bands)
+	{
+
+	}
+	void draw_fill_band(std::stringstream& output, const circle_setting& on_circle, const vector<onband>& bands)
 	{
 		//<path d="M300,200 h-150 a150,150 0 1,0 150,-150 z" fill = "red" stroke = "blue" stroke - width = "5" / >
 		int band_number = bands.size();
@@ -234,8 +313,14 @@ namespace circos
 			output << i;
 		}
 	}
-	void draw(std::stringstream& output, const circle_setting& on_cicle, const vector<statistic_setting> statistics)
+	void draw(std::stringstream& output, const circle_setting& on_cicle, const vector<value_region> statistics)
 	{
+		stat_type type = statistics[0].draw_type;
+		switch (type)
+		{
+		case stat_type::linechart:
 
+
+		}
 	}
 }
