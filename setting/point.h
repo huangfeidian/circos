@@ -5,6 +5,7 @@
 using std::ostream;
 using std::sin;
 using std::cos;
+#pragma once
 namespace circos
 {
 	extern int background_radius;
@@ -83,7 +84,7 @@ namespace circos
 			in_stream << "/>\n";
 			return in_stream;
 		}
-		int to_path()
+		int convert_to_path()
 		{
 			//<path id="textPath" d="M 250 500 A 250,250 0 1 1 250 500.0001"/>
 			stringstream path_string;

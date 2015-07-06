@@ -2,6 +2,7 @@
 #include "point.h"
 #include "global_container.h"
 #include <sstream>
+#pragma once
 using std::endl;
 using std::stringstream;
 namespace circos
@@ -31,15 +32,14 @@ namespace circos
 				large_flag = 0;
 			}
 		}
-		
-		friend ostream& operator<<(ostream& in_stream, CircularArc in_arc)
+		friend ostream& operator<<(ostream& in_stream, CircularArc in_arc)//add to path
 		{
 			in_stream << " A " << in_arc.radius << "," << in_arc.radius << " ";
 			in_stream << 0 << " " << in_arc.large_flag << "," << in_arc.sweep_flag << " ";
 			in_stream << in_arc.to_point;
 			return in_stream;
 		}
-		int to_path()
+		int convert_to_path()
 		{
 			//<path id="textPath" d="M 250 500 A 250,250 0 1 1 250 500.0001"/>
 			stringstream path_string;
@@ -56,30 +56,99 @@ namespace circos
 	{
 		int on_radius;
 		int control_radius;
-		float begin_angle;
-		float end_angle;
+		float from_angle;
+		float to_angle;
+		int from_position;
+		int to_position;
+		int from_band_index;
+		int to_band_index;
 		int stroke_width;
 		color link_color;
 		float opacity;
-		BesielLink() :on_radius(0), control_radius(0), begin_angle(0), end_angle(0), stroke_width(0), opacity(0)
+		BesielLink() :on_radius(0), control_radius(0), from_angle(0), to_angle(0), stroke_width(0), opacity(0)
 		{
 
 		}
-		friend ostream& operator<<(ostream& in_stream, BesielLink in_link)
+		BesielLink(int in_on_radius, float in_begin_angle, float in_end_angle, int in_control_radius)
+			:on_radius(in_on_radius), from_angle(in_begin_angle), to_angle(in_end_angle), control_radius(in_control_radius)
+		{
+
+		}
+		BesielLink(const string& input)
+		{
+			stringstream in_stream(input);
+			//"Link" band_from(string) position_from(int) band_to(string) position_to(int) control_radius(int) stroke_width(int) link_color(color) optional[opacity(float)]
+			string temp;
+			in_stream >> temp;
+			if (temp.compare("link") != 0)
+			{
+				std::cout << "unexpected beginning " << temp << "while parsing  link\n";
+				exit(1);
+			}
+			in_stream >> temp;
+			auto index_iterator = band_map_index.find(temp);
+			if ((index_iterator) == band_map_index.end())
+			{
+				std::cout << "unknown band label " << temp << " encountered\n";
+				exit(1);
+			}
+			from_band_index = index_iterator->second;
+			in_stream >> from_position;
+			in_stream >> temp;
+			index_iterator = band_map_index.find(temp);
+			if ((index_iterator) == band_map_index.end())
+			{
+				std::cout << "unknown band label " << temp << " encountered\n";
+				exit(1);
+			}
+			to_band_index = index_iterator->second;
+			in_stream >> to_position;
+			in_stream >> control_radius;
+			in_stream >> stroke_width;
+			in_stream >> link_color;
+			string optional;
+			in_stream >> optional;
+
+			while (optional.length()>0)
+			{
+				auto delimiter = optional.find('=');
+				string option_label = optional.substr(0, delimiter);
+				string option_value = optional.substr(delimiter + 1);
+				if (option_label.compare("opacity") == 0)
+				{
+					opacity = stof(option_value);
+				}
+				else
+				{
+					std::cout << "unknown optional value " << optional << std::endl;
+					exit(1);
+				}
+				in_stream >> optional;
+			}
+		}
+		friend istream& operator>>(istream& in_stream, BesielLink& in_link)
+		{
+			string one_line;
+			in_stream >> one_line;
+			in_link = BesielLink(one_line);
+			return in_stream;
+			
+		}
+		friend ostream& operator<<(ostream& in_stream, const BesielLink& in_link)
 		{
 			//<path d="M200,300 Q400,50 600,300 " fill = "none" stroke = "red" stroke - width = "5" / >
 			SvgPoint from_point;
 			SvgPoint to_point;
 			SvgPoint control_point;
-			from_point = SvgPoint(in_link.on_radius, in_link.begin_angle);
-			to_point = SvgPoint(in_link.on_radius, in_link.end_angle);
-			if (abs(in_link.end_angle - in_link.begin_angle) < PI / 2)
+			from_point = SvgPoint(in_link.on_radius, in_link.from_angle);
+			to_point = SvgPoint(in_link.on_radius, in_link.to_angle);
+			if (abs(in_link.to_angle - in_link.from_angle) < PI / 2)
 			{
-				control_point = SvgPoint(in_link.control_radius, (in_link.begin_angle + in_link.end_angle) / 2);
+				control_point = SvgPoint(in_link.control_radius, (in_link.from_angle + in_link.to_angle) / 2);
 			}
 			else
 			{
-				control_point = SvgPoint(in_link.control_radius, (in_link.begin_angle + in_link.end_angle) / 2 - PI / 2);
+				control_point = SvgPoint(in_link.control_radius, (in_link.from_angle + in_link.to_angle) / 2 - PI / 2);
 			}
 			in_stream << "<path d=\" ";
 			in_stream << "M " << from_point;
@@ -90,14 +159,27 @@ namespace circos
 			in_stream << "stroke-width=\"" << in_link.stroke_width << "\" ";
 			in_stream << "opacity=\"" << in_link.opacity << "\" ";
 			in_stream << "/>" << endl;
-
+			return in_stream;
 		}
-	};
-	void draw(ostream& output, const circle& on_circle, const vector<BesielLink>& BesielLinks)
-	{
-		for (auto i : BesielLinks)
+		string add_to_path()
 		{
-			output << i;
+			stringstream in_stream;
+			SvgPoint to_point;
+			SvgPoint control_point;
+			to_point = SvgPoint(on_radius, to_angle);
+			if (abs(to_angle - from_angle) < PI / 2)
+			{
+				control_point = SvgPoint(control_radius, (from_angle + to_angle) / 2);
+			}
+			else
+			{
+				control_point = SvgPoint(control_radius, (from_angle + to_angle) / 2 - PI / 2);
+			}
+			in_stream << "Q" << control_point;
+			in_stream << to_point;
+			return in_stream.str();
 		}
-	}
+		
+	};
+
 }

@@ -2,7 +2,6 @@
 #include "../setting/circle.h"
 #include "../setting/arc.h"
 #include "../setting/band.h"
-#include "../setting/statistic.h"
 #include "../setting/enum.h"
 
 #include <sstream>

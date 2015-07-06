@@ -41,7 +41,17 @@ namespace circos
 			color_value = colorful.substr(first_of_rgb, delimit - first_of_rgb);
 			b = stoi(color_value);
 		}
-		void set_gradient(color begin_color, color end_color, float percentage)
+		color& operator=(const color& from_color)
+		{
+			if (&from_color != this)
+			{
+				r = from_color.r;
+				g = from_color.g;
+				b = from_color.b;
+			}
+			return *this;
+		}
+		void set_gradient(const color& begin_color, const color& end_color, float percentage)
 		{
 			r = begin_color.r + (end_color.r - begin_color.r)*percentage;
 			g = begin_color.g + (end_color.g - begin_color.g)*percentage;

@@ -1,5 +1,9 @@
 #include "colors.h"
+#include <vector>
 using std::vector;
+using std::string;
+using std::stringstream;
+#pragma once
 namespace circos
 {
 	struct circle
@@ -18,6 +22,7 @@ namespace circos
 		}
 		circle(const string& input)
 		{
+			// "circle" circle_label(string) inner_radius(int) outer_radius(int) gap(int) circle_color(
 			stringstream input_buf(input);
 			string head;
 			input_buf >> head;
@@ -63,26 +68,28 @@ namespace circos
 				input_buf >> optional;
 			}
 		}
-	};
-
-	void draw(ostream& output, const vector<circle>& circles)
-	{
-		//<circle cx = "50" cy = "50" r = "40" stroke = "black" stroke - width = "3" fill = "red" / >
-		int cx, cy;
-		cx = cy = background_radius;
-		int r;
-		int stroke_breadth;
-		for (auto i : circles)//我们以画边框的形式来画圆弧
+		friend istream& operator>>(istream& in_stream, circle& in_circle)
 		{
-			r = i.inner_radius;
-			stroke_breadth = i.outer_radius - i.inner_radius;
-			if (i.circle_color.b > 0)
+			string temp;
+			in_stream >> temp;
+			in_circle = circle(temp);
+			return in_stream;
+		}
+		friend ostream& operator<<(ostream& in_stream, const circle& in_circle)
+		{
+			//<circle cx = "50" cy = "50" r = "40" stroke = "black" stroke - width = "3" fill = "red" / >
+			int cx, cy;
+			cx = cy = background_radius;
+			int r;
+			int stroke_breadth;
+			r = in_circle.inner_radius;
+			stroke_breadth = in_circle.outer_radius - in_circle.inner_radius;
+			if (in_circle.circle_color.b > 0)
 			{
 				output << "circle cx =\"" << cx << "\" cy=\"" << cy << "\" r=" << r;
-				output << " stroke=\"" << i.circle_color << "\" stroke-width=\"" << stroke_breadth;
-				output<< "\" opacity=\"" << 0 << "\"/>" << endl;
+				output << " stroke=\"" << in_circle.circle_color << "\" stroke-width=\"" << stroke_breadth;
+				output << "\" opacity=\"" << 0 << "\"/>" << endl;
 			}
 		}
-	}
-	vector<circle> all_circles;
+	};
 };
