@@ -88,7 +88,7 @@ namespace circos
 		band_begin = 0;
 		int sweep_flag = 1;
 		int large_arc = 0;
-		CircularArc arc_to_draw;
+		circular_arc arc_to_draw;
 
 		//对于这个band 我们需要先向上，然后顺时针，然后向下，然后逆时针
 		p_1 = SvgPoint(on_circle.inner_radius, onbands.angle_begin);
@@ -102,9 +102,9 @@ namespace circos
 		output << "<path d=\"";
 		//output << " M " << p_1.x << "," << p_1.y;
 		output << " M " << p_2;
-		output << CircularArc(on_circle.outer_radius, onbands.angle_begin, onbands.angle_end, 1);
+		output << circular_arc(on_circle.outer_radius, onbands.angle_begin, onbands.angle_end, 1);
 		output << "L " << p_4;
-		output << CircularArc(on_circle.inner_radius, onbands.angle_end, onbands.angle_begin, 0);
+		output << circular_arc(on_circle.inner_radius, onbands.angle_end, onbands.angle_begin, 0);
 		output << "z\" ";
 		output << "fill=\"" << onbands.band_color << "\" ";
 		output << "opacity=\"" << onbands.opacity << "\"";
@@ -204,7 +204,7 @@ namespace circos
 			output << "</textPath>\n";
 			output << "</text>\n";
 		case 1://左对齐
-			CircularArc arc_to_draw = CircularArc(on_circle.outer_radius, onbands.angle_begin, onbands.angle_end, 1);
+			circular_arc arc_to_draw = circular_arc(on_circle.outer_radius, onbands.angle_begin, onbands.angle_end, 1);
 			int path_id = arc_to_draw.convert_to_path();
 			output << "<text font-family=\"monospace\" font-size=\"" << onbands.font_size << "\" ";
 			output << "fill=\"" << onbands.band_color << "\" >\n";
@@ -214,7 +214,7 @@ namespace circos
 			output << "</text>\n";
 			break;
 		case 2://居中对齐
-			CircularArc arc_to_draw = CircularArc(on_circle.outer_radius, onbands.angle_begin, onbands.angle_end, 1);
+			circular_arc arc_to_draw = circular_arc(on_circle.outer_radius, onbands.angle_begin, onbands.angle_end, 1);
 			int path_id = arc_to_draw.convert_to_path();
 			output << "<text font-family=\"monospace\" font-size=\"" << onbands.font_size << "\" ";
 			output << "fill=\"" << onbands.band_color << "\" >\n";

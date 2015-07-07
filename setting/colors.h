@@ -41,7 +41,29 @@ namespace circos
 			color_value = colorful.substr(first_of_rgb, delimit - first_of_rgb);
 			b = stoi(color_value);
 		}
+		color(const color& from_color)
+		{
+			r = from_color.r;
+			g = from_color.g;
+			b = from_color.b;
+		}
+		color(color&& from_color)
+		{
+			r = from_color.r;
+			g = from_color.g;
+			b = from_color.b;
+		}
 		color& operator=(const color& from_color)
+		{
+			if (&from_color != this)
+			{
+				r = from_color.r;
+				g = from_color.g;
+				b = from_color.b;
+			}
+			return *this;
+		}
+		color& operator=(color&& from_color)
 		{
 			if (&from_color != this)
 			{

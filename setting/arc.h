@@ -9,18 +9,18 @@ namespace circos
 {
 
 #define PI 3.14159f
-	struct CircularArc
+	struct circular_arc
 	{
 		SvgPoint from_point;
 		SvgPoint to_point;
 		int radius;
 		int large_flag;
 		int sweep_flag;
-		CircularArc() :radius(0), large_flag(0), sweep_flag(0)
+		circular_arc() :radius(0), large_flag(0), sweep_flag(0)
 		{
 
 		}
-		CircularArc(int in_radius, float begin_angle, float end_angle,int in_sweep_flag=1) 
+		circular_arc(int in_radius, float begin_angle, float end_angle,int in_sweep_flag=1) 
 			:from_point(in_radius, begin_angle), to_point(in_radius, end_angle), sweep_flag(in_sweep_flag)
 		{
 			if (abs(end_angle - begin_angle )> PI / 2)
@@ -32,7 +32,7 @@ namespace circos
 				large_flag = 0;
 			}
 		}
-		friend ostream& operator<<(ostream& in_stream, CircularArc in_arc)//add to path
+		friend ostream& operator<<(ostream& in_stream, circular_arc in_arc)//add to path
 		{
 			in_stream << " A " << in_arc.radius << "," << in_arc.radius << " ";
 			in_stream << 0 << " " << in_arc.large_flag << "," << in_arc.sweep_flag << " ";
@@ -52,7 +52,7 @@ namespace circos
 		}
 	};
 	
-	struct BesielLink
+	struct besiel_link
 	{
 		int on_radius;
 		int control_radius;
@@ -65,16 +65,16 @@ namespace circos
 		int stroke_width;
 		color link_color;
 		float opacity;
-		BesielLink() :on_radius(0), control_radius(0), from_angle(0), to_angle(0), stroke_width(0), opacity(0)
+		besiel_link() :on_radius(0), control_radius(0), from_angle(0), to_angle(0), stroke_width(0), opacity(0)
 		{
 
 		}
-		BesielLink(int in_on_radius, float in_begin_angle, float in_end_angle, int in_control_radius)
+		besiel_link(int in_on_radius, float in_begin_angle, float in_end_angle, int in_control_radius)
 			:on_radius(in_on_radius), from_angle(in_begin_angle), to_angle(in_end_angle), control_radius(in_control_radius)
 		{
 
 		}
-		BesielLink(const string& input)
+		besiel_link(const string& input)
 		{
 			stringstream in_stream(input);
 			//"Link" band_from(string) position_from(int) band_to(string) position_to(int) control_radius(int) stroke_width(int) link_color(color) optional[opacity(float)]
@@ -126,15 +126,15 @@ namespace circos
 				in_stream >> optional;
 			}
 		}
-		friend istream& operator>>(istream& in_stream, BesielLink& in_link)
+		friend istream& operator>>(istream& in_stream, besiel_link& in_link)
 		{
 			string one_line;
 			in_stream >> one_line;
-			in_link = BesielLink(one_line);
+			in_link = besiel_link(one_line);
 			return in_stream;
 			
 		}
-		friend ostream& operator<<(ostream& in_stream, const BesielLink& in_link)
+		friend ostream& operator<<(ostream& in_stream, const besiel_link& in_link)
 		{
 			//<path d="M200,300 Q400,50 600,300 " fill = "none" stroke = "red" stroke - width = "5" / >
 			SvgPoint from_point;

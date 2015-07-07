@@ -10,7 +10,7 @@ using std::endl;
 #pragma once
 namespace circos
 {
-	struct Track
+	struct track
 	{
 		bool cross;
 		int on_radius;
@@ -27,11 +27,11 @@ namespace circos
 		int to_band_index;
 		color track_color;
 		float opacity;
-		Track() :cross(false), on_radius(0), control_radius(0), begin_from_angle(0), end_from_angle(0), begin_to_angle(0), end_to_angle(0)
+		track() :cross(false), on_radius(0), control_radius(0), begin_from_angle(0), end_from_angle(0), begin_to_angle(0), end_to_angle(0)
 		{
 
 		}
-		Track(const string& input)
+		track(const string& input)
 		{
 			//"Track" from_band(string) begin_from_position(int) end_from_position(int) end_band(string) begin_to_position(int) end_to_position(int) 
 			//control_radius(int) cross(bool) track_color(Color) optional[opacity=float]
@@ -81,14 +81,14 @@ namespace circos
 				in_stream >> optional;
 			}
 		}
-		friend istream& operator>>(istream& in_stream, Track& in_track)
+		friend istream& operator>>(istream& in_stream, track& in_track)
 		{
 			string temp;
 			in_stream >> temp;
-			in_track = Track(temp);
+			in_track = track(temp);
 			return in_stream;
 		}
-		friend ostream& operator<<(ostream& in_stream, const Track& in_track)
+		friend ostream& operator<<(ostream& in_stream, const track& in_track)
 		{
 			stringstream in_stream(input);
 			SvgPoint begin_from;
@@ -105,10 +105,10 @@ namespace circos
 			{
 
 				in_stream << "path d=\" M" << begin_from;
-				in_stream << BesielLink(in_track.on_radius, in_track.begin_from_angle, in_track.begin_to_angle, control_radius).add_to_path();
-				in_stream << CircularArc(in_track.on_radius, in_track.begin_to_angle,in_track.end_to_angle, 1);
-				in_stream << BesielLink(in_track.on_radius,in_track.end_to_angle,in_track.end_from_angle, control_radius).add_to_path();
-				in_stream << CircularArc(in_track.on_radius,in_track.end_from_angle, in_track.begin_from_angle, 0);
+				in_stream << besiel_link(in_track.on_radius, in_track.begin_from_angle, in_track.begin_to_angle, control_radius).add_to_path();
+				in_stream << circular_arc(in_track.on_radius, in_track.begin_to_angle,in_track.end_to_angle, 1);
+				in_stream << besiel_link(in_track.on_radius,in_track.end_to_angle,in_track.end_from_angle, control_radius).add_to_path();
+				in_stream << circular_arc(in_track.on_radius,in_track.end_from_angle, in_track.begin_from_angle, 0);
 				in_stream << "fill= \"" << track_color << "\" ";
 				in_stream << "opacity=\"" << opacity << "\"";
 				in_stream << "/>" << endl;
@@ -116,10 +116,10 @@ namespace circos
 			else
 			{
 				in_stream << "path d=\" M" << begin_from;
-				in_stream << BesielLink(in_track.on_radius,in_track.end_from_angle, in_track.begin_to_angle, control_radius).add_to_path();
-				in_stream << CircularArc(in_track.on_radius, in_track.begin_to_angle,in_track.end_to_angle, 1);
-				in_stream << BesielLink(in_track.on_radius,in_track.end_to_angle, in_track.begin_from_angle, control_radius).add_to_path();
-				in_stream << CircularArc(in_track.on_radius, in_track.begin_from_angle,in_track.end_from_angle, 1);
+				in_stream << besiel_link(in_track.on_radius,in_track.end_from_angle, in_track.begin_to_angle, control_radius).add_to_path();
+				in_stream << circular_arc(in_track.on_radius, in_track.begin_to_angle,in_track.end_to_angle, 1);
+				in_stream << besiel_link(in_track.on_radius,in_track.end_to_angle, in_track.begin_from_angle, control_radius).add_to_path();
+				in_stream << circular_arc(in_track.on_radius, in_track.begin_from_angle,in_track.end_from_angle, 1);
 				in_stream << "fill= \"" << track_color << "\" ";
 				in_stream << "opacity=\"" << opacity << "\"";
 				in_stream << "/>" << endl;

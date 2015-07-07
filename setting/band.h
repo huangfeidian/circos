@@ -97,7 +97,7 @@ namespace circos
 		band_begin = 0;
 		int sweep_flag = 1;
 		int large_arc = 0;
-		CircularArc arc_to_draw;
+		circular_arc arc_to_draw;
 		for (auto i : bands)
 		{
 			//对于这个band 我们需要先向上，然后顺时针，然后向下，然后逆时针
@@ -114,9 +114,9 @@ namespace circos
 			output << "<path d=\"";
 			//output << " M " << p_1.x << "," << p_1.y;
 			output << " M " << p_2;
-			output << CircularArc(on_circle.outer_radius,angle_begin,angle_end, 1);
+			output << circular_arc(on_circle.outer_radius,angle_begin,angle_end, 1);
 			output << "L " << p_4;
-			output << CircularArc( on_circle.inner_radius, angle_end,angle_begin, 0);
+			output << circular_arc( on_circle.inner_radius, angle_end,angle_begin, 0);
 			output << "z\" ";
 			output << "fill=\"" << i.band_color << "\" ";
 			output << "opacity=\"" << i.opacity << "\"";
