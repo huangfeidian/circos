@@ -1,7 +1,11 @@
-#include "setting/normalise.h"
+
 #include <fstream>
 #include <unordered_set>
 #include <array>
+#include "setting/onband.h"
+#include "setting/track.h"
+#include "setting/arc.h"
+#pragma once
 using std::array;
 using std::unordered_set;
 using std::ifstream;
@@ -55,6 +59,9 @@ namespace circos
 		void read_fill_onbands(const string& file_path);
 		void all_normalise();
 		void reorder();
+		void draw_head(ostream& in_stream);
+		void draw_end(ostream& in_stream);
+		void draw_body(ostream& in_stream);
 		friend ostream& operator<<(ostream& in_stream, const SvgGraph& in_graph);
 	};
 }
