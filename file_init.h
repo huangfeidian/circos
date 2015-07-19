@@ -5,6 +5,8 @@
 #include "setting/onband.h"
 #include "setting/track.h"
 #include "setting/arc.h"
+#include "setting/circle.h"
+#include "setting/enum.h"
 #pragma once
 using std::array;
 using std::unordered_set;

@@ -1,3 +1,4 @@
+#pragma once
 namespace circos
 {
 	enum stat_type//statistic map

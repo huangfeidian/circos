@@ -11,9 +11,10 @@ namespace circos
 		utf8_txt_stream >> temp >> temp >> temp;
 	}
 	int path_index=0;
-	int background_radius=5000;
+	double background_radius=5000;
 	map<string, int> circle_map_index{};
 	map<string, int> band_map_index{};
+	vector<pair<double, double>> circle_radius{};
 	const unordered_set<string> SvgGraph::head_set = {
 		"circle", "link", "track", "band", "linechart_onband","histogram_onband","heatmap_onband", "tick_onband", "label_onband", "fill_onband" };
 	void SvgGraph::read_circles(const string& file_path)
@@ -26,6 +27,8 @@ namespace circos
 		{
 			all_circles.emplace_back(single_line);
 			circle_map_index.insert(std::make_pair(all_circles[index].circle_label, index));
+			circle_radius.push_back(std::make_pair(all_circles[index].inner_radius, all_circles[index].outer_radius));
+			index++;
 		}
 	}
 	void SvgGraph::read_bands(const string& file_path)
@@ -34,10 +37,12 @@ namespace circos
 		strip_utf8header(band_file);
 		string single_line;
 		int index = 0;
-		while (band_file >> single_line)
+		while (std::getline(band_file,single_line))
 		{
-			all_bands.emplace_back(single_line);
+			band temp_band(single_line);
+			all_bands.emplace_back(temp_band);
 			band_map_index.insert(std::make_pair(all_bands[index].band_label, index));
+			index++;
 		}
 	}
 	void SvgGraph::read_tick_onbands(const string& file_path)
@@ -45,7 +50,7 @@ namespace circos
 		ifstream tick_onband_file(file_path);
 		strip_utf8header(tick_onband_file);
 		string single_line;
-		while (tick_onband_file >> single_line)
+		while (std::getline( tick_onband_file , single_line))
 		{
 			all_tick_onbands.emplace_back(single_line);
 		}
@@ -55,7 +60,7 @@ namespace circos
 		ifstream heatmap_onband_file(file_path);
 		strip_utf8header(heatmap_onband_file);
 		string single_line;
-		while (heatmap_onband_file >> single_line)
+		while (std::getline(heatmap_onband_file,single_line))
 		{
 			all_heatmap_onbands.emplace_back(single_line);
 		}
@@ -65,7 +70,7 @@ namespace circos
 		ifstream linechart_onband_file(file_path);
 		strip_utf8header(linechart_onband_file);
 		string single_line;
-		while (linechart_onband_file >> single_line)
+		while (std::getline(linechart_onband_file, single_line))
 		{
 			all_linechart_onbands.emplace_back(single_line);
 		}
@@ -75,7 +80,7 @@ namespace circos
 		ifstream histogram_onband_file(file_path);
 		strip_utf8header(histogram_onband_file);
 		string single_line;
-		while (histogram_onband_file >> single_line)
+		while (std::getline(histogram_onband_file,single_line))
 		{
 			all_histogram_onbands.emplace_back(single_line);
 		}
@@ -85,7 +90,7 @@ namespace circos
 		ifstream label_onband_file(file_path);
 		strip_utf8header(label_onband_file);
 		string single_line;
-		while (label_onband_file >> single_line)
+		while (std::getline(label_onband_file,single_line))
 		{
 			all_label_onbands.emplace_back(single_line);
 		}
@@ -95,7 +100,7 @@ namespace circos
 		ifstream file_onband_file(file_path);
 		strip_utf8header(file_onband_file);
 		string single_line;
-		while (file_onband_file >> single_line)
+		while (std::getline(file_onband_file,single_line))
 		{
 			all_fill_onbands.emplace_back(single_line);
 		}
@@ -105,7 +110,7 @@ namespace circos
 		ifstream link_file(file_path);
 		strip_utf8header(link_file);
 		string single_line;
-		while (link_file >> single_line)
+		while (std::getline(link_file ,single_line))
 		{
 			all_links.emplace_back(single_line);
 		}
@@ -115,7 +120,7 @@ namespace circos
 		ifstream track_file(file_path);
 		strip_utf8header(track_file);
 		string single_line;
-		while (track_file >> single_line)
+		while (std::getline(track_file , single_line))
 		{
 			all_tracks.emplace_back(single_line);
 		}
@@ -266,7 +271,7 @@ namespace circos
 	}
 	void SvgGraph::all_normalise()
 	{
-		for (auto i : all_thing_to_draw)
+		for (auto& i : all_thing_to_draw)
 		{
 			vector<band> all_bands_on_circle;
 			for (auto j : i.all_bands)
@@ -274,6 +279,7 @@ namespace circos
 				all_bands_on_circle.push_back(j.current_band);
 			}
 			normalise(i.current_circle, all_bands_on_circle);
+
 			for (int j = 0; j < all_bands_on_circle.size(); j++)
 			{
 				all_bands[i.all_bands[j].revert_index] = all_bands_on_circle[j];

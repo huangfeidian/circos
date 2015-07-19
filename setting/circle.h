@@ -1,5 +1,7 @@
 #include "colors.h"
 #include <vector>
+#include <sstream>
+#include "global_container.h"
 using std::vector;
 using std::string;
 using std::stringstream;
@@ -8,13 +10,13 @@ namespace circos
 {
 	struct circle
 	{
-		int inner_radius;
-		int outer_radius;
+		double inner_radius;
+		double outer_radius;
 		color circle_color;
 		color heat_color[2];
 		string circle_label;
-		float opacity;
-		int gap;
+		double opacity;
+		double gap;
 		vector<int> bands;
 		circle() :inner_radius(0), outer_radius(0), circle_color(), opacity(1),  gap(20)
 		{
@@ -22,7 +24,7 @@ namespace circos
 		}
 		circle(const string& input)
 		{
-			// "circle" circle_label(string) inner_radius(int) outer_radius(int) gap(int) circle_color(
+			// "circle" circle_label(string) inner_radius(int) outer_radius(int) gap(int) circle_color(color)
 			stringstream input_buf(input);
 			string head;
 			input_buf >> head;
@@ -38,6 +40,7 @@ namespace circos
 			input_buf >> outer_radius;
 			input_buf >> gap;
 			input_buf >> circle_color;
+			opacity = 1.0;
 			string optional;
 			input_buf >> optional;
 
@@ -77,19 +80,21 @@ namespace circos
 		}
 		friend ostream& operator<<(ostream& in_stream, const circle& in_circle)
 		{
-			//<circle cx = "50" cy = "50" r = "40" stroke = "black" stroke - width = "3" fill = "red" / >
-			int cx, cy;
-			cx = cy = background_radius;
-			int r;
-			int stroke_breadth;
-			r = in_circle.inner_radius;
-			stroke_breadth = in_circle.outer_radius - in_circle.inner_radius;
-			if (in_circle.circle_color.b > 0)
+			//<circle cx = "50" cy = "50" r = "40" stroke = "black" stroke - width = "3" fill = "white" / >
+			double cx, cy;
+			cx = cy = circos::background_radius;
+			double r;
+			double stroke_breadth;
+			r = (in_circle.inner_radius+in_circle.outer_radius)/2;
+			stroke_breadth = (in_circle.outer_radius - in_circle.inner_radius);
+			if (in_circle.circle_color.b >= 0)
 			{
-				output << "circle cx =\"" << cx << "\" cy=\"" << cy << "\" r=" << r;
-				output << " stroke=\"" << in_circle.circle_color << "\" stroke-width=\"" << stroke_breadth;
-				output << "\" opacity=\"" << 0 << "\"/>" << endl;
+				in_stream << "<circle cx=\"" << cx << "\" cy=\"" << cy << "\" r=\"" << r<<"\" ";
+				in_stream << "stroke=\"" << in_circle.circle_color << "\" stroke-width=\"" << stroke_breadth<<"\" ";
+				in_stream << "fill=\"none\" ";
+				in_stream << "opacity=\"" << in_circle.opacity << "\"/>" << endl;
 			}
+			return in_stream;
 		}
 	};
 };

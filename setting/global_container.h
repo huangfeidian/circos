@@ -6,10 +6,12 @@
 using std::vector;
 using std::string;
 using std::map;
+using std::pair;
 namespace circos
 {
-	vector<string> path_define;
-	int background_radius;
-	map<string, int> circle_map_index;
-	map<string, int> band_map_index;
+	extern int path_index;
+	extern double background_radius;
+	extern map<string, int> circle_map_index;
+	extern vector<pair<double, double>> circle_radius;
+	extern map<string, int> band_map_index;
 }

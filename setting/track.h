@@ -13,21 +13,21 @@ namespace circos
 	struct track
 	{
 		bool cross;
-		int on_radius;
-		int control_radius;
-		float begin_from_angle;
-		float end_from_angle;
-		float begin_to_angle;
-		float end_to_angle;
-		int begin_from_position;
-		int end_from_position;
-		int begin_to_position;
-		int end_to_position;
+		double on_radius;
+		double control_radius;
+		double  begin_from_angle;
+		double  end_from_angle;
+		double  begin_to_angle;
+		double  end_to_angle;
+		double begin_from_position;
+		double end_from_position;
+		double begin_to_position;
+		double end_to_position;
 		int from_band_index;
 		int to_band_index;
 		color track_color;
-		float opacity;
-		track() :cross(false), on_radius(0), control_radius(0), begin_from_angle(0), end_from_angle(0), begin_to_angle(0), end_to_angle(0)
+		double  opacity;
+		track() :cross(false), on_radius(0), control_radius(0), begin_from_angle(0), end_from_angle(0), begin_to_angle(0), end_to_angle(0), opacity(0)
 		{
 
 		}
@@ -38,9 +38,9 @@ namespace circos
 			stringstream in_stream(input);
 			string temp;
 			in_stream >> temp;
-			if (temp.compare("Track") != 0)
+			if (temp.compare("track") != 0)
 			{
-				std::cout << "unexpected beginning " << temp << " while parse Track\n";
+				std::cout << "unexpected beginning " << temp << " while parse track\n";
 				exit(1);
 			}
 			in_stream >> temp;
@@ -62,6 +62,7 @@ namespace circos
 			to_band_index = index_iterator->second;
 			in_stream >> begin_to_position >> end_to_position;
 			in_stream >> control_radius >> cross>>track_color;
+			opacity = 1.0;
 			string optional;
 			in_stream >> optional;
 			while (optional.length()>0)
@@ -90,7 +91,6 @@ namespace circos
 		}
 		friend ostream& operator<<(ostream& in_stream, const track& in_track)
 		{
-			stringstream in_stream(input);
 			SvgPoint begin_from;
 			SvgPoint end_from;
 			SvgPoint begin_to;
@@ -100,28 +100,28 @@ namespace circos
 			end_from = SvgPoint(in_track.on_radius,in_track.end_from_angle);
 			begin_to = SvgPoint(in_track.on_radius, in_track.begin_to_angle);
 			end_to = SvgPoint(in_track.on_radius,in_track.end_to_angle);
-			control_point = SvgPoint(control_radius, (in_track.begin_from_angle +in_track.end_to_angle) / 2);
-			if (cross)
+			control_point = SvgPoint(in_track.control_radius, (in_track.begin_from_angle +in_track.end_to_angle) / 2);
+			if (in_track.cross)
 			{
 
-				in_stream << "path d=\" M" << begin_from;
-				in_stream << besiel_link(in_track.on_radius, in_track.begin_from_angle, in_track.begin_to_angle, control_radius).add_to_path();
+				in_stream << "<path d=\" M" << begin_from;
+				in_stream << besiel_link(in_track.on_radius, in_track.begin_from_angle, in_track.begin_to_angle, in_track.control_radius).add_to_path();
 				in_stream << circular_arc(in_track.on_radius, in_track.begin_to_angle,in_track.end_to_angle, 1);
-				in_stream << besiel_link(in_track.on_radius,in_track.end_to_angle,in_track.end_from_angle, control_radius).add_to_path();
-				in_stream << circular_arc(in_track.on_radius,in_track.end_from_angle, in_track.begin_from_angle, 0);
-				in_stream << "fill= \"" << track_color << "\" ";
-				in_stream << "opacity=\"" << opacity << "\"";
+				in_stream << besiel_link(in_track.on_radius,in_track.end_to_angle,in_track.end_from_angle, in_track.control_radius).add_to_path();
+				in_stream << circular_arc(in_track.on_radius, in_track.end_from_angle, in_track.begin_from_angle, 0) << "\" ";
+				in_stream << "fill= \"" << in_track.track_color << "\" ";
+				in_stream << "opacity=\"" << in_track.opacity << "\"";
 				in_stream << "/>" << endl;
 			}
 			else
 			{
-				in_stream << "path d=\" M" << begin_from;
-				in_stream << besiel_link(in_track.on_radius,in_track.end_from_angle, in_track.begin_to_angle, control_radius).add_to_path();
-				in_stream << circular_arc(in_track.on_radius, in_track.begin_to_angle,in_track.end_to_angle, 1);
-				in_stream << besiel_link(in_track.on_radius,in_track.end_to_angle, in_track.begin_from_angle, control_radius).add_to_path();
-				in_stream << circular_arc(in_track.on_radius, in_track.begin_from_angle,in_track.end_from_angle, 1);
-				in_stream << "fill= \"" << track_color << "\" ";
-				in_stream << "opacity=\"" << opacity << "\"";
+				in_stream << "<path d=\" M" << begin_from;
+				in_stream << besiel_link(in_track.on_radius, in_track.begin_from_angle, in_track.end_to_angle, in_track.control_radius).add_to_path();
+				in_stream << circular_arc(in_track.on_radius, in_track.end_to_angle, in_track.begin_to_angle, 0);
+				in_stream << besiel_link(in_track.on_radius, in_track.begin_to_angle, in_track.end_from_angle, in_track.control_radius).add_to_path();
+				in_stream << circular_arc(in_track.on_radius, in_track.end_from_angle, in_track.begin_from_angle, 0) << "\" ";
+				in_stream << "fill= \"" << in_track.track_color << "\" ";
+				in_stream << "opacity=\"" << in_track.opacity << "\"";
 				in_stream << "/>" << endl;
 			}
 			return in_stream;

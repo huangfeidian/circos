@@ -1,10 +1,12 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#pragma once
 using std::ostream;
 using std::istream;
 using std::string;
 using std::stoi;
+using std::endl;
 namespace circos
 {
 
@@ -13,7 +15,7 @@ namespace circos
 		int r;
 		int g;
 		int b;
-		color():r(-1),g(-1),b(-1)
+		color():r(255),g(255),b(255)
 		{
 
 		}

@@ -1,4 +1,3 @@
-#include "colors.h"
 #include "point.h"
 #include "global_container.h"
 #include <sstream>
@@ -13,17 +12,29 @@ namespace circos
 	{
 		SvgPoint from_point;
 		SvgPoint to_point;
-		int radius;
+		double radius;
 		int large_flag;
 		int sweep_flag;
 		circular_arc() :radius(0), large_flag(0), sweep_flag(0)
 		{
 
 		}
-		circular_arc(int in_radius, float begin_angle, float end_angle,int in_sweep_flag=1) 
-			:from_point(in_radius, begin_angle), to_point(in_radius, end_angle), sweep_flag(in_sweep_flag)
+		circular_arc(double in_radius, double begin_angle, double end_angle,int in_sweep_flag=1) 
+			: sweep_flag(in_sweep_flag), radius(in_radius)
 		{
-			if (abs(end_angle - begin_angle )> PI / 2)
+			from_point = SvgPoint(in_radius, begin_angle);
+			to_point = SvgPoint(in_radius, end_angle);
+			//if (begin_angle < end_angle)
+			//{
+			//	from_point = SvgPoint(in_radius, begin_angle);
+			//	to_point = SvgPoint(in_radius, end_angle);
+			//}
+			//else
+			//{
+			//	from_point = SvgPoint(in_radius, end_angle);
+			//	to_point = SvgPoint(in_radius, begin_angle);
+			//}
+			if (abs(end_angle - begin_angle )> PI )
 			{
 				large_flag = 1;
 			}
@@ -39,37 +50,36 @@ namespace circos
 			in_stream << in_arc.to_point;
 			return in_stream;
 		}
-		int convert_to_path()
+		int convert_to_path(ostream& in_stream)
 		{
 			//<path id="textPath" d="M 250 500 A 250,250 0 1 1 250 500.0001"/>
-			stringstream path_string;
-			path_string << "<path id=\"textPath" << path_define.size() << "\" ";
-			path_string << "d= \" M " << from_point.x << " " << from_point.y << " ";
-			path_string << *this;
-			path_string << "/>\n";
-			path_define.push_back(path_string.str());
-			return path_define.size() - 1;
+			in_stream << "<path id=\"textPath" << path_index << "\" ";
+			in_stream << "d= \" M " << from_point.x << " " << from_point.y << " ";
+			in_stream << *this;
+			in_stream << "\" fill=\"none\"/>\n";
+			path_index++;
+			return path_index-1;
 		}
 	};
 	
 	struct besiel_link
 	{
-		int on_radius;
-		int control_radius;
-		float from_angle;
-		float to_angle;
-		int from_position;
-		int to_position;
+		double on_radius;
+		double control_radius;
+		double from_angle;
+		double to_angle;
+		double from_position;
+		double to_position;
 		int from_band_index;
 		int to_band_index;
-		int stroke_width;
+		double stroke_width;
 		color link_color;
-		float opacity;
+		double opacity;
 		besiel_link() :on_radius(0), control_radius(0), from_angle(0), to_angle(0), stroke_width(0), opacity(0)
 		{
 
 		}
-		besiel_link(int in_on_radius, float in_begin_angle, float in_end_angle, int in_control_radius)
+		besiel_link(double in_on_radius, double in_begin_angle, double in_end_angle, double in_control_radius)
 			:on_radius(in_on_radius), from_angle(in_begin_angle), to_angle(in_end_angle), control_radius(in_control_radius)
 		{
 
@@ -106,6 +116,7 @@ namespace circos
 			in_stream >> control_radius;
 			in_stream >> stroke_width;
 			in_stream >> link_color;
+			opacity = 1.0;
 			string optional;
 			in_stream >> optional;
 
@@ -142,18 +153,18 @@ namespace circos
 			SvgPoint control_point;
 			from_point = SvgPoint(in_link.on_radius, in_link.from_angle);
 			to_point = SvgPoint(in_link.on_radius, in_link.to_angle);
-			if (abs(in_link.to_angle - in_link.from_angle) < PI / 2)
+			if (abs(in_link.to_angle - in_link.from_angle) < PI )
 			{
 				control_point = SvgPoint(in_link.control_radius, (in_link.from_angle + in_link.to_angle) / 2);
 			}
 			else
 			{
-				control_point = SvgPoint(in_link.control_radius, (in_link.from_angle + in_link.to_angle) / 2 - PI / 2);
+				control_point = SvgPoint(in_link.control_radius, (in_link.from_angle + in_link.to_angle) / 2 - PI);
 			}
 			in_stream << "<path d=\" ";
 			in_stream << "M " << from_point;
-			in_stream << "Q" << control_point;
-			in_stream << to_point;
+			in_stream << "Q " << control_point;
+			in_stream << to_point<<"\" ";
 			in_stream << "fill= \"none\"" << " ";
 			in_stream << "stroke=\"" << in_link.link_color << "\" ";
 			in_stream << "stroke-width=\"" << in_link.stroke_width << "\" ";
@@ -167,13 +178,13 @@ namespace circos
 			SvgPoint to_point;
 			SvgPoint control_point;
 			to_point = SvgPoint(on_radius, to_angle);
-			if (abs(to_angle - from_angle) < PI / 2)
+			if (abs(to_angle - from_angle) < PI )
 			{
 				control_point = SvgPoint(control_radius, (from_angle + to_angle) / 2);
 			}
 			else
 			{
-				control_point = SvgPoint(control_radius, (from_angle + to_angle) / 2 - PI / 2);
+				control_point = SvgPoint(control_radius, (from_angle + to_angle) / 2 - PI);
 			}
 			in_stream << "Q" << control_point;
 			in_stream << to_point;
