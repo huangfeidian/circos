@@ -79,6 +79,7 @@ namespace circos
 					std::cout << "unknown optional value " << optional << std::endl;
 					exit(1);
 				}
+				optional.clear();
 				in_stream >> optional;
 			}
 		}

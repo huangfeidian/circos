@@ -6,7 +6,7 @@ using std::endl;
 using std::stringstream;
 namespace circos
 {
-
+#define EPS 0.04
 #define PI 3.14159f
 	struct circular_arc
 	{
@@ -134,6 +134,7 @@ namespace circos
 					std::cout << "unknown optional value " << optional << std::endl;
 					exit(1);
 				}
+				optional.clear();
 				in_stream >> optional;
 			}
 		}
@@ -153,7 +154,8 @@ namespace circos
 			SvgPoint control_point;
 			from_point = SvgPoint(in_link.on_radius, in_link.from_angle);
 			to_point = SvgPoint(in_link.on_radius, in_link.to_angle);
-			if (abs(in_link.to_angle - in_link.from_angle) < PI )
+			float radius_diff = abs(in_link.to_angle - in_link.from_angle);
+			if ( radius_diff< PI -EPS)
 			{
 				control_point = SvgPoint(in_link.control_radius, (in_link.from_angle + in_link.to_angle) / 2);
 			}
@@ -161,6 +163,7 @@ namespace circos
 			{
 				control_point = SvgPoint(in_link.control_radius, (in_link.from_angle + in_link.to_angle) / 2 - PI);
 			}
+			
 			in_stream << "<path d=\" ";
 			in_stream << "M " << from_point;
 			in_stream << "Q " << control_point;

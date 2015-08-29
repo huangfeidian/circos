@@ -68,6 +68,8 @@ namespace circos
 						exit(1);
 					}
 				}
+				optional.clear();
+
 				input_buf >> optional;
 			}
 		}

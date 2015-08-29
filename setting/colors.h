@@ -27,7 +27,7 @@ namespace circos
 		{
 			if (colorful.compare(0, 3, "rgb", 3) != 0)
 			{
-				std::cout << "color prefix " << colorful.substr(0, 3) << " is not accepted\n";
+				std::cout << "color prefix " << colorful << " is not accepted\n";
 				exit(1);
 			}
 			auto first_of_rgb = colorful.find('(') + 1;
@@ -92,7 +92,7 @@ namespace circos
 			in_stream >> colorful;
 			if (colorful.compare(0, 3, "rgb", 3) != 0)
 			{
-				std::cout << "color prefix " << colorful.substr(0, 3) << " is not accepted\n";
+				std::cout << "color prefix " << colorful<< " is not accepted\n";
 				exit(1);
 			}
 			auto first_of_rgb = colorful.find('(') + 1;
