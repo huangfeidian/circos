@@ -6,7 +6,7 @@ using std::endl;
 using std::stringstream;
 namespace circos
 {
-#define EPS 0.04
+#define EPS 0.01
 #define PI 3.14159f
 	struct circular_arc
 	{
@@ -155,19 +155,35 @@ namespace circos
 			from_point = SvgPoint(in_link.on_radius, in_link.from_angle);
 			to_point = SvgPoint(in_link.on_radius, in_link.to_angle);
 			float radius_diff = abs(in_link.to_angle - in_link.from_angle);
-			if ( radius_diff< PI -EPS)
+			if (abs(radius_diff - PI) < EPS)
 			{
-				control_point = SvgPoint(in_link.control_radius, (in_link.from_angle + in_link.to_angle) / 2);
+				if (in_link.from_angle < PI)
+				{
+					control_point = SvgPoint(in_link.control_radius, (in_link.from_angle + in_link.to_angle) / 2);
+				}
+				else
+				{
+					control_point = SvgPoint(in_link.control_radius, (in_link.from_angle + in_link.to_angle) / 2 - PI);
+				}
+				
 			}
 			else
 			{
-				control_point = SvgPoint(in_link.control_radius, (in_link.from_angle + in_link.to_angle) / 2 - PI);
+				if (radius_diff < PI)
+				{
+					control_point = SvgPoint(in_link.control_radius, (in_link.from_angle + in_link.to_angle) / 2);
+
+				}
+				else
+				{
+
+					control_point = SvgPoint(in_link.control_radius, (in_link.from_angle + in_link.to_angle) / 2 - PI);
+				}
 			}
-			
 			in_stream << "<path d=\" ";
 			in_stream << "M " << from_point;
 			in_stream << "Q " << control_point;
-			in_stream << to_point<<"\" ";
+			in_stream << to_point << "\" ";
 			in_stream << "fill= \"none\"" << " ";
 			in_stream << "stroke=\"" << in_link.link_color << "\" ";
 			in_stream << "stroke-width=\"" << in_link.stroke_width << "\" ";
