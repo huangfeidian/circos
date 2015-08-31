@@ -22,3 +22,4 @@ value的声明如下
 上述各种类型的数据要求分离存放，不同类型的数据不能放在一个文件里。因为我们在总设置文件中是这样做的：
 `type filepath=path`
 最后贴一张我做的图啊啊啊，大家鼓掌。
+![圆周率](https://raw.githubusercontent.com/huangfeidian/circos/master/picture/pi_custom.png)
