@@ -11,7 +11,7 @@ namespace circos
 		double angle_begin;
 		double angle_end;
 		double opacity;
-		int on_this_band;
+		int band_idx;
 		onband() :band_color(), begin(0), end(0), opacity(1)
 		{
 
@@ -37,13 +37,13 @@ namespace circos
 			}
 			string band_id;
 			input_buf >> band_id;
-			auto band_position = band_map_index.find(band_id);
-			if (band_position == band_map_index.end())
+			auto band_position = config.band_map_index.find(band_id);
+			if (band_position == config.band_map_index.end())
 			{
 				std::cout << "error while lookup band label " << band_id;
 				exit(1);
 			}
-			on_this_band = band_position->second;
+			band_idx = band_position->second;
 			input_buf >> begin;
 			input_buf >> end;
 			string colorful;
@@ -101,13 +101,13 @@ namespace circos
 			}
 			string band_id;
 			input_buf >> band_id;
-			auto band_position = band_map_index.find(band_id);
-			if (band_position == band_map_index.end())
+			auto band_position = config.band_map_index.find(band_id);
+			if (band_position == config.band_map_index.end())
 			{
 				std::cout << "error while lookup band label " << band_id;
 				exit(1);
 			}
-			on_this_band = band_position->second;
+			band_idx = band_position->second;
 			input_buf >> begin;
 			input_buf >> end;
 			input_buf >> font_size;
@@ -167,13 +167,13 @@ namespace circos
 			}
 			string band_id;
 			input_buf >> band_id;
-			auto band_position = band_map_index.find(band_id);
-			if (band_position == band_map_index.end())
+			auto band_position = config.band_map_index.find(band_id);
+			if (band_position == config.band_map_index.end())
 			{
 				std::cout << "error while lookup band label " << band_id;
 				exit(1);
 			}
-			on_this_band = band_position->second;
+			band_idx = band_position->second;
 			input_buf >> begin;
 			input_buf >> end;
 			input_buf >> width;
@@ -234,13 +234,13 @@ namespace circos
 			}
 			string band_id;
 			input_buf >> band_id;
-			auto band_position = band_map_index.find(band_id);
-			if (band_position == band_map_index.end())
+			auto band_position = config.band_map_index.find(band_id);
+			if (band_position == config.band_map_index.end())
 			{
 				std::cout << "error while lookup band label " << band_id;
 				exit(1);
 			}
-			on_this_band = band_position->second;
+			band_idx = band_position->second;
 			input_buf >> begin;
 			input_buf >> end;
 			input_buf >> value;

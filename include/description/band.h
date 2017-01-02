@@ -1,5 +1,5 @@
 #include "colors.h"
-#include "global_container.h"
+#include "../circos_config.h"
 #include <string>
 #include <type_traits>
 #include <sstream>
@@ -36,8 +36,8 @@ namespace circos
 			}
 			string circle_id;
 			input_buf >> circle_id;
-			auto circle_position = circle_map_index.find(circle_id);
-			if ( circle_position== circle_map_index.end())
+			auto circle_position = config.circle_map_index.find(circle_id);
+			if ( circle_position== config.circle_map_index.end())
 			{
 				std::cout << "error while lookup circle label " << circle_id;
 				exit(1);

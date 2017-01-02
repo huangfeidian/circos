@@ -1,7 +1,7 @@
 #include "colors.h"
 #include <vector>
 #include <sstream>
-#include "global_container.h"
+#include "../circos_config.h"
 using std::vector;
 using std::string;
 using std::stringstream;
