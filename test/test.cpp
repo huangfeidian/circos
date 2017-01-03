@@ -13,17 +13,17 @@ int main()
 	Rectangle rect_test_1(Point(100, 100), Point(200, 100), Color(128, 105, 180), 100, true);
 	Rectangle rect_test_2(Point(100, 100), Point(200, 200), Color(0, 105, 180), 141, true,0.5);
 	Circle circle_test_1(200, Point(300, 300), Color(0, 255, 180), 0.5, true);
-	Arc arc(300, 0, 3.1415, Point(400, 400), Color(0, 255, 100));
+	Arc arc(300, 0, 3.1415, Point(400, 400), Color(0, 255, 100),0,1.0,4);
 	SvgGraph svg_graph(svg_filename, radius, background_color);
 	PngImage png_image(png_filename, radius, background_color);
-	svg_graph << rect_test_1;
+	/*svg_graph << rect_test_1;
 	png_image << rect_test_1;
 	svg_graph << rect_test_2;
 	png_image << rect_test_2;
 	svg_graph << circle_test_1;
 	png_image << circle_test_1;
 	svg_graph << line;
-	png_image << line;
+	png_image << line;*/
 	svg_graph << arc;
 	png_image << arc;
 }

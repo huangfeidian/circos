@@ -62,7 +62,7 @@ namespace circos
 		}
 		SvgGraph& operator<<( const Point& point)
 		{
-			output<< point.x << "," << point.y << " ";
+			output<< point.x << " " << point.y << " ";
 			return *this;
 		}
 		SvgGraph& operator<<(const Line& line)
@@ -89,7 +89,16 @@ namespace circos
 			graph << "<path id=\"textPath" << path_index << "\" ";
 			graph << "d= \" M " << arc.from_point.x << " " << arc.from_point.y << " ";
 			graph.add_to_path(arc);
-			graph << "\" fill=\""<<arc.color<<"\"/>\n";
+			if (arc.fill_flag)
+			{
+				graph << "L " << arc.center.x << " " << arc.center.y << " Z\" ";
+				graph << "fill=\"" << arc.color << "\" ";
+			}
+			else
+			{
+				graph << "\" fill=\"none\" ";
+			}
+			graph << "stroke=\"" << arc.color << "\" " << "stroke-width=\"" << arc.stroke << "\" />";
 			path_index++;
 			return graph;
 		}
@@ -110,7 +119,7 @@ namespace circos
 		}
 		void add_to_path(const Bezier& bezier)
 		{
-			(*this)<<"Q"<<bezier.control_point<<bezier.end_point;
+			(*this)<<"Q "<<bezier.control_point<<bezier.end_point;
 		}
 		SvgGraph& operator<<(const Circle& circle)
 		{

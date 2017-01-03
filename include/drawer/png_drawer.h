@@ -90,14 +90,35 @@ namespace circos
 		}
 		void draw_path(const vector<Point>& path, Color color, int stroke = 1, float opacity = 1.0)
 		{
+			if (stroke == 1)
+			{
+				for(const auto& i:path)
+				{
+					plot(i.x, i.y, color, opacity);
+				}
+				return;
+			}
 			int offset_left = (stroke / 2) * -1;
 			int offset_right = (stroke + 1) / 2;
+			vector<Point> final_path;
 			for (const auto& i : path)
 			{
 				for (int j = offset_left;j < offset_right;j++)
 				{
-					plot(i.x + j, i.y, color, opacity);
+					for (int k = offset_left;k < offset_right;k++)
+					{
+						if (flood_map[i.y + k][i.x + j] != 1)
+						{
+							flood_map[i.y + k][i.x + j] = 1;
+							final_path.push_back(Point(i.x + j, i.y + k));
+						}
+						plot(i.x + j, i.y+k, color, opacity);
+					}
 				}
+			}
+			for (const auto& i : final_path)
+			{
+				plot(i, color, opacity);
 			}
 		}
 		~PngImage()
@@ -451,7 +472,28 @@ namespace circos
 		}
 		PngImage& operator<<(const Arc& arc)
 		{
-			draw_path(path(arc), arc.color, arc.stroke, arc.opacity);
+			auto path_points = path(arc);
+			draw_path(path_points, arc.color, arc.stroke, arc.opacity);
+			if (arc.fill_flag)
+			{
+				auto line_1 = Line(arc.center, arc.from_point, arc.color);
+				auto line_2 = Line(arc.center, arc.to_point, arc.color);
+				*this << line_1 << line_2;
+				auto path_line1 = path(line_1);
+				auto path_line2 = path(line_2);
+				copy(path_line1.begin(), path_line1.end(), back_inserter(path_points));
+				copy(path_line2.begin(), path_line2.end(), back_inserter(path_points));
+				Point middle_point;
+				if (arc.begin_angle < arc.end_angle)
+				{
+					middle_point = Point(arc.radius, (arc.begin_angle + arc.end_angle) / 2)*0.5 + arc.center;
+				}
+				else
+				{
+					middle_point = Point(arc.radius, 2*PI -(arc.begin_angle + arc.end_angle) / 2)*0.5 + arc.center;
+				}
+				flood(path_points, vector<Point>{middle_point}, arc.color, arc.opacity);
+			}
 			return *this;
 		}
 		vector<Point> path(const Bezier& bezier)
