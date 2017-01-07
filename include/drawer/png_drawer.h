@@ -36,8 +36,8 @@ namespace circos
 		vector<Color> _buffer;//这个是真正的存储区域 存储了所有的color信息
 		vector<Color*> _image;//这个是png的行指针，只能存行，因为libpng规定了这个
 
-		vector<char> flood_buffer;
-		vector<char*> flood_map;//这个按照png里的惯例 ，也弄成行指针吧
+		vector<uint8_t> flood_buffer;
+		vector<uint8_t*> flood_map;//这个按照png里的惯例 ，也弄成行指针吧
 
 		string file_name;
 		int bit_depth = 8;
@@ -55,8 +55,8 @@ namespace circos
 		, _compression_level(compress)
 		, _image(2*in_radius, nullptr)
 		{
-			flood_buffer = vector<char>(width*height, 0);
-			flood_map = vector<char*>(height, nullptr);
+			flood_buffer = vector<uint8_t>(width*height, 0);
+			flood_map = vector<uint8_t*>(height, nullptr);
 			auto begin = &flood_buffer[0];
 			for (int i = 0;i < height;i++)
 			{
@@ -72,7 +72,7 @@ namespace circos
 				_buffer[i]=backgroud_color;
 			}
 		}
-		void plot(ColorPoint input, float blend = 1.0)
+		void plot(Colorbasic_point input, float blend = 1.0)
 		{
 			_image[input.pos.y][input.pos.x].blend(input.color, blend);
 		}
@@ -112,7 +112,6 @@ namespace circos
 							flood_map[i.y + k][i.x + j] = 1;
 							final_path.push_back(Point(i.x + j, i.y + k));
 						}
-						plot(i.x + j, i.y+k, color, opacity);
 					}
 				}
 			}
@@ -185,6 +184,10 @@ namespace circos
 			//这里为了保险起见才加了这个判断函数
 			//只要有一个处于边界就停止，避免可能的边界没有完全闭合的情况
 		{
+			if (current.x == 0 || current.x == width - 1 || current.y == 0 || current.y == height - 1)
+			{
+				return false;
+			}
 			Point up(current.x, current.y + 1);
 			Point down(current.x, current.y - 1);
 			Point left(current.x - 1, current.y);
@@ -461,7 +464,7 @@ namespace circos
 					copy(temp.begin(),temp.end(), back_inserter(result));
 					begin_idx++;
 				}
-				auto temp = arc_path(begin_idx*PI/4, angle_end, radius);
+				auto temp = arc_path(begin_idx*PI/4+EPS, angle_end, radius);
 				copy(temp.begin(),temp.end(), back_inserter(result));
 				for (auto& i : result)
 				{
@@ -486,11 +489,11 @@ namespace circos
 				Point middle_point;
 				if (arc.begin_angle < arc.end_angle)
 				{
-					middle_point = Point(arc.radius, (arc.begin_angle + arc.end_angle) / 2)*0.5 + arc.center;
+					middle_point = radius_point(arc.radius, (arc.begin_angle + arc.end_angle) / 2)*0.5 + arc.center;
 				}
 				else
 				{
-					middle_point = Point(arc.radius, 2*PI -(arc.begin_angle + arc.end_angle) / 2)*0.5 + arc.center;
+					middle_point = radius_point(arc.radius, 2*PI -(arc.begin_angle + arc.end_angle) / 2)*0.5 + arc.center;
 				}
 				flood(path_points, vector<Point>{middle_point}, arc.color, arc.opacity);
 			}
@@ -499,34 +502,37 @@ namespace circos
 		vector<Point> path(const Bezier& bezier)
 		{
 			vector<Point> result;
-			const auto&  p1 = bezier.begin_point;
-			const auto& p2 = bezier.end_point;
-			const auto& cp = bezier.control_point;
-			Point c1;
-			Point c2;
+			const auto&  p1 = cast_point<int,double>(bezier.begin_point);
+			const auto& p2 = cast_point<int, double>(bezier.end_point);
+			const auto& cp = cast_point<int, double>(bezier.control_point);
+			basic_point<double> c1;
+			basic_point<double> c2;
+			basic_point<double> double_px;
 			Point px;
-			int total_len = Line(bezier.begin_point, bezier.control_point).len() + Line(bezier.control_point, bezier.end_point).len();
+			int total_len = (Line(bezier.begin_point, bezier.control_point).len() + Line(bezier.control_point, bezier.end_point).len());
 			if (total_len == 0)
 			{
 				return result;
 			}
-			float step = 1 / total_len;
-			float inc = 0;
+			double step = 1.0 / total_len;
+			double inc = 0;
 			c1 = p1 + (cp - p1)*inc;
 			c2 = cp + (p2 - cp)*inc;
-			px = c1 + (c2 - c1)*inc;
+			double_px = c1 + (c2 - c1)*inc;
+			px = cast_point<double,int>(double_px);
 			result.push_back(px);
 			inc += step;
 			while (inc <= 1)
 			{
 				c1 = p1 + (cp - p1)*inc;
 				c2 = cp + (p2 - cp)*inc;
-				px = c1 + (c2 - c1)*inc;
+				double_px = c1 + (c2 - c1)*inc;
+				px = cast_point<double,int>(double_px);
 				if (!(px==result.back()))
 				{
 					result.push_back(px);
 				}
-				
+				inc += step;
 			}
 			return result;
 		}
@@ -648,6 +654,7 @@ namespace circos
 				Point middle_2 = (track.arc_2.from_point + track.arc_2.to_point)*0.5;
 				flood(path_points, vector<Point>{middle_1, middle_2}, track.color, track.opacity);
 			}
+			return *this;
 		}
 	};
 }

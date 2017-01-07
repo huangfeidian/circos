@@ -60,9 +60,9 @@ namespace circos
 			output<< color;
 			return *this;
 		}
-		SvgGraph& operator<<( const Point& point)
+		SvgGraph& operator<<(const Point& point)
 		{
-			output<< point.x << " " << point.y << " ";
+			output<< point.x << "," << point.y << " ";
 			return *this;
 		}
 		SvgGraph& operator<<(const Line& line)
@@ -110,7 +110,7 @@ namespace circos
 			graph << "M " << bezier.begin_point;
 			graph << "Q " << bezier.control_point;
 			graph << bezier.end_point << "\" ";
-			graph << "fill= \"none\"" << " ";
+			graph << "fill=\"none\"" << " ";
 			graph << "stroke=\"" << bezier.color << "\" ";
 			graph << "stroke-width=\"" << bezier.stroke_width << "\" ";
 			graph << "opacity=\"" << bezier.opacity << "\" ";
@@ -163,9 +163,10 @@ namespace circos
 			graph.add_to_path(track.arc_2);
 			graph.add_to_path(track.bezier_2);
 			graph<<"\" ";
+			graph << "stroke=\"" << track.color << "\" stroke-width=\"" << track.arc_1.stroke << "\" ";
 			if(track.fill)
 			{
-				graph<<"fill =\""<<track.color<<"\"";
+				graph<<"fill=\""<<track.color<<"\" ";
 			}
 			else
 			{
