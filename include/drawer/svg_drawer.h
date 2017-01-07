@@ -65,6 +65,10 @@ namespace circos
 			output<< point.x << "," << point.y << " ";
 			return *this;
 		}
+		void add_to_path(const Line& line)
+		{
+			(*this) << " L" << line.to << " ";
+		}
 		SvgGraph& operator<<(const Line& line)
 		{
 			auto& graph = *this;
@@ -87,11 +91,11 @@ namespace circos
 		{
 			auto& graph = *this;
 			graph << "<path id=\"textPath" << path_index << "\" ";
-			graph << "d= \" M " << arc.from_point.x << " " << arc.from_point.y << " ";
+			graph << "d= \" M " << arc.from_point<<" ";
 			graph.add_to_path(arc);
 			if (arc.fill_flag)
 			{
-				graph << "L " << arc.center.x << " " << arc.center.y << " Z\" ";
+				graph << "L " << arc.center<< " Z\" ";
 				graph << "fill=\"" << arc.color << "\" ";
 			}
 			else
@@ -152,6 +156,32 @@ namespace circos
 			
 			graph<<"transform = \"rotate("<<theta<<" "<<rect.left.x<<" "<<rect.left.y<<")\"";
 			graph<<"/>\n";
+			return graph;
+		}
+		SvgGraph& operator<<(const Ring& ring)
+		{
+			auto& graph = *this;
+			Arc arc_1(ring.inner_radius, ring.begin_angle, ring.end_angle, ring.center, ring.color);
+			Arc arc_2(ring.outer_radius, ring.end_angle, ring.begin_angle, ring.center, ring.color);
+			Line line_1(radius_point(ring.inner_radius, ring.end_angle,ring.center), radius_point(ring.outer_radius, ring.end_angle,ring.center), ring.color);
+			Line line_2(radius_point(ring.outer_radius, ring.begin_angle, ring.center), radius_point(ring.inner_radius, ring.begin_angle, ring.center), ring.color);
+			graph << "<path d=\" M" << arc_1.from_point;
+			graph.add_to_path(arc_1);
+			graph.add_to_path(line_1);
+			graph.add_to_path(arc_2);
+			graph.add_to_path(line_2);
+			graph << "\" ";
+			graph << "stroke=\"" << ring.color << "\" stroke-width=\"" << ring.stroke << "\" ";
+			if (ring.fill)
+			{
+				graph << "fill=\"" << ring.color << "\"";
+			}
+			else
+			{
+				graph << "fill=\"none\" ";
+			}
+			graph << "opacity=\"" << ring.opacity << "\"";
+			graph << "/>\n";
 			return graph;
 		}
 		SvgGraph& operator<<(const Track& track)

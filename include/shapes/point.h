@@ -84,12 +84,12 @@ namespace circos
 		result.y = static_cast<T2>(in_point.y);
 		return result;
 	}
-	Point radius_point(int radius, double angle)
+	Point radius_point(int radius, double angle, Point center = Point())
 	{
 		Point result;
 		result.x = radius*cos(angle);
 		result.y = radius*sin(angle);
-		return result;
+		return result+center;
 	}
 	struct Colorbasic_point
 	{

@@ -438,8 +438,8 @@ namespace circos
 			const auto& points = get_circle(radius);;
 			if(angle_begin >angle_end)
 			{
-				auto result_1 = path(Arc(arc.radius,0,angle_begin,arc.center,arc.color));
-				auto result_2 = path(Arc(arc.radius,angle_end,2*PI,arc.center,arc.color));
+				auto result_1 = path(Arc(arc.radius,angle_begin,PI*2,arc.center,arc.color));
+				auto result_2 = path(Arc(arc.radius,0,angle_end,arc.center,arc.color));
 				copy(result_2.begin(),result_2.end(), back_inserter(result_1));
 				return result_1;
 			}
@@ -628,7 +628,41 @@ namespace circos
 			}
 			return *this;
 		}
-		
+		PngImage& operator<<(const Ring& ring)
+		{
+			vector<Point> path_points;
+			Arc arc_1(ring.inner_radius, ring.begin_angle, ring.end_angle, ring.center, ring.color);
+			Arc arc_2(ring.outer_radius, ring.begin_angle, ring.end_angle, ring.center, ring.color);
+			Line line_1(radius_point(ring.inner_radius, ring.end_angle, ring.center), radius_point(ring.outer_radius, ring.end_angle, ring.center), ring.color);
+			Line line_2(radius_point(ring.outer_radius, ring.begin_angle, ring.center), radius_point(ring.inner_radius, ring.begin_angle, ring.center), ring.color);
+			auto arc_path1 = path(arc_1);
+			auto arc_path2 = path(arc_2);
+			auto line_path1 = path(line_1);
+			auto line_path2 = path(line_2);
+			copy(arc_path1.begin(), arc_path1.end(), back_inserter(path_points));
+			copy(arc_path2.begin(), arc_path2.end(), back_inserter(path_points));
+			copy(line_path1.begin(), line_path1.end(), back_inserter(path_points));
+			copy(line_path2.begin(), line_path2.end(), back_inserter(path_points));
+			draw_path(path_points, ring.color, ring.stroke, ring.opacity);
+			if (ring.fill)
+			{
+				double middle_angle = 0;
+				double in_end_angle = ring.end_angle;
+				double in_begin_angle = ring.begin_angle;
+				double radius_diff = in_end_angle - in_begin_angle;
+				if (ring.end_angle > ring.begin_angle)
+				{
+					middle_angle = (ring.end_angle + ring.begin_angle) / 2;
+				}
+				else
+				{
+					middle_angle = 2 * PI - (ring.begin_angle + ring.end_angle) / 2;
+				}
+				auto middle_point = radius_point((ring.inner_radius + ring.outer_radius) / 2, middle_angle, ring.center);
+				flood(path_points, vector<Point>{middle_point}, ring.color, ring.opacity);
+			}
+			return *this;
+		}
 		PngImage& operator<<(const Track& track)
 		{
 			const auto& arc_1 = path(track.arc_1);

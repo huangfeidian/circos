@@ -39,7 +39,7 @@ namespace circos
 		{
 			begin_point = center+radius_point(in_on_radius, in_begin_angle);
 			end_point = center+radius_point(in_on_radius, in_end_angle);
-			double radius_diff = in_end_angle - in_begin_angle;
+			double radius_diff = abs(in_end_angle - in_begin_angle);
 			if(abs(radius_diff - PI) < EPS)
 			{
 				if(in_begin_angle < PI)

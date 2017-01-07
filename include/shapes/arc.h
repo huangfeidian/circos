@@ -35,24 +35,32 @@ namespace circos
 			, opacity(in_opacity)
 			, stroke(in_stroke)
 		{
-			if (begin_angle < end_angle)
-			{
-				sweep_flag = 1;
-			}
-			else
-			{
-				sweep_flag = 0;
-			}
+			sweep_flag = 1; //当前我们一定是顺时针画的
 			from_point = radius_point(in_radius, begin_angle) + center;
 			to_point = radius_point(in_radius, end_angle) + center;
-			if (abs(end_angle - begin_angle )> PI )
+			if (end_angle > begin_angle)
 			{
-				large_flag = 1;
+				if (end_angle - begin_angle >= PI)
+				{
+					large_flag = 1;
+				}
+				else
+				{
+					large_flag = 0;
+				}
 			}
 			else
 			{
-				large_flag = 0;
+				if (end_angle - begin_angle + 2 * PI > PI)
+				{
+					large_flag = 1;
+				}
+				else
+				{
+					large_flag = 0;
+				}
 			}
+			
 		}
 	};
 }
