@@ -30,7 +30,7 @@ namespace circos
 		, fill(in_fill)
 		, opacity(in_opacity)
 		{
-			
+			 
 		}
 	};
 };
