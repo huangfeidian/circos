@@ -9,7 +9,8 @@
 #include <png.h>
 #include <zlib.h>
 #include <stack>
-//#include <ft2build.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
 #include "../shapes/line.h"
 #include "../shapes/circle.h"
@@ -46,6 +47,11 @@ namespace circos
 		const string software = "circos implemented in c++";
 		const string title = "circos.png";
 		unordered_map<int, vector<Point>> circle_cache;
+		//下面是跟freetype相关的成员
+		unordered_map<string, string> font_path;//所有字体相关文件的存储路径映射
+		unordered_map<string, vector<unsigned char>> font_cache;//字体文件读入内存
+		FT_Library* ft_library;
+
 		PngImage(string in_file_name, int in_radius, Color back_color, int compress=8)
 		: file_name(in_file_name)
 		, radius(in_radius)
@@ -71,6 +77,35 @@ namespace circos
 			{
 				_buffer[i]=backgroud_color;
 			}
+			auto error = FT_Init_FreeType(ft_library);
+			if (error)
+			{
+				cerr << "cant init ft_library" << endl;
+				exit(1);
+			}
+		}
+		void init_font_path(const unordered_map<string, string>& in_font_files)
+		{
+			font_path = in_font_files;
+		}
+		const vector<unsigned char>& get_font_mem(const string& font_name)
+		{
+			if (font_path.find(font_name) == font_path.end())
+			{
+				cerr << "unknown font name " << font_name << endl;
+				exit(1);
+			}
+			auto iter = font_cache.find(font_name);
+			if (iter != font_cache.end())
+			{
+				return iter->second;
+			}
+			font_cache[font_name] = vector<unsigned char>();
+			auto& result = font_cache[font_name];
+			ifstream font_file(font_path[font_name],ios::binary);
+			copy(std::istreambuf_iterator<char>(font_file), std::istreambuf_iterator<char>(), back_inserter(result));
+			return result;
+
 		}
 		void plot(Colorbasic_point input, float blend = 1.0)
 		{
@@ -257,6 +292,76 @@ namespace circos
 			{
 				flood_map[i.y][i.x] = 0;
 			}
+		}
+		void draw_text(const Line& base_line, const string& text, const string& font_name, int font_size)
+		{
+			FT_Face face;
+			auto font_mem = get_font_mem(font_name);
+			FT_UInt glyph_index;
+			FT_Error error;
+			FT_Matrix matrix;
+			FT_Vector pen;
+
+			FT_Bool use_kerning;
+			FT_UInt previous = 0;
+			double angle = atan2(base_line.to.y - base_line.from.y,base_line.to.x-base_line.from.x);
+			double cos_angle = cos(angle);
+			double sin_angle = sin(angle);
+			matrix.xx = static_cast<FT_Fixed>(cos_angle * 65536);
+			matrix.xy = static_cast<FT_Fixed>(-sin_angle * 65536);
+			matrix.yx = static_cast<FT_Fixed>(sin_angle * 65536);
+			matrix.yy = static_cast<FT_Fixed>(cos_angle * 65536);
+			pen.x = base_line.from.x * 64;
+			pen.y = base_line.from.y * 64;
+			error = FT_New_Memory_Face(*ft_library, &font_mem[0], font_mem.size(), 0, &face);
+			if (error)
+			{
+				cerr << "error loading font:" << font_name << " from memory" << endl;
+				return;
+			}
+			error = FT_Set_Char_Size(face, font_size * 64, font_size * 64, 100, 100);
+			if (error)
+			{
+				cerr << "Freetype set char size error, font:" << font_name << " size:" << font_size << endl;
+				return ;
+			}
+			FT_GlyphSlot slot = face->glyph;
+			use_kerning = FT_HAS_KERNING(face);
+			for (char i : text)
+			{
+				glyph_index = FT_Get_Char_Index(face, i);
+				if (use_kerning&& previous&&glyph_index)
+				{
+					FT_Vector delta;
+					FT_Get_Kerning(face, previous, glyph_index, ft_kerning_default, &delta);
+					pen.x += static_cast<int>(delta.x*cos_angle);
+					pen.y += static_cast<int>(delta.y*sin_angle);
+				}
+				FT_Set_Transform(face, &matrix, &pen);
+				error = FT_Load_Glyph(face, glyph_index, FT_LOAD_DEFAULT);
+				if (error)
+				{
+					cerr << "freetype cant load glyph, font:" << font_name << " index:" << glyph_index << endl;
+					return;
+				}
+				error = FT_Render_Glyph(face->glyph, ft_render_mode_normal);
+				if (error)
+				{
+					cerr << "freetype cant load glyph, font:" << font_name << " index:" << glyph_index << endl;
+					return;
+				}
+				FT_Bitmap* bitmap = &slot->bitmap;
+				int bitmap_left = slot->bitmap_left;
+				int bitmap_top = slot->bitmap_top;
+				//这里应该开始画bitmap了
+				pen.x += slot->advance.x;
+				pen.y += slot->advance.y;
+				previous = glyph_index;
+				
+			}
+			FT_Done_Face(face);
+
+
 		}
 		vector<Point> path(const Line& line)
 		{
