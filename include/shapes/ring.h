@@ -1,3 +1,4 @@
+#pragma once
 #include "../color.h"
 #include "point.h"
 #include <vector>
