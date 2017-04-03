@@ -380,7 +380,7 @@ namespace circos
 			matrix.xx = static_cast<FT_Fixed>(cos_angle * 65536);
 			matrix.xy = static_cast<FT_Fixed>(-sin_angle * 65536);
 			matrix.yx = static_cast<FT_Fixed>(sin_angle * 65536);
-			matrix.yy = static_cast<FT_Fixed>(-cos_angle * 65536);
+			matrix.yy = static_cast<FT_Fixed>(cos_angle * 65536);
 			pen.x = base_line.from.x * 64;
 			pen.y = base_line.from.y * 64;
 			error = FT_New_Memory_Face(ft_library, &font_mem[0], font_mem.size(), 0, &face);
