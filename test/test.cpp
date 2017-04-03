@@ -19,6 +19,7 @@ int main()
 	Arc arc_1(360, PI / 6, PI / 3, center, Color(128, 128, 128),0,1.0,2);
 	Arc arc_2(360, PI*2 / 3, PI*5/ 6, center, Color(128, 128, 128),0,1.0,8);
 	Arc arc_3(360, PI * 5 / 6+PI, PI * 2 / 3+PI, center, Color(128, 128, 128));
+
 	//Bezier bezier_1(arc_1.to_point, arc_3.from_point, center, arc_1.color);
 	//Bezier bezier_2(arc_3.to_point, arc_1.from_point, center, arc_1.color);
 	//Track track_1(arc_1, arc_3, bezier_1, bezier_2, arc_1.color,true);
@@ -41,14 +42,14 @@ int main()
 	//png_image << ring;
 	//svg_graph << line;
 	//png_image << line;
-	svg_graph << arc;
-	png_image << arc;
-	svg_graph << arc_1;
-	png_image << arc_1;
-	svg_graph << arc_2;
-	png_image << arc_2;
-	svg_graph << arc_3;
-	png_image << arc_3;
+	//svg_graph << arc;
+	//png_image << arc;
+	//svg_graph << arc_1;
+	//png_image << arc_1;
+	//svg_graph << arc_2;
+	//png_image << arc_2;
+	//svg_graph << arc_3;
+	//png_image << arc_3;
 	//svg_graph << track_3;
 	//png_image << track_3;
 	//svg_graph << track_2;
@@ -59,4 +60,11 @@ int main()
 	//png_image << bezier_2;
 	//svg_graph << bezier_3;
 	//png_image << bezier_3;
+	const string& font_name = "C:/Windows/Fonts/msyhl.ttc";
+	png_image.init_font_path(unordered_map<string, string>{
+		{
+			"arial", font_name
+		} });
+	int font_size = 64;
+	png_image.draw_text(line, u8"ƒ·¬ÍÀ¿¡À", "arial", font_size, Color(128, 128, 128), 1.0);
 }

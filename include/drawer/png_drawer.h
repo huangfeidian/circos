@@ -50,7 +50,7 @@ namespace circos
 		//下面是跟freetype相关的成员
 		unordered_map<string, string> font_path;//所有字体相关文件的存储路径映射
 		unordered_map<string, vector<unsigned char>> font_cache;//字体文件读入内存
-		FT_Library* ft_library;
+		FT_Library ft_library;
 
 		PngImage(string in_file_name, int in_radius, Color back_color, int compress=8)
 		: file_name(in_file_name)
@@ -77,7 +77,7 @@ namespace circos
 			{
 				_buffer[i]=backgroud_color;
 			}
-			auto error = FT_Init_FreeType(ft_library);
+			auto error = FT_Init_FreeType(&ft_library);
 			if (error)
 			{
 				cerr << "cant init ft_library" << endl;
@@ -293,7 +293,70 @@ namespace circos
 				flood_map[i.y][i.x] = 0;
 			}
 		}
-		void draw_text(const Line& base_line, const string& text, const string& font_name, int font_size)
+		vector<uint32_t> utf8_to_uint(const string& text) const
+		{
+			unsigned char u, v, w, x, y, z;
+			vector<uint32_t> utf8_result;
+			int num_chars = 0;
+			uint32_t num_bytes = text.length();
+			long iii = 0;
+			while (iii < num_bytes)
+			{
+				uint32_t cur_utf8_char = 0;
+				z = text[iii];
+				if (z <= 127)
+				{
+					cur_utf8_char = z;
+				}
+				if (z >= 192 && z <= 223)
+				{
+					iii++;
+					y = text[iii];
+					cur_utf8_char = (z - 192) * 64 + (y - 128);
+				}
+				if (z >= 224 && z <= 239)
+				{
+					iii++; y = text[iii];
+					iii++; x = text[iii];
+					cur_utf8_char = (z - 224) * 4096 + (y - 128) * 64 + (x - 128);
+				}
+				if ((240 <= z) && (z <= 247))
+				{
+					iii++; y = text[iii];
+					iii++; x = text[iii];
+					iii++; w = text[iii];
+					cur_utf8_char = (z - 240) * 262144 + (y - 128) * 4096 + (x - 128) * 64 + (w - 128);
+				}
+				if ((248 <= z) && (z <= 251))
+				{
+					iii++; y = text[iii];
+					iii++; x = text[iii];
+					iii++; w = text[iii];
+					iii++; v = text[iii];
+					cur_utf8_char = (z - 248) * 16777216 + (y - 128) * 262144 + (x - 128) * 4096 + (w - 128) * 64 + (v - 128);
+				}
+
+				if ((252 == z) || (z == 253))
+				{
+					iii++; y = text[iii];
+					iii++; x = text[iii];
+					iii++; w = text[iii];
+					iii++; v = text[iii];
+					u = text[iii];
+					cur_utf8_char = (z - 252) * 1073741824 + (y - 128) * 16777216 + (x - 128) * 262144 + (w - 128) * 4096 + (v - 128) * 64 + (u - 128);
+				}
+				if (z >= 254)
+				{
+					std::cerr << "convert string to utf8 char fail with first byte larger than 234" << std::endl;
+					exit(1);
+				}
+				utf8_result.push_back(cur_utf8_char);
+				iii++;
+			}
+			return utf8_result;
+		}
+		void draw_text(const Line& base_line, const string& text, const string& font_name, int font_size, Color color, float alpha)
+			//这里要处理一下utf8
 		{
 			FT_Face face;
 			auto font_mem = get_font_mem(font_name);
@@ -304,16 +367,16 @@ namespace circos
 
 			FT_Bool use_kerning;
 			FT_UInt previous = 0;
-			double angle = atan2(base_line.to.y - base_line.from.y,base_line.to.x-base_line.from.x);
+			double angle = atan2(base_line.to.y - base_line.from.y,base_line.to.x-base_line.from.x) - 3.14159/2;
 			double cos_angle = cos(angle);
 			double sin_angle = sin(angle);
 			matrix.xx = static_cast<FT_Fixed>(cos_angle * 65536);
 			matrix.xy = static_cast<FT_Fixed>(-sin_angle * 65536);
 			matrix.yx = static_cast<FT_Fixed>(sin_angle * 65536);
-			matrix.yy = static_cast<FT_Fixed>(cos_angle * 65536);
+			matrix.yy = static_cast<FT_Fixed>(-cos_angle * 65536);
 			pen.x = base_line.from.x * 64;
 			pen.y = base_line.from.y * 64;
-			error = FT_New_Memory_Face(*ft_library, &font_mem[0], font_mem.size(), 0, &face);
+			error = FT_New_Memory_Face(ft_library, &font_mem[0], font_mem.size(), 0, &face);
 			if (error)
 			{
 				cerr << "error loading font:" << font_name << " from memory" << endl;
@@ -327,7 +390,8 @@ namespace circos
 			}
 			FT_GlyphSlot slot = face->glyph;
 			use_kerning = FT_HAS_KERNING(face);
-			for (char i : text)
+			const auto& u8_text = utf8_to_uint(text);
+			for (uint32_t i : u8_text)
 			{
 				glyph_index = FT_Get_Char_Index(face, i);
 				if (use_kerning&& previous&&glyph_index)
@@ -350,18 +414,31 @@ namespace circos
 					cerr << "freetype cant load glyph, font:" << font_name << " index:" << glyph_index << endl;
 					return;
 				}
-				FT_Bitmap* bitmap = &slot->bitmap;
-				int bitmap_left = slot->bitmap_left;
-				int bitmap_top = slot->bitmap_top;
 				//这里应该开始画bitmap了
+				draw_bitmap(slot, base_line.from, color, alpha);
 				pen.x += slot->advance.x;
 				pen.y += slot->advance.y;
 				previous = glyph_index;
-				
 			}
 			FT_Done_Face(face);
-
-
+		}
+		void draw_bitmap(const FT_GlyphSlot& slot,Point start, Color color, float alpha)
+		{
+			const FT_Bitmap* bitmap = &slot->bitmap;
+			int left = slot->bitmap_left;
+			int top = slot->bitmap_top;
+			float temp;
+			for (uint32_t i = 1;i < bitmap->rows;i++)
+			{
+				for (uint32_t j = 1; j < bitmap->width;j++)
+				{
+					temp = static_cast<uint8_t>(bitmap->buffer[(i - 1)*bitmap->width + (j - 1)]);
+					if (temp)
+					{
+						plot(left + j, top - i, color, alpha*temp/255.0);
+					}
+				}
+			}
 		}
 		vector<Point> path(const Line& line)
 		{

@@ -1,7 +1,7 @@
 #pragma once
 #include <circos_description.h>
 #include <fstream>
-#include "../../include/circos_config.h"
+#include <description/circos_config.h>
 namespace circos
 {
 	class SvgGraph
