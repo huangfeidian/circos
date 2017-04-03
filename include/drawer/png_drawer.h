@@ -19,6 +19,8 @@
 #include "../shapes/ring.h"
 #include "../shapes/track.h"
 #include "../shapes/rectangle.h"
+#include "../shapes/line_text.h"
+
 
 using namespace std;
 #define PI 3.1415926
@@ -93,6 +95,11 @@ namespace circos
 			if (font_path.find(font_name) == font_path.end())
 			{
 				cerr << "unknown font name " << font_name << endl;
+				cerr << "all avail fonts is " << endl;
+				for (const auto& i : font_path)
+				{
+					cerr << i.first << endl;
+				}
 				exit(1);
 			}
 			auto iter = font_cache.find(font_name);
@@ -679,6 +686,11 @@ namespace circos
 				}
 				flood(path_points, vector<Point>{middle_point}, arc.color, arc.opacity);
 			}
+			return *this;
+		}
+		PngImage& operator<<(const LineText& line_text)
+		{
+			draw_text(line_text.on_line, line_text.utf8_text, line_text.font_name, line_text.font_size, line_text.color, line_text.opacity);
 			return *this;
 		}
 		vector<Point> path(const Bezier& bezier)

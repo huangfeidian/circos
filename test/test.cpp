@@ -9,7 +9,7 @@ int main()
 	Color background_color = Color(255, 105, 180);
 	string svg_filename = "circos.svg";
 	string png_filename = "circos.png";
-	Line line(Point(400, 400), Point(400, 500), Color(0, 255, 180), 4);
+	Line line(Point(400, 400), Point(450, 500), Color(0, 255, 180), 4);
 	//Rectangle rect_test_1(Point(100, 100), Point(200, 100), Color(128, 105, 180), 100, true);
 	//Rectangle rect_test_2(Point(100, 100), Point(200, 200), Color(0, 105, 180), 141, true,0.5);
 	Point center(400, 400);
@@ -63,8 +63,10 @@ int main()
 	const string& font_name = "C:/Windows/Fonts/msyhl.ttc";
 	png_image.init_font_path(unordered_map<string, string>{
 		{
-			"arial", font_name
+			"yahei", font_name
 		} });
 	int font_size = 64;
-	png_image.draw_text(line, u8"ƒ·¬ÍÀ¿¡À", "arial", font_size, Color(128, 128, 128), 1.0);
+	LineText line_text(line, "nihehe", "yahei", font_size, Color(128, 128, 128), 1.0);
+	png_image << line_text;
+	svg_graph << line_text;
 }
