@@ -374,7 +374,7 @@ namespace circos
 
 			FT_Bool use_kerning;
 			FT_UInt previous = 0;
-			double angle = atan2(base_line.to.y - base_line.from.y,base_line.to.x-base_line.from.x) - 3.14159/2;
+			double angle = atan2(base_line.to.y - base_line.from.y,base_line.to.x-base_line.from.x) ;
 			double cos_angle = cos(angle);
 			double sin_angle = sin(angle);
 			matrix.xx = static_cast<FT_Fixed>(cos_angle * 65536);
@@ -422,14 +422,14 @@ namespace circos
 					return;
 				}
 				//这里应该开始画bitmap了
-				draw_bitmap(slot, base_line.from, color, alpha);
+				draw_bitmap(slot, base_line, color, alpha);
 				pen.x += slot->advance.x;
 				pen.y += slot->advance.y;
 				previous = glyph_index;
 			}
 			FT_Done_Face(face);
 		}
-		void draw_bitmap(const FT_GlyphSlot& slot,Point start, Color color, float alpha)
+		void draw_bitmap(const FT_GlyphSlot& slot,Line on_line, Color color, float alpha)
 		{
 			const FT_Bitmap* bitmap = &slot->bitmap;
 			int left = slot->bitmap_left;
@@ -442,11 +442,24 @@ namespace circos
 					temp = static_cast<uint8_t>(bitmap->buffer[(i - 1)*bitmap->width + (j - 1)]);
 					if (temp)
 					{
-						plot(left + j, top - i, color, alpha*temp/255.0);
+						auto sym_point = symmetric_point(on_line, Point(left + j, top - i));
+						plot(sym_point.x, sym_point.y, color, alpha*temp/255.0);
+						//plot(left + j, top - i, color, alpha*temp / 255.0);
 					}
 				}
 			}
 		}
+		Point symmetric_point(Line line, Point point)const
+			// 获得某一点相对于某条线的对称点
+		{
+			pair<int, int> vec_1 = make_pair(line.to.x - line.from.x, line.to.y - line.from.y);
+			pair<int, int> vec_2 = make_pair(point.x - line.from.x, point.y - line.from.y);
+			float length = (vec_1.first*vec_2.first + vec_1.second*vec_2.second)/(1.0*(vec_1.first*vec_1.first+vec_1.second*vec_1.second));
+			pair<int, int> remain = static_cast<pair<int,int>>(make_pair(vec_2.first - length*vec_1.first, vec_2.second - length*vec_1.second));
+			pair<int, int> vec_3 = make_pair(vec_2.first - 2 * remain.first, vec_2.second - 2 * remain.second);
+			return Point(vec_3.first + line.from.x, vec_3.second + line.from.y);
+		}
+
 		vector<Point> path(const Line& line)
 		{
 			vector<Point> result;

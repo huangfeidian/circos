@@ -211,7 +211,7 @@ namespace circos
 		{
 			const Line& base_line = line_text.on_line;
 			auto& graph = *this;
-			double angle = -1*atan2(base_line.to.y - base_line.from.y, base_line.to.x - base_line.from.x)*180/PI;
+			double angle = atan2(base_line.to.y - base_line.from.y, base_line.to.x - base_line.from.x)*180/PI;
 			graph << "<text x=\"" << base_line.from.x << "\" y=\"" << base_line.from.y << "\" ";
 			//graph << "font-family=\"" << line_text.font_name << "\" " << "font-size=\"" << line_text.font_size << "\" ";
 			graph << "font-family=\"" << "Verdana" << "\" " << "font-size=\"" << line_text.font_size << "\" ";
