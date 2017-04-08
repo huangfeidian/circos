@@ -50,12 +50,13 @@ namespace circos
 		const string title = "circos.png";
 		unordered_map<int, vector<Point>> circle_cache;
 		//下面是跟freetype相关的成员
-		unordered_map<string, string> font_path;//所有字体相关文件的存储路径映射
+		const std::unordered_map<string, std::pair<std::string, std::string>>& font_info;//所有字体相关文件的存储路径映射
 		unordered_map<string, vector<unsigned char>> font_cache;//字体文件读入内存
 		FT_Library ft_library;
 
-		PngImage(string in_file_name, int in_radius, Color back_color, int compress=8)
-		: file_name(in_file_name)
+		PngImage(const std::unordered_map<string, std::pair<std::string, std::string>>& in_font_info,string in_file_name, int in_radius, Color back_color, int compress=8)
+		: font_info(in_font_info)
+		,file_name(in_file_name)
 		, radius(in_radius)
 		, width(2*in_radius)
 		, height(2*in_radius)
@@ -86,17 +87,14 @@ namespace circos
 				exit(1);
 			}
 		}
-		void init_font_path(const unordered_map<string, string>& in_font_files)
-		{
-			font_path = in_font_files;
-		}
+
 		const vector<unsigned char>& get_font_mem(const string& font_name)
 		{
-			if (font_path.find(font_name) == font_path.end())
+			if (font_info.find(font_name) == font_info.end())
 			{
 				cerr << "unknown font name " << font_name << endl;
 				cerr << "all avail fonts is " << endl;
-				for (const auto& i : font_path)
+				for (const auto& i : font_info)
 				{
 					cerr << i.first << endl;
 				}
@@ -108,8 +106,15 @@ namespace circos
 				return iter->second;
 			}
 			font_cache[font_name] = vector<unsigned char>();
+
 			auto& result = font_cache[font_name];
-			ifstream font_file(font_path[font_name],ios::binary);
+			auto font_iter = font_info.find(font_name);
+			if (font_iter == font_info.end())
+			{
+				std:cerr << "unknown font " << font_name << std::endl;
+				exit(1);
+			}
+			ifstream font_file(font_iter->second.first,ios::binary);
 			copy(std::istreambuf_iterator<char>(font_file), std::istreambuf_iterator<char>(), back_inserter(result));
 			return result;
 

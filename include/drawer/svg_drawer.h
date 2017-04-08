@@ -27,11 +27,14 @@ namespace circos
 		int path_index = 0;
 		const int background_radius;
 		const Color background_color;
+		const std::unordered_map<std::string, std::pair<std::string, std::string>>& font_info;//first is png font filepath second is svn font name
 	public:
-		SvgGraph(string in_file_name, int in_background_radius, Color in_background_color)
-			: file_name(in_file_name)
+		SvgGraph(const std::unordered_map<std::string, std::pair<std::string, std::string>>& in_font_info,
+			string in_file_name, int in_background_radius, Color in_background_color)
+			: font_info(in_font_info)
+			, file_name(in_file_name)
 			, background_radius(in_background_radius)
-			,background_color(in_background_color)
+			, background_color(in_background_color)
 		{
 			output << R"(<?xml version="1.0" encoding="utf-8" standalone="no"?>)" << std::endl;
 			output << R"(<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">)" << std::endl;
@@ -41,29 +44,29 @@ namespace circos
 			output << "<rect x=\"0\" y=\"0\" width=\"" << 2 * background_radius << "\" height=\"" << 2 * background_radius << "\" ";
 			output << "fill=\"" << background_color << "\"/>" << std::endl;
 		}
-		SvgGraph& operator<<( const string& input_str)
+		SvgGraph& operator<<(const string& input_str)
 		{
-			output<<input_str;
+			output << input_str;
 			return *this;
 		}
-		SvgGraph& operator<<( int value)
+		SvgGraph& operator<<(int value)
 		{
 			output << value;
 			return *this;
 		}
-		SvgGraph& operator<<( double value)
+		SvgGraph& operator<<(double value)
 		{
-			output<<value;
+			output << value;
 			return *this;
 		}
 		SvgGraph& operator<<(Color color)
 		{
-			output<< color;
+			output << color;
 			return *this;
 		}
 		SvgGraph& operator<<(const Point& point)
 		{
-			output<< point.x << "," << point.y << " ";
+			output << point.x << "," << point.y << " ";
 			return *this;
 		}
 		void add_to_path(const Line& line)
@@ -74,7 +77,7 @@ namespace circos
 		{
 			auto& graph = *this;
 			graph << "<line ";
-			graph << "x1=\"" << line.from.x << "\" y1=\" "<< line.from.y << "\" ";
+			graph << "x1=\"" << line.from.x << "\" y1=\" " << line.from.y << "\" ";
 			graph << "x2=\"" << line.to.x << "\" y2=\"" << line.to.y << "\" ";
 			graph << "stroke=\"" << line.color << "\" ";
 			graph << "stroke-width=\"" << line.width << "\" ";
@@ -82,6 +85,17 @@ namespace circos
 			graph << "/>\n";
 			return graph;
 		}
+		const std::string& get_font_name(const std::string& input_name)const
+		{
+			auto iter = font_info.find(input_name);
+			if (iter == font_info.end())
+			{
+				std::cerr << "unknown font " << input_name << std::endl;
+				exit(1);
+			}
+			return iter->second.second;
+		}
+
 		void add_to_path(const Arc& arc)
 		{
 			(*this) << " A " << arc.radius << "," << arc.radius << " ";
@@ -214,7 +228,7 @@ namespace circos
 			double angle = atan2(base_line.to.y - base_line.from.y, base_line.to.x - base_line.from.x)*180/PI;
 			graph << "<text x=\"" << base_line.from.x << "\" y=\"" << base_line.from.y << "\" ";
 			//graph << "font-family=\"" << line_text.font_name << "\" " << "font-size=\"" << line_text.font_size << "\" ";
-			graph << "font-family=\"" << "Verdana" << "\" " << "font-size=\"" << line_text.font_size << "\" ";
+			graph << "font-family=\"" << get_font_name(line_text.font_name) << "\" " << "font-size=\"" << line_text.font_size << "\" ";
 			graph << "fill=\"" << line_text.color << "\" ";
 			graph << "opacity=\"" << line_text.opacity << "\" ";
 			graph << "transform=\"rotate(" << angle << " " << base_line.from.x << " " << base_line.from.y << ")\"";
