@@ -389,7 +389,7 @@ namespace circos
 				cerr << "error loading font:" << font_name << " from memory" << endl;
 				return;
 			}
-			error = FT_Set_Char_Size(face, font_size * 64, font_size * 64, 100, 100);
+			error = FT_Set_Pixel_Sizes(face, font_size, 0);
 			if (error)
 			{
 				cerr << "Freetype set char size error, font:" << font_name << " size:" << font_size << endl;

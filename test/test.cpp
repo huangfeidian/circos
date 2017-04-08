@@ -67,6 +67,7 @@ int main()
 		} });
 	int font_size = 64;
 	LineText line_text(line, u8"笑死人了", "yahei", font_size, Color(128, 128, 128), 1.0);
+	LineText line_text_2(line, u8"笑死人了", "yahei", font_size*1.5, Color(128, 128, 128), 1.0);
 	png_image << line;
 	svg_graph << line;
 	png_image << line_text;
