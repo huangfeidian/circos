@@ -9,8 +9,8 @@
 #include <png.h>
 #include <zlib.h>
 #include <stack>
-#include <ft2build.h>
-#include FT_FREETYPE_H
+
+
 
 #include "../shapes/line.h"
 #include "../shapes/circle.h"
@@ -21,6 +21,10 @@
 #include "../shapes/rectangle.h"
 #include "../shapes/line_text.h"
 
+#ifdef USE_TEXT
+#include FT_FREETYPE_H
+#include <ft2build.h>
+#endif
 
 using namespace std;
 #define PI 3.1415926
@@ -49,10 +53,12 @@ namespace circos
 		const string software = "circos implemented in c++";
 		const string title = "circos.png";
 		unordered_map<int, vector<Point>> circle_cache;
-		//下面是跟freetype相关的成员
 		const std::unordered_map<string, std::pair<std::string, std::string>>& font_info;//所有字体相关文件的存储路径映射
+		//下面是跟freetype相关的成员
+#ifdef USE_TEXT
 		unordered_map<string, vector<unsigned char>> font_cache;//字体文件读入内存
 		FT_Library ft_library;
+#endif
 
 		PngImage(const std::unordered_map<string, std::pair<std::string, std::string>>& in_font_info,string in_file_name, int in_radius, Color back_color, int compress=8)
 		: font_info(in_font_info)
@@ -80,14 +86,17 @@ namespace circos
 			{
 				_buffer[i]=backgroud_color;
 			}
+#ifdef USE_TEXT
+
 			auto error = FT_Init_FreeType(&ft_library);
 			if (error)
 			{
 				cerr << "cant init ft_library" << endl;
 				exit(1);
 			}
+#endif
 		}
-
+#ifdef USE_TEXT
 		const vector<unsigned char>& get_font_mem(const string& font_name)
 		{
 			if (font_info.find(font_name) == font_info.end())
@@ -119,6 +128,7 @@ namespace circos
 			return result;
 
 		}
+#endif
 		void plot(Colorbasic_point input, float blend = 1.0)
 		{
 			_image[input.pos.y][input.pos.x].blend(input.color, blend);
@@ -181,7 +191,7 @@ namespace circos
 			time_t gmt;
 			png_time mod_time;
 			int entries = 4;
-			 time(&gmt);
+			time(&gmt);
 			png_convert_from_time_t(&mod_time, gmt);
 			png_set_tIME(png_ptr, info_ptr, &mod_time);
 			/* key is a 1-79 character description of type char* */
@@ -305,6 +315,7 @@ namespace circos
 				flood_map[i.y][i.x] = 0;
 			}
 		}
+#ifdef USE_TEXT
 		vector<uint32_t> utf8_to_uint(const string& text) const
 		{
 			unsigned char u, v, w, x, y, z;
@@ -464,7 +475,12 @@ namespace circos
 			pair<int, int> vec_3 = make_pair(vec_2.first - 2 * remain.first, vec_2.second - 2 * remain.second);
 			return Point(vec_3.first + line.from.x, vec_3.second + line.from.y);
 		}
-
+		PngImage& operator<<(const LineText& line_text)
+		{
+			draw_text(line_text.on_line, line_text.utf8_text, line_text.font_name, line_text.font_size, line_text.color, line_text.opacity);
+			return *this;
+		}
+#endif
 		vector<Point> path(const Line& line)
 		{
 			vector<Point> result;
@@ -706,11 +722,7 @@ namespace circos
 			}
 			return *this;
 		}
-		PngImage& operator<<(const LineText& line_text)
-		{
-			draw_text(line_text.on_line, line_text.utf8_text, line_text.font_name, line_text.font_size, line_text.color, line_text.opacity);
-			return *this;
-		}
+
 		vector<Point> path(const Bezier& bezier)
 		{
 			vector<Point> result;

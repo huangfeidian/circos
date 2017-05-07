@@ -7,7 +7,6 @@
 using std::ostream;
 using std::sin;
 using std::cos;
-#pragma once
 namespace circos
 {
 	template<typename T>

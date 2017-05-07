@@ -195,7 +195,7 @@ namespace circos
 			{
 				graph << "fill=\"none\" ";
 			}
-			graph << "opacity=\"" << ring.opacity << "\"";
+			graph << " opacity=\"" << ring.opacity << "\"";
 			graph << "/>\n";
 			return graph;
 		}

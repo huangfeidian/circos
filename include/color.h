@@ -1,8 +1,9 @@
+#pragma once
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <cstdint>
-#pragma once
+
 using std::ostream;
 using std::istream;
 using std::string;
