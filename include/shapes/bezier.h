@@ -42,6 +42,8 @@ namespace circos
 			double radius_diff = abs(in_end_angle - in_begin_angle);
 			if(abs(radius_diff - PI) < EPS)
 			{
+				// 这里我们要随机的让他翻转
+				int second_digit = (int(in_begin_angle+in_end_angle * 100) / 10)%10;
 				if(in_begin_angle < PI)
 				{
 					control_point = center+radius_point(in_control_radius, (in_begin_angle + in_end_angle)/2);

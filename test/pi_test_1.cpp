@@ -12,7 +12,7 @@ using namespace std;
 using namespace circos;
 void pi_test_1(void)
 {
-    ifstream pi_file("../data/pi10000.txt");
+    ifstream pi_file("../data/pi100000.txt");
     string pi_str((istreambuf_iterator<char>(pi_file)), istreambuf_iterator<char>());
     vector<char> pi_digits;
     pi_digits.reserve(pi_str.size());
@@ -78,10 +78,12 @@ void pi_test_1(void)
     }
     int radius = 4000;
     Point center(radius, radius);
-    float inner_radius_ratio = 0.8;
+    float inner_radius_ratio = 0.85;
     float outer_radius_ratio = 0.9;
+	float control_radius_ration = 0.3;
     int inner_radius = inner_radius_ratio*radius;
     int outer_radius = outer_radius_ratio*radius;
+	int control_radius = control_radius_ration*radius;
     Color background_color = Color(0,0,0);
     string svg_filename = "circos_pi_test_1.svg";
     string png_filename = "circos_pi_test_1.png";
@@ -94,4 +96,16 @@ void pi_test_1(void)
         svg_graph<<cur_ring;
         png_image<<cur_ring;
     }
+	for (int i = 0; i < 10; i++)
+	{
+		for (const auto& link : connections[i])
+		{
+			float from_angle = all_strands[i].position_to_angle(link.first);
+			float to_angle = all_strands[link.second.first].position_to_angle(link.second.second);
+			Bezier connection(center, inner_radius, from_angle, to_angle, strand_color[i], control_radius, 1, 0.1);
+			svg_graph << connection;
+			png_image << connection;
+
+		}
+	}
 }
