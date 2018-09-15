@@ -33,16 +33,16 @@ namespace circos
 			: stroke_width(in_stroke_width)
 			, color(in_color)
 			, opacity(in_opacity)
-			//Õâ¸ö¹¹Ôìº¯ÊıµÄ×îÖØÒª²ÎÊıÊÇcontrol radius
-			//´ú±íµÄÊÇÕâ¸öbezierµÄ¿ØÖÆµãÓëÔ²µÄÖĞĞÄµãÖ®¼äµÄ¾àÀë
-			//¿ØÖÆµãµÄ½Ç¶ÈÎªÕâÁ½¸ö½Ç¶ÈµÄÖĞ¼äÖµ
+			//è¿™ä¸ªæ„é€ å‡½æ•°çš„æœ€é‡è¦å‚æ•°æ˜¯control radius
+			//ä»£è¡¨çš„æ˜¯è¿™ä¸ªbezierçš„æ§åˆ¶ç‚¹ä¸åœ†çš„ä¸­å¿ƒç‚¹ä¹‹é—´çš„è·ç¦»
+			//æ§åˆ¶ç‚¹çš„è§’åº¦ä¸ºè¿™ä¸¤ä¸ªè§’åº¦çš„ä¸­é—´å€¼
 		{
 			begin_point = center+radius_point(in_on_radius, in_begin_angle);
 			end_point = center+radius_point(in_on_radius, in_end_angle);
 			double radius_diff = abs(in_end_angle - in_begin_angle);
 			if(abs(radius_diff - PI) < EPS)
 			{
-				// ÕâÀïÎÒÃÇÒªËæ»úµÄÈÃËû·­×ª
+				// è¿™é‡Œæˆ‘ä»¬è¦éšæœºçš„è®©ä»–ç¿»è½¬
 				int second_digit = (int(in_begin_angle+in_end_angle * 100) / 10)%10;
 				if(in_begin_angle < PI)
 				{

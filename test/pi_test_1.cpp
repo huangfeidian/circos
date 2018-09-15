@@ -8,13 +8,17 @@
 #include <algorithm>
 #include <numeric>
 #include <color.h>
+#include <random>
+#include <algorithm>
+
 using namespace std;
 using namespace circos;
 void pi_test_1(void)
 {
-    ifstream pi_file("../data/pi100000.txt");
+	ifstream pi_file("../data/pi10000.txt");
     string pi_str((istreambuf_iterator<char>(pi_file)), istreambuf_iterator<char>());
     vector<char> pi_digits;
+	std::unordered_map<string, pair<string, string>> font_info{ { "yahei",make_pair("C:/Windows/Fonts/msyhl.ttc", "microsoft yahei") } };
     pi_digits.reserve(pi_str.size());
     int i = 0;
     for (; i < pi_str.size() - 1; i++)
@@ -76,10 +80,10 @@ void pi_test_1(void)
         all_strands[i].opacity = 1.0;
 		_pre_total_size += chunk_size[i];
     }
-    int radius = 4000;
+    int radius = 1000;
     Point center(radius, radius);
-    float inner_radius_ratio = 0.85;
-    float outer_radius_ratio = 0.9;
+    float inner_radius_ratio = 0.8;
+    float outer_radius_ratio = 0.85;
 	float control_radius_ration = 0.3;
     int inner_radius = inner_radius_ratio*radius;
     int outer_radius = outer_radius_ratio*radius;
@@ -87,25 +91,109 @@ void pi_test_1(void)
     Color background_color = Color(0,0,0);
     string svg_filename = "circos_pi_test_1.svg";
     string png_filename = "circos_pi_test_1.png";
-    std::unordered_map<string, pair<string, string>> font_info;
+    // std::unordered_map<string, pair<string, string>> font_info;
     circos::SvgGraph svg_graph(font_info, svg_filename, radius, background_color);
     circos::PngImage png_image(font_info, png_filename, radius, background_color);
+	// draw strands
     for(int i=0; i<10; i++)
     {
         Ring cur_ring(center, inner_radius, outer_radius, all_strands[i].angle_begin, all_strands[i].angle_end, all_strands[i].strand_color, 1, true);
         svg_graph<<cur_ring;
         png_image<<cur_ring;
     }
+	// draw bezier
+	//for (int i = 0; i < 10; i++)
+	//{
+	//	for (const auto& link : connections[i])
+	//	{
+	//		float from_angle = all_strands[i].position_to_angle(link.first);
+	//		float to_angle = all_strands[link.second.first].position_to_angle(link.second.second);
+	//		Bezier connection(center, inner_radius, from_angle, to_angle, strand_color[i], control_radius, 1, 0.1);
+	//		svg_graph << connection;
+	//		png_image << connection;
+
+	//	}
+	//}
+
+	// draw histogram
+	// draw ticks
+	float line_radius_ratio = 0.95;
+	int line_radius = radius*line_radius_ratio;
+	Color tick_color(255, 0, 0);
+	int tick_thickness = 1;
 	for (int i = 0; i < 10; i++)
 	{
+		int gap = 0;
 		for (const auto& link : connections[i])
 		{
-			float from_angle = all_strands[i].position_to_angle(link.first);
-			float to_angle = all_strands[link.second.first].position_to_angle(link.second.second);
-			Bezier connection(center, inner_radius, from_angle, to_angle, strand_color[i], control_radius, 1, 0.1);
-			svg_graph << connection;
-			png_image << connection;
-
+			gap = (gap + 1) ;
+			if (gap % 10 == 0)
+			{
+				float from_angle = all_strands[i].position_to_angle(link.first);
+				float tick_hight_ratio = 0.5;
+				int tick_out_radius = outer_radius*(1 - tick_hight_ratio) + line_radius*tick_hight_ratio;
+				Line tick_line(radius_point(outer_radius, from_angle, center), radius_point(tick_out_radius, from_angle, center), tick_color, tick_thickness);
+				svg_graph << tick_line;
+				png_image << tick_line;
+			}
+			if (gap % 50 == 0)
+			{
+				float from_angle = all_strands[i].position_to_angle(link.first);
+				float tick_hight_ratio = 1;
+				int tick_out_radius = outer_radius*(1 - tick_hight_ratio) + line_radius*tick_hight_ratio;
+				Line tick_line(radius_point(outer_radius, from_angle, center), radius_point(tick_out_radius, from_angle, center), tick_color, tick_thickness);
+				svg_graph << tick_line;
+				png_image << tick_line;
+			}
 		}
+	}
+	// draw line chart
+	//float line_radius_ratio = 0.95;
+	//int line_radius = radius*line_radius_ratio;
+	//Color tick_color(255, 0, 0);
+	//int tick_thickness = 2;
+	//for (int i = 0; i < 10; i++)
+	//{
+	//	int gap = 0;
+	//	Point pre_point = radius_point(outer_radius, all_strands[i].angle_begin, center);
+	//	for (const auto& link : connections[i])
+	//	{
+	//		gap = (gap + 1) % 10;
+	//		if (gap == 0)
+	//		{
+	//			float from_angle = all_strands[i].position_to_angle(link.first);
+	//			float tick_hight_ratio = link.second.first *0.1;
+	//			int tick_out_radius = outer_radius*(1 - tick_hight_ratio) + line_radius*tick_hight_ratio;
+	//			Point cur_point = radius_point(tick_out_radius, from_angle, center);
+	//			Line tick_line(pre_point, cur_point, tick_color, tick_thickness);
+	//			svg_graph << tick_line;
+	//			png_image << tick_line;
+	//			pre_point = cur_point;
+	//		}
+	//	}
+	//}
+
+
+	// draw label
+	int label_font_size = 64;
+	Color font_color(255, 255, 255);
+	for (int i = 0; i < 10; i++)
+	{
+		float angle = (all_strands[i].angle_begin + all_strands[i].angle_end) / 2;
+		Line on_line(radius_point(outer_radius, angle, center), radius_point(line_radius, angle, center));
+		LineText line_text(on_line, to_string(i), "yahei", label_font_size, font_color);
+		svg_graph << line_text;
+		png_image << line_text;
+	}
+	// draw track
+	vector<int> basic_pool{ 0,1,2,3,4,5,6,7,8,9, };
+	random_device rd;
+	mt19937 g(rd());
+	for (int i = 0; i < 100; i++)
+	{
+		shuffle(basic_pool.begin(), basic_pool.end(), g);
+		int from_idx = basic_pool[0];
+		int to_idx = basic_pool[1];
+
 	}
 }

@@ -22,8 +22,9 @@
 #include "../shapes/line_text.h"
 
 #ifdef USE_TEXT
-#include FT_FREETYPE_H
 #include <ft2build.h>
+#include FT_FREETYPE_H
+
 #endif
 
 using namespace std;

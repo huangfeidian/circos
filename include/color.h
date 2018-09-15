@@ -42,26 +42,6 @@ namespace circos
 			b = a.b*(1-opacity)+b.b*opacity;
 		}
 
-		Color(const string& Colorful)
-		{
-			if (Colorful.compare(0, 3, "rgb", 3) != 0)
-			{
-				std::cout << "Color prefix " << Colorful << " is not accepted\n";
-				exit(1);
-			}
-			auto first_of_rgb = Colorful.find('(') + 1;
-			auto delimit = Colorful.find(',', first_of_rgb);
-			string Color_value = Colorful.substr(first_of_rgb, delimit - first_of_rgb);
-			r = stoi(Color_value);
-			first_of_rgb = delimit + 1;
-			delimit = Colorful.find(',', first_of_rgb);
-			Color_value = Colorful.substr(first_of_rgb, delimit - first_of_rgb);
-			g = stoi(Color_value);
-			first_of_rgb = delimit + 1;
-			delimit = Colorful.find(',', first_of_rgb);
-			Color_value = Colorful.substr(first_of_rgb, delimit - first_of_rgb);
-			b = stoi(Color_value);
-		}
 		void blend(const Color& other, float opacity)
 		{
 			r = other.r*opacity + r*(1 - opacity);
@@ -77,29 +57,6 @@ namespace circos
 		friend ostream& operator<<(ostream& in_stream, const Color& in_Color)
 		{
 			in_stream << "rgb(" << int(in_Color.r) << "," << int(in_Color.g) << "," << int(in_Color.b) << ")";
-			return in_stream;
-		}
-		friend istream& operator>>(istream& in_stream, Color& in_Color)
-		{
-			string Colorful;
-			in_stream >> Colorful;
-			if (Colorful.compare(0, 3, "rgb", 3) != 0)
-			{
-				std::cout << "Color prefix " << Colorful<< " is not accepted\n";
-				exit(1);
-			}
-			auto first_of_rgb = Colorful.find('(') + 1;
-			auto delimit = Colorful.find(',', first_of_rgb);
-			string Color_value = Colorful.substr(first_of_rgb, delimit - first_of_rgb);
-			in_Color.r = stoi(Color_value);
-			first_of_rgb = delimit + 1;
-			delimit = Colorful.find(',', first_of_rgb);
-			Color_value = Colorful.substr(first_of_rgb, delimit - first_of_rgb);
-			in_Color.g = stoi(Color_value);
-			first_of_rgb = delimit + 1;
-			delimit = Colorful.find(',', first_of_rgb);
-			Color_value = Colorful.substr(first_of_rgb, delimit - first_of_rgb);
-			in_Color.b = stoi(Color_value);
 			return in_stream;
 		}
 		

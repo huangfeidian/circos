@@ -36,7 +36,7 @@ namespace circos
 
 	struct CircosDescription
 	{
-		const static unordered_set<string> head_set;
+		unordered_set<string> head_set;
 		vector<circle> all_circles;
 		vector<circle_description> all_thing_to_draw;
 		vector<band> all_bands;
