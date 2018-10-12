@@ -209,6 +209,46 @@ namespace circos
 		default:
 			return std::nullopt;
 	}
+	std::optional<Circle> read_circle_from_row(const typed_worksheet& cur_worksheet, const std::map<std::uint32_t, const typed_cell*>& row_info)
+	{
+		auto all_keys = std::vector<std::string>{"circle_id", "inner_radius", "outer_radius", "gap", "color", "filled", "opacity"};
+		for(const auto & i : all_keys)
+		{
+			if(row_info.find(i) == row_info.cend())
+			{
+				return std::nullopt;
+			}
+		}
+		std::optional<std::uint32_t> inner_radius = row_info.find("inner_radius").second->expect_value<std::uint32_t>();
+		if(!inner_radius)
+		{
+			return std::nullopt;
+		}
+		std::optional<std::uint32_t> outer_radius = row_info.find("outer_radius").second->expect_value<std::uint32_t>();
+		if(!outer_radius)
+		{
+			return std::nullopt;
+		}
+		std::optional<std::uint32_t> gap = row_info.find("gap").second->expect_value<std::uint32_t>();
+		if(!gap)
+		{
+			return std::nullopt;
+		}
+		std::optional<std::string_view> circle_id = row_info.find("circle_id").second->expect_value<std::string_view>();
+		if(!circle_id)
+		{
+			return std::nullopt;
+		}
+
+		std::optional<Color> color = read_color_from_cell(cur_worksheet, row_info.find("color")->second);
+		if(!color)
+		{
+			return std::nullopt;
+		}
+		auto opacity = row_info.find("opacity").second->expect_value<float>();
+		auto filled = row_info.find("filled").second->expect_value<bool>();
+		return Circle(static_cast<double>(inner_radius.value()), Point(0, 0), color.value(), in_opacity = opacity? opacity.value(), 1.0, in_filled = filled?filled.value(), true);
+	}
 
 }
 
