@@ -19,6 +19,16 @@ namespace circos
 {
     using namespace xlsx_reader;
 	using namespace std;
+	enum class sheet_type
+	{
+		circle,
+		band,
+		fill_onband,
+		lable_on_band,
+		tick_on_band,
+		value_on_band,
+		colors,
+	}
     std::optional<Color> read_color_from_cell(const typed_worksheet& cur_worksheet, const typed_cell& cell_value)
     {
         if(!cell_value.cur_typed_value)
@@ -209,7 +219,7 @@ namespace circos
 		default:
 			return std::nullopt;
 	}
-	std::optional<Circle> read_circle_from_row(const typed_worksheet& cur_worksheet, const std::map<std::uint32_t, const typed_cell*>& row_info)
+	std::optional<Circle> read_circle_from_row(const typed_worksheet& cur_worksheet, const std::map<std::string_view, const typed_cell*>& row_info)
 	{
 		auto all_keys = std::vector<std::string>{"circle_id", "inner_radius", "outer_radius", "gap", "color", "filled", "opacity"};
 		for(const auto & i : all_keys)
@@ -250,6 +260,101 @@ namespace circos
 		return Circle(static_cast<double>(inner_radius.value()), Point(0, 0), color.value(), in_opacity = opacity? opacity.value(), 1.0, in_filled = filled?filled.value(), true);
 	}
 
+	std::unordered_map<sheet_type, std::vector<std::string_view>> read_configration_from_workbook(const workbook<typed_worksheet>&  cur_workbook)
+	{
+		//default configuration sheet name config
+		std::unordered_map<sheet_type, std::vector<std::string_view>> result;
+		auto sheet_idx_opt = cur_workbook.get_sheet_index_by_name("config");
+		if(!sheet_idx_opt)
+		{
+			std::cerr<<"cant find config sheet for workbook "<<cur_workbook.get_workbook_name()<<std::endl;
+			return result;
+		}
+		auto sheet_idx = sheet_idx_opt.value();
+		// config typed headers (id sheet_type sheet_name)
+		const auto& cur_worksheet = cur_workbook.get_worksheet(sheet_idx);
+		const auto& cur_headers = cur_worksheet.get_typed_headers();
+		std::vector<typed_header> sheet_headers;
+		auto id_header = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "id", "");
+		auto type_header = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "sheet_type", "");
+		auto name_header = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "sheet_name", "")
+		sheet_headers.push_back(id_header);
+		sheet_headers.push_back(type_header);
+		sheet_headers.push_back(name_header);
+		if(!cur_worksheet.check_header_match(sheet_headers))
+		{
+			std::cerr<<"header size should be 3 for column(id(int32), sheet_type(int32), sheet_name(string))"<<std::endl;
+			return result;
+		}
+		//
+		for(const auto& one_row: cur_worksheet.get_all_typed_row_info())
+		{
+			auto type_value = one_row.find(1);
+			if(type_value == one_row.end())
+			{
+				std::cerr<<"cant find value for column sheet_type"<<std::endl;
+				return result;
+			}
+			auto name_value = one_row.find(2);
+			if(name_value == one_row.end())
+			{
+				std::cerr<<"cant find value for column sheet_name"<< std::endl;
+			}
+			const auto& pre = result.find(type_value->second);
+			if(pre == result.end())
+			{
+				result[type_value->second] = std::vector<std::string_view>({name_value->second});
+			}
+			else
+			{
+				pre.push_back(name_value->second);
+			}
+		}
+		return result;
+	}
+
+	void read_circle_sheet(const typed_worksheet& circle_sheet, std::unordered_map<std::string_view, Cricle>& all_circles)
+	{
+		// circle headers circle_id(string) inner_radius(int) outer_radius(int) gap(int) color(RGB) ref_color(ref) opacity(double) filled(bool)
+		std::unordered_map<std::string_view, typed_header> sheet_headers;
+		sheet_headers["circle_id"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "circle_id", "");
+		sheet_headers["inner_radius"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "inner_radius", "");
+		sheet_headers["outer_radius"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "outer_radius", "");
+
+		auto point_type_detail = make_tuple(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), 3, ',');
+		sheet_headers["center"] = typed_header(new extend_node_type_descriptor(point_type_detail), "center", "");
+		
+		sheet_headers["color"] = typed_header(new extend_node_type_descriptor(point_type_detail), "color", "");
+
+		sheet_headers["opacity"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_double), "opacity", "");
+		sheet_headers["filled"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_bool), "filled", "");
+
+		sheet_headers["gap"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "gap", "");
+		for(const auto& i: circle_sheet.get_typed_headers())
+		{
+			auto cur_iter = sheet_headers.find(i.header_name);
+			if(cur_iter == sheet_headers.end())
+			{
+				continue;
+			}
+			if(!(cur_iter->second == i))
+			{
+				return;
+			}
+		}
+
+		for(const auto& i: circle_sheet.get_all_typed_row_info())
+		{
+			Circle cur_circle;
+			for(const auto& j: i->second)
+			{
+				if(j->second.header_name == "circle_id")
+				{
+					
+				}
+			}
+		}
+	} 
 }
 
 
