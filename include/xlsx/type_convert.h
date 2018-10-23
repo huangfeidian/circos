@@ -38,62 +38,17 @@ namespace circos
         switch(cell_value.cur_typed_value->type_desc->_type)
         {
             case basic_node_type_descriptor::list:
-			{
-				auto cur_type_detail = cell_value.cur_typed_value->type_desc->get_list_detail_t();
-				if (!cur_type_detail)
-				{
-					return std::nullopt;
-				}
-				if (cell_value.cur_typed_value->v_list.size() != 3)
-				{
-					return std::nullopt;
-				}
-				if (std::get<0>(cur_type_detail.value())->_type != basic_node_type_descriptor::number_u32)
-				{
-					return std::nullopt;
-				}
-				std::uint32_t r, g, b;
-				r = cell_value.cur_typed_value->v_list[0]->v_uint32;
-				g = cell_value.cur_typed_value->v_list[1]->v_uint32;
-				b = cell_value.cur_typed_value->v_list[2]->v_uint32;
-				return Color(r, g, b);
-			}
-                
 			case basic_node_type_descriptor::tuple:
 			{
-				auto cur_type_detail = cell_value.cur_typed_value->type_desc->get_tuple_detail_t();
-				if (!cur_type_detail)
+				auto opt_color = cell_value.cur_typed_value->get_value<std::tuple<int, int, int>>();
+				if(!opt_color)
 				{
 					return std::nullopt;
 				}
-				if (cell_value.cur_typed_value->v_list.size() != 3)
-				{
-					return std::nullopt;
-				}
-				auto tuple_detail = cur_type_detail.value().first;
-				if (tuple_detail.size() != 3)
-				{
-					return std::nullopt;
-				}
-
-				if (tuple_detail[0]->_type != basic_node_type_descriptor::number_u32)
-				{
-					return std::nullopt;
-				}
-				if (tuple_detail[1](cur_type_detail.value())->_type != basic_node_type_descriptor::number_u32)
-				{
-					return std::nullopt;
-				}
-				if (tuple_detail[2](cur_type_detail.value())->_type != basic_node_type_descriptor::number_u32)
-				{
-					return std::nullopt;
-				}
-				std::uint32_t r, g, b;
-				r = cell_value.cur_typed_value->v_list[0]->v_uint32;
-				g = cell_value.cur_typed_value->v_list[1]->v_uint32;
-				b = cell_value.cur_typed_value->v_list[2]->v_uint32;
-				return Color(r, g, b);
+				auto real_color = opt_color.value();
+				return Color(get<0>(real_color), get<1>(real_color), get<2>(real_color))
 			}
+			
 			case basic_node_type_descriptor::ref_id:
 			{
 				auto cur_type_detail = cell_value.cur_typed_value->type_desc->get_ref_detail_t();
@@ -164,60 +119,17 @@ namespace circos
 		{
 			return std::nullopt;
 		}
-		switch (cell_value.cur_typed_value->type_desc->_type)
-		{
-		case basic_node_type_descriptor::list:
-		{
-			auto cur_type_detail = cell_value.cur_typed_value->type_desc->get_list_detail_t();
-			if (!cur_type_detail)
-			{
-				return std::nullopt;
-			}
-			if (cell_value.cur_typed_value->v_list.size() != 2)
-			{
-				return std::nullopt;
-			}
-			if (std::get<0>(cur_type_detail.value())->_type != basic_node_type_descriptor::number_32)
-			{
-				return std::nullopt;
-			}
-			std::int32_t x, y;
-			x = cell_value.cur_typed_value->v_list[0]->v_int32;
-			y = cell_value.cur_typed_value->v_list[1]->v_int32;
-			return Point(x, y);
-		}
 
-		case basic_node_type_descriptor::tuple:
+		auto opt_point = cell_value.cur_typed_value->get_value<std::tuple<int, int>>();
+		if(!opt_point)
 		{
-			auto cur_type_detail = cell_value.cur_typed_value->type_desc->get_tuple_detail_t();
-			if (!cur_type_detail)
-			{
-				return std::nullopt;
-			}
-			if (cell_value.cur_typed_value->v_list.size() != 2)
-			{
-				return std::nullopt;
-			}
-			auto tuple_detail = cur_type_detail.value().first;
-			if (tuple_detail.size() != 2)
-			{
-				return std::nullopt;
-			}
-
-			auto x_opt = cell_value.cur_typed_value->v_list[0].get_value<std::int32_t>();
-			if (!x_opt)
-			{
-				return std::nullopt;
-			}
-			auto y_opt = cell_value.cur_typed_value->v_list[1].get_value<std::int32_t>();
-			if (!y_opt)
-			{
-				return std::nullopt;
-			}
-			return Point(x_opt.value(), y_opt.value());
-		}
-		default:
 			return std::nullopt;
+		}
+		else
+		{
+			auto real_point = opt_point.value();
+			return Point(std::get<0>(real_point), std::get<1>(real_point));
+		}
 	}
 	std::optional<Circle> read_circle_from_row(const typed_worksheet& cur_worksheet, const std::map<std::string_view, const typed_cell*>& row_info)
 	{
@@ -260,7 +172,7 @@ namespace circos
 		return Circle(static_cast<double>(inner_radius.value()), Point(0, 0), color.value(), in_opacity = opacity? opacity.value(), 1.0, in_filled = filled?filled.value(), true);
 	}
 
-	std::unordered_map<sheet_type, std::vector<std::string_view>> read_configration_from_workbook(const workbook<typed_worksheet>&  cur_workbook)
+	std::unordered_map<sheet_type, std::vector<std::string_view>> read_configuration_from_workbook(const workbook<typed_worksheet>&  cur_workbook)
 	{
 		//default configuration sheet name config
 		std::unordered_map<sheet_type, std::vector<std::string_view>> result;
