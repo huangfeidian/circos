@@ -233,37 +233,38 @@ namespace circos
 		sheet_headers["inner_radius"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "inner_radius", "");
 		sheet_headers["outer_radius"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "outer_radius", "");
 
-		auto point_type_detail = make_tuple(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), 3, ',');
+		auto point_type_detail = make_tuple(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), 2, ',');
 		sheet_headers["center"] = typed_header(new extend_node_type_descriptor(point_type_detail), "center", "");
 		
-		sheet_headers["color"] = typed_header(new extend_node_type_descriptor(point_type_detail), "color", "");
+		auto color_type_detail = make_tuple(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), 2, ',');
+		sheet_headers["color"] = typed_header(new extend_node_type_descriptor(color_type_detail), "color", "");
 
 		sheet_headers["opacity"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_double), "opacity", "");
 		sheet_headers["filled"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_bool), "filled", "");
 
 		sheet_headers["gap"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "gap", "");
-		for(const auto& i: circle_sheet.get_typed_headers())
+		auto header_match = circle_sheet.check_header_match(sheet_headers, "circle_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
+		if(!header_match)
 		{
-			auto cur_iter = sheet_headers.find(i.header_name);
-			if(cur_iter == sheet_headers.end())
-			{
-				continue;
-			}
-			if(!(cur_iter->second == i))
-			{
-				return;
-			}
+			std::cerr<<"header for circle description mismatch for sheet "<<circle_sheet._name<<std::endl;
+			return;
 		}
 
 		for(const auto& i: circle_sheet.get_all_typed_row_info())
 		{
-			Circle cur_circle;
+			Circle cur_circle("tmp", 0, Point(0,0), Color(0,0,0));
 			for(const auto& j: i->second)
 			{
 				if(j->second.header_name == "circle_id")
 				{
-					
+					auto opt_circle_id = j->second.get_value<std::string_view>();
+					if(!opt_circle_id)
+					{
+						continue;
+					}
+					cur_circle.id = opt_circle_id.value();
 				}
+				if(j->second.header_name)
 			}
 		}
 	} 
