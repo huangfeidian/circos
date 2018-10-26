@@ -1,0 +1,35 @@
+#include <vector>
+#include <string>
+#include <string_view>
+#include "../shapes/point.h"
+#include "../color.h"
+
+namespace circos::model
+{
+    struct circle_desc
+    {
+        std::string_view circle_id;
+        int inner_radius;
+        int outer_radius;
+        int gap;
+        Color fill_color;
+    };
+    struct band_desc
+    {
+        std::string_view circle_id;
+        std::string_view band_id;
+        int range_begin;
+        int range_end;
+        Color fill_color;
+
+    };
+    struct circle_tick
+    {
+        // 处理圆环上的刻度
+        std::string_view circle_id;
+        int gap;
+        Color fill_color;
+        int width;
+        int height;
+    };
+}
