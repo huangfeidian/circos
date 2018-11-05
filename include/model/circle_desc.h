@@ -13,6 +13,7 @@ namespace circos::model
         int outer_radius;
         int gap;
         Color fill_color;
+        double opacity;
     };
     struct band_desc
     {
@@ -21,7 +22,7 @@ namespace circos::model
         int range_begin;
         int range_end;
         Color fill_color;
-
+        double opacity;
     };
     struct circle_tick
     {
@@ -31,5 +32,6 @@ namespace circos::model
         Color fill_color;
         int width;
         int height;
+        double opacity;
     };
 }
