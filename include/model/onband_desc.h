@@ -27,4 +27,18 @@ namespace circos::model
         int width;
         int height;
     };
+    struct value_onband: public fill_onband
+    {
+        double value;
+    }
+    struct value_onband_config
+    {
+        circos::value_on_band_draw_type draw_type;
+        double base_value;
+        double max_value;
+        double scale;
+        Color base_color;
+        Color max_color;
+        std::string_view band_id;
+    }
 }

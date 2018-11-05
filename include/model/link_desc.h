@@ -12,7 +12,7 @@ namespace circos::model
         double control_radius_percent; //negative for direct link
 
     }
-    struct cross_link
+    struct range_link
     {
         std::string_view from_band_id;
         int from_pos_begin_idx;
