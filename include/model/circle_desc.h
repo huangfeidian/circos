@@ -34,4 +34,8 @@ namespace circos::model
         int height;
         double opacity;
     };
+    struct model_config
+    {
+        int radius;
+    }
 }

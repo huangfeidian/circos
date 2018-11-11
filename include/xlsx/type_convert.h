@@ -808,6 +808,41 @@ namespace circos
 			all_range_links[cur_range_link.link_id] = cur_range_link;
 		}
 	} 
+
+	void read_model_config(const typed_worksheet& config_sheet, model::model_config& cur_config)
+	{
+		// key value
+		std::unordered_map<std::string_view, typed_header> sheet_headers;
+		sheet_headers["config_key"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "config_key", "");
+		sheet_headers["config_value"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "config_value", "");
+		auto header_match = config_sheet.check_header_match(sheet_headers, "config_key", std::vector<std::string_view>({}), std::vector<std::string_view>({}));
+		if(!header_match)
+		{
+			std::cerr<<"header for model_config description mismatch for sheet "<<config_sheet._name<<std::endl;
+			return;
+		}
+		for(const auto& i: point_link_sheet.get_all_typed_row_info())
+		{
+			auto opt_cur_key_name = i.find(1).second->cur_typed_value->get_value<std::string_view>();
+			if(!opt_cur_key_name)
+			{
+				continue;
+			}
+			auto cur_key_name = opt_cur_key_name.value();
+
+			auto opt_cur_value = i.find(2).second->cur_typed_value->get_value<std::string_view>();
+			if(!opt_cur_value)
+			{
+				continue;
+			}
+			auto cur_value = opt_cur_value.value();
+			if(cur_row_name == "radius")
+			{
+				cur_config.radius = std::stoi(std::string(cur_value));
+			}
+
+		}
+	}
 }
 
 
