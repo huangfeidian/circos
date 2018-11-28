@@ -1,5 +1,6 @@
 #include <vector>
-#include "../shapes/color"
+#include "../basics/point.h"
+#include "../basics/color.h"
 
 namespace circos::model
 {

@@ -1,6 +1,7 @@
 #pragma once
 #include <cmath>
-#include "point.h"
+#include "../basics/point.h"
+#include "../basics/color.h"
 #include "arc.h"
 #include "bezier.h"
 

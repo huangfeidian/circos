@@ -1,5 +1,6 @@
 #pragma once
-#include "point.h"
+#include "../basics/point.h"
+#include "../basics/color.h"
 using std::endl;
 using std::stringstream;
 namespace circos
@@ -64,6 +65,43 @@ namespace circos
 					control_point = center+radius_point(in_control_radius, (in_begin_angle + in_end_angle) / 2 - PI);
 				}
 			}
+		}
+		vector<Point> path() const
+		{
+			vector<Point> result;
+			const auto& p1 = cast_point<int,double>(begin_point);
+			const auto& p2 = cast_point<int, double>(end_point);
+			const auto& cp = cast_point<int, double>(control_point);
+			basic_point<double> c1;
+			basic_point<double> c2;
+			basic_point<double> double_px;
+			Point px;
+			int total_len = (Line(begin_point, control_point).len() + Line(control_point, end_point).len());
+			if (total_len == 0)
+			{
+				return result;
+			}
+			double step = 1.0 / total_len;
+			double inc = 0;
+			c1 = p1 + (cp - p1)*inc;
+			c2 = cp + (p2 - cp)*inc;
+			double_px = c1 + (c2 - c1)*inc;
+			px = cast_point<double,int>(double_px);
+			result.push_back(px);
+			inc += step;
+			while (inc <= 1)
+			{
+				c1 = p1 + (cp - p1)*inc;
+				c2 = cp + (p2 - cp)*inc;
+				double_px = c1 + (c2 - c1)*inc;
+				px = cast_point<double,int>(double_px);
+				if (!(px==result.back()))
+				{
+					result.push_back(px);
+				}
+				inc += step;
+			}
+			return result;
 		}
 	};
 }

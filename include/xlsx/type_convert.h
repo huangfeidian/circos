@@ -225,7 +225,7 @@ namespace circos
 		return result;
 	}
 
-	void read_circle_sheet(const typed_worksheet& circle_sheet, std::unordered_map<std::string_view, model::band_desc>& all_circles)
+	void read_circle_sheet(const typed_worksheet& circle_sheet, std::unordered_map<std::string_view, model::circle_desc>& all_circles)
 	{
 		// circle headers circle_id(string) inner_radius(int) outer_radius(int) gap(int) color(RGB) ref_color(ref) opacity(double) filled(bool)
 		std::unordered_map<std::string_view, typed_header> sheet_headers;
@@ -337,7 +337,7 @@ namespace circos
 	} 
 	void read_band_sheet(const typed_worksheet& band_sheet, std::unordered_map<std::string_view, model::band_desc>& all_bands)
 	{
-		// circle headers band_id(string) circle_id(string)  range_begin(int) range_end(int) color(RGB) ref_color(ref) opacity(double)
+		// band_desc headers band_id(string) circle_id(string)  range_begin(int) range_end(int) color(RGB) ref_color(ref) opacity(double)
 		std::unordered_map<std::string_view, typed_header> sheet_headers;
 		sheet_headers["circle_id"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "circle_id", "");
 
@@ -839,6 +839,16 @@ namespace circos
 			if(cur_row_name == "radius")
 			{
 				cur_config.radius = std::stoi(std::string(cur_value));
+			}
+			elif(cur_row_name == "background_color")
+			{
+				auto opt_color = cell_value.cur_typed_value->get_value<std::tuple<int, int, int>>();
+				if(!opt_color)
+				{
+					continue;
+				}
+				auto real_color = opt_color.value();
+				cur_config.background_color Color(get<0>(real_color), get<1>(real_color), get<2>(real_color))
 			}
 
 		}

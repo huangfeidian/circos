@@ -1,6 +1,6 @@
 #pragma once
-#include "../color.h"
-#include "point.h"
+#include "../basics/point.h"
+#include "../basics/color.h"
 #include <vector>
 using std::vector;
 using std::string;
