@@ -17,7 +17,7 @@
 #include <xlsx_typed.h>
 namespace circos
 {
-    using namespace xlsx_reader;
+	using namespace xlsx_reader;
 	using namespace std;
 	enum class sheet_type
 	{
@@ -29,15 +29,15 @@ namespace circos
 		value_on_band,
 		colors,
 	}
-    std::optional<Color> read_color_from_cell(const typed_worksheet& cur_worksheet, const typed_cell& cell_value)
-    {
-        if(!cell_value.cur_typed_value)
-        {
-            return std::nullopt;
-        }
-        switch(cell_value.cur_typed_value->type_desc->_type)
-        {
-            case basic_node_type_descriptor::list:
+	std::optional<Color> read_color_from_cell(const typed_worksheet& cur_worksheet, const typed_cell& cell_value)
+	{
+		if(!cell_value.cur_typed_value)
+		{
+			return std::nullopt;
+		}
+		switch(cell_value.cur_typed_value->type_desc->_type)
+		{
+			case basic_node_type_descriptor::list:
 			case basic_node_type_descriptor::tuple:
 			{
 				auto opt_color = cell_value.cur_typed_value->get_value<std::tuple<int, int, int>>();
@@ -109,9 +109,9 @@ namespace circos
 			default:
 				return std::nullopt;
 				
-        }
-        return std::nullopt;
-    }
+		}
+		return std::nullopt;
+	}
 
 	std::optional<Point> read_point_from_cell(const typed_worksheet& cur_worksheet, const typed_cell& cell_value)
 	{
@@ -337,14 +337,15 @@ namespace circos
 	} 
 	void read_band_sheet(const typed_worksheet& band_sheet, std::unordered_map<std::string_view, model::band_desc>& all_bands)
 	{
-		// band_desc headers band_id(string) circle_id(string)  range_begin(int) range_end(int) color(RGB) ref_color(ref) opacity(double)
+		// band_desc headers band_id(string) circle_id(string)  width(int) color(RGB) ref_color(ref) opacity(double) sequence(int)
 		std::unordered_map<std::string_view, typed_header> sheet_headers;
 		sheet_headers["circle_id"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "circle_id", "");
 
 		sheet_headers["band_id"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "band_id", "");
 
-		sheet_headers["range_begin"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "range_begin", "");
-		sheet_headers["range_end"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "range_end", "");
+		sheet_headers["width"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "width", "");
+
+		sheet_headers["sequence"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "sequence", "");
 		
 		auto color_type_detail = make_tuple(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), 2, ',');
 		sheet_headers["color"] = typed_header(new extend_node_type_descriptor(color_type_detail), "color", "");
@@ -400,33 +401,30 @@ namespace circos
 					}
 					cur_band.fill_color = opt_color.value();
 				}
-				elif(current_header_name == "range_begin")
+				elif(current_header_name == "width")
 				{
-					auto opt_radius = j->second.get_value<int>();
-					if(!opt_radius)
+					auto opt_width = j->second.get_value<int>();
+					if(!opt_width)
 					{
 						continue;
 					}
-					cur_band.range_begin = opt_radius.value();
+					cur_band.width = opt_width.value();
 				}
-				elif(current_header_name == "range_end")
+				elif(current_header_name == "sequence")
 				{
-					auto opt_radius = j->second.get_value<int>();
-					if(!opt_radius)
+					auto opt_seq = j->second.get_value<int>();
+					if(!opt_seq)
 					{
 						continue;
 					}
-					cur_band.range_end = opt_radius.value();
+					cur_band.sequence = opt_seq.value();
 				}
+				
 			}
 			if(!cur_band.band_id)
 			{
 				std::cerr<<"cant find band for row "<< i.first<<std::endl;
 				continue;
-			}
-			if(cur_band.range_begin >= cur_band.range_end)
-			{
-				swap(cur_band.range_begin, cur_band.range_end);
 			}
 			if(all_bands.find(cur_band.band_id) != all_bands.end())
 			{
@@ -444,7 +442,7 @@ namespace circos
 
 	void read_circle_tick_sheet(const typed_worksheet& tick_sheet, std::unordered_map<std::string_view, model::circle_tick>& all_circle_ticks)
 	{
-		// circle headers band_id(string) circle_id(string)  range_begin(int) range_end(int) color(RGB) ref_color(ref) opacity(double)
+		// circle_tick headers circle_id(string)  width(int) height(int) color(RGB) ref_color(ref) opacity(double)
 		std::unordered_map<std::string_view, typed_header> sheet_headers;
 		sheet_headers["circle_id"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "circle_id", "");
 

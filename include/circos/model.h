@@ -26,15 +26,18 @@ namespace circos::model
 		int gap;
 		Color fill_color;
 		double opacity;
+		double angle_per_unit;
 	};
 	struct band
 	{
 		std::string_view circle_id;
 		std::string_view band_id;
-		int range_begin;
-		int range_end;
+		int width;
 		Color fill_color;
 		double opacity;
+		int sequence; // must not be duplicated
+		//calculated
+		double angle_begin;
 	};
 	struct circle_tick
 	{
@@ -47,8 +50,9 @@ namespace circos::model
 		double opacity;
 	};
 
-		struct point_link
+	struct point_link
 	{
+		// 两点之间的连线
 		std::string_view link_id;
 		std::string_view from_band_id;
 		int from_pos_idx;
@@ -57,6 +61,7 @@ namespace circos::model
 		double control_radius_percent; //negative for direct link
 		Color fill_color;
 		double opacity;
+		int width;
 
 	};
 	struct range_link

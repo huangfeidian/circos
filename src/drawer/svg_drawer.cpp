@@ -1,4 +1,4 @@
-#include "../../svg_drawer.h"
+#include <circos/drawer/svg_drawer.h>
 
 namespace circos
 {

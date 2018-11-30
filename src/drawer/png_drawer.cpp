@@ -1,6 +1,6 @@
 #include <unordered_map>
 #include <string>
-#include "../../include/drawer/png_drawer.h"
+#include <circos/drawer/png_drawer.h>
 
 namespace circos
 {
