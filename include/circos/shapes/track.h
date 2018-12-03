@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <cmath>
 #include "../basics/point.h"
 #include "../basics/color.h"
@@ -55,10 +55,10 @@ namespace circos
 				std::swap(span2_begin, span2_end);
 			}
 			arc_2 = Arc(radius2, span2_begin, span2_end, center, in_color);
-			auto control_point_1 = radius_point((radius1 + radius2) / 2 * control_radius_percent, (span1_end + span2_begin) / 2, center);
-			auto control_point_2 = radius_point((radius1 + radius2) / 2 * control_radius_percent, (span2_end + span1_begin) / 2, center);
-			bezier_1 = Bezier(radius_point(radius1, span1_end, center), radius_point(radius2, span2_begin, center), control_point_1, in_color, in_opacity);
-			bezier_2 = Bezier(radius_point(radius2, span2_end, center), radius_point(radius1, span1_begin, center), control_point_2, in_color, in_opacity);
+			auto control_point_1 = Point::radius_point((radius1 + radius2) / 2 * control_radius_percent, (span1_end + span2_begin) / 2, center);
+			auto control_point_2 = Point::radius_point((radius1 + radius2) / 2 * control_radius_percent, (span2_end + span1_begin) / 2, center);
+			bezier_1 = Bezier(Point::radius_point(radius1, span1_end, center), Point::radius_point(radius2, span2_begin, center), control_point_1, in_color, in_opacity);
+			bezier_2 = Bezier(Point::radius_point(radius2, span2_end, center), Point::radius_point(radius1, span1_begin, center), control_point_2, in_color, in_opacity);
 
 		}
 	};

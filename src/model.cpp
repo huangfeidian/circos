@@ -1,6 +1,7 @@
-#include <circos/model.h>
+﻿#include <circos/model.h>
 #include <algorithm>
 #include <numeric>
+#include <unordered_map>
 namespace circos::model
 {
 	using namespace std;
@@ -40,7 +41,7 @@ namespace circos::model
 				return a.sequence < b.sequence;
 			});
 			int total_len = (sorted_vector.size() - 1) * cur_circle.gap;
-			accumulate(sorted_vector.begin(), sorted_vector.end(), total_len, [](const band& cur_band, int pre_total)
+			accumulate(sorted_vector.begin(), sorted_vector.end(), total_len, [](int pre_total, const band& cur_band)
 			{
 				return pre_total + cur_band.width;
 			});
@@ -88,7 +89,7 @@ namespace circos::model
 			double angle_by_unit = pi() * 2 / circle_ranges[circle_id];
 			for(int i = 0; i < total_count; i++)
 			{
-				Line cur_tick_line = Line(radius_point(cur_circle.outer_radius, i * cur_circle.gap * angle_by_unit), radius_point(cur_circle.outer_radius + cur_tick.height, i * cur_circle.gap * angle_by_unit), cur_tick.fill_color, cur_tick.width, cur_tick.opacity);
+				Line cur_tick_line = Line(Point::radius_point(cur_circle.outer_radius, i * cur_circle.gap * angle_by_unit), Point::radius_point(cur_circle.outer_radius + cur_tick.height, i * cur_circle.gap * angle_by_unit), cur_tick.fill_color, cur_tick.width, cur_tick.opacity);
 				pre_collection.lines.push_back(cur_tick_line);
 			}
 		}
@@ -115,7 +116,7 @@ namespace circos::model
 			if(cur_point_link.control_radius_percent <= 0)
 			{
 				// 这个是直线
-				Line cur_line = Line(radius_point(from_circle.inner_radius, from_band.angle_begin + from_circle.angle_per_unit * cur_point_link.from_pos_idx), radius_point(to_circle.outer_radius, to_band.angle_begin + to_circle.angle_per_unit * cur_point_link.to_pos_idx), cur_point_link.fill_color, cur_point_link.width, cur_point_link.opacity);
+				Line cur_line = Line(Point::radius_point(from_circle.inner_radius, from_band.angle_begin + from_circle.angle_per_unit * cur_point_link.from_pos_idx), Point::radius_point(to_circle.outer_radius, to_band.angle_begin + to_circle.angle_per_unit * cur_point_link.to_pos_idx), cur_point_link.fill_color, cur_point_link.width, cur_point_link.opacity);
 			}
 			else
 			{
@@ -129,8 +130,8 @@ namespace circos::model
 				}
 				else
 				{
-					auto control_point = radius_point((from_circle.inner_radius + to_circle.inner_radius) / 2 * cur_point_link.control_radius_percent, (from_angle + to_angle) / 2, config.center);
-					Bezier cur_bezier = Bezier(radius_point(from_circle.inner_radius, from_angle, config.center), radius_point(to_circle.inner_radius, to_angle, config.center), control_point, cur_point_link.fill_color, cur_point_link.opacity);
+					auto control_point = Point::radius_point((from_circle.inner_radius + to_circle.inner_radius) / 2 * cur_point_link.control_radius_percent, (from_angle + to_angle) / 2, config.center);
+					Bezier cur_bezier = Bezier(Point::radius_point(from_circle.inner_radius, from_angle, config.center), Point::radius_point(to_circle.inner_radius, to_angle, config.center), control_point, cur_point_link.fill_color, cur_point_link.opacity);
 					pre_collection.beziers.push_back(cur_bezier);
 				}
 			}

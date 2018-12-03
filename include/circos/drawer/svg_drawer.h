@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <sstream>
 #include <string>
 #include <vector>
@@ -14,8 +14,6 @@
 #include "../shapes/line_text.h"
 using std::vector;
 using std::endl;
-#define PI 3.1415926
-#define EPS 0.0001
 namespace circos
 {
 

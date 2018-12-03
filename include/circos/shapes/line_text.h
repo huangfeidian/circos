@@ -1,8 +1,11 @@
-#pragma once
+﻿#pragma once
+#include <string>
 #include "../basics/point.h"
 #include "../basics/color.h"
+#include "line.h"
 namespace circos
 {
+	using std::string;
 	struct LineText
 	{
 		string font_name;

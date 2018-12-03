@@ -1,7 +1,11 @@
-#pragma once
+﻿#pragma once
+
+#include <cmath>
+#include <utility>
+
 #include "../basics/point.h"
 #include "../basics/color.h"
-#include <cmath>
+
 namespace circos
 {
 	struct Line
@@ -29,11 +33,11 @@ namespace circos
 		Point symmetric_point(Point point) const
 		// 获得对称点
 		{
-			pair<int, int> vec_1 = make_pair(to.x - from.x, to.y - from.y);
-			pair<int, int> vec_2 = make_pair(point.x - from.x, point.y - from.y);
+			std::pair<int, int> vec_1 = std::make_pair(to.x - from.x, to.y - from.y);
+			std::pair<int, int> vec_2 = std::make_pair(point.x - from.x, point.y - from.y);
 			float length = (vec_1.first*vec_2.first + vec_1.second*vec_2.second)/(1.0*(vec_1.first*vec_1.first+vec_1.second*vec_1.second));
-			pair<int, int> remain = static_cast<pair<int,int>>(make_pair(vec_2.first - length*vec_1.first, vec_2.second - length*vec_1.second));
-			pair<int, int> vec_3 = make_pair(vec_2.first - 2 * remain.first, vec_2.second - 2 * remain.second);
+			std::pair<int, int> remain = static_cast<std::pair<int,int>>(std::make_pair(vec_2.first - length*vec_1.first, vec_2.second - length*vec_1.second));
+			std::pair<int, int> vec_3 = std::make_pair(vec_2.first - 2 * remain.first, vec_2.second - 2 * remain.second);
 			return Point(vec_3.first + from.x, vec_3.second + from.y);
 		}
 	};

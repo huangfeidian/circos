@@ -1,10 +1,10 @@
-#pragma once
+﻿#pragma once
 #include <cmath>
 namespace circos
 {
 	constexpr double pi()
 	{
-		return std::atan(1) * 4;
+		return 3.14159265;
 	}
 	enum class text_align_type: std::uint8_t
 	{

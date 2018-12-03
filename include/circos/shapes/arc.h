@@ -1,7 +1,10 @@
 ﻿#pragma once
 
+#include <vector>
+#include <algorithm>
 #include "../basics/point.h"
 #include "../basics/color.h"
+#include "circle.h"
 
 namespace circos
 {
@@ -36,8 +39,8 @@ namespace circos
 			, stroke(in_stroke)
 		{
 			sweep_flag = 1; //
-			from_point = radius_point(in_radius, begin_angle) + center;
-			to_point = radius_point(in_radius, end_angle) + center;
+			from_point = Point::radius_point(in_radius, begin_angle) + center;
+			to_point = Point::radius_point(in_radius, end_angle) + center;
 			if (end_angle > begin_angle)
 			{
 				sweep_flag = 1;
@@ -64,9 +67,9 @@ namespace circos
 			}
 			
 		}
-		vector<Point> path() const
+		std::vector<Point> path() const
 		{
-			vector<Point> result;
+			std::vector<Point> result;
 			if(abs(begin_angle-end_angle) < EPS)
 			{
 				return result;
@@ -110,12 +113,12 @@ namespace circos
 			}
 		}
 
-		static vector<Point> arc_path(double angle_begin, double angle_end, int radius)
+		static std::vector<Point> arc_path(double angle_begin, double angle_end, int radius)
 		{
 			//这个函数只负责不大于PI/4区域的路径
 			if (abs(angle_end - angle_begin) < EPS)
 			{
-				return vector<Point>();
+				return std::vector<Point>();
 			}
 			int idx = angle_begin * 4 / PI;
 			if (idx >= 4)
@@ -163,16 +166,16 @@ namespace circos
 			const auto& cache = Circle::get_circle(radius);
 			double begin_x = radius*cos(angle_end);
 			double end_x = radius*cos(angle_begin);
-			auto begin_iter = lower_bound(cache.begin(), cache.end(), begin_x, [](const Point& a, double x)
+			auto begin_iter = std::lower_bound(cache.begin(), cache.end(), begin_x, [](const Point& a, double x)
 			{
 				return a.x < x;
 			});
-			auto end_iter = lower_bound(cache.begin(), cache.end(),end_x, [](const Point& a, double x)
+			auto end_iter = std::lower_bound(cache.begin(), cache.end(),end_x, [](const Point& a, double x)
 			{
 				return a.x < x;
 			});
-			vector<Point> result;
-			copy(begin_iter, end_iter, back_inserter(result));
+			std::vector<Point> result;
+			std::copy(begin_iter, end_iter, back_inserter(result));
 			return result;
 		}
 	};

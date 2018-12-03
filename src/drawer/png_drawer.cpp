@@ -1,4 +1,4 @@
-#include <unordered_map>
+﻿#include <unordered_map>
 #include <string>
 #include <circos/drawer/png_drawer.h>
 #include <circos/shape_collection.h>
@@ -9,7 +9,7 @@ namespace circos
 #define PI 3.1415926
 #define EPS 0.0001
 
-	PngImage::PngImage(const unordered_map<string, pair<string, string>>& in_font_info, string in_file_name, int in_radius, Color back_color, int compress=8)
+	PngImage::PngImage(const unordered_map<string, pair<string, string>>& in_font_info, string in_file_name, int in_radius, Color back_color, int compress)
 	: font_info(in_font_info)
 	,file_name(in_file_name)
 	, radius(in_radius)
@@ -79,15 +79,15 @@ namespace circos
 
 	}
 #endif
-	void PngImage::plot(Colorbasic_point input, float blend = 1.0)
+	void PngImage::plot(Colorbasic_point input, float blend)
 	{
 		_image[input.pos.y][input.pos.x].blend(input.color, blend);
 	}
-	void PngImage::plot(Point pos, Color color,float blend = 1.0)
+	void PngImage::plot(Point pos, Color color,float blend)
 	{
 		_image[pos.y][pos.x].blend(color,blend);
 	}
-	void PngImage::plot(int x, int y, Color color, float blend=1.0)
+	void PngImage::plot(int x, int y, Color color, float blend)
 	{
 		_image[y][x].blend(color,blend);
 	}
@@ -95,7 +95,7 @@ namespace circos
 	{
 		return _image[pos.y][pos.x];
 	}
-	void PngImage::draw_path(const vector<Point>& path, Color color, int stroke = 1, float opacity = 1.0)
+	void PngImage::draw_path(const vector<Point>& path, Color color, int stroke, float opacity)
 	{
 		if (stroke == 1)
 		{
@@ -219,7 +219,7 @@ namespace circos
 		return true;
 
 	}
-	void PngImage::flood(const vector<Point> boundary, vector<Point> interiors, Color fill_color, double opacity =1.0)
+	void PngImage::flood(const vector<Point> boundary, vector<Point> interiors, Color fill_color, double opacity)
 		//要求interior一定在boundary里面
 	{
 		vector<Point> fill_points;
@@ -514,11 +514,11 @@ namespace circos
 			Point middle_point;
 			if (arc.begin_angle < arc.end_angle)
 			{
-				middle_point = radius_point(arc.radius, (arc.begin_angle + arc.end_angle) / 2)*0.5 + arc.center;
+				middle_point = Point::radius_point(arc.radius, (arc.begin_angle + arc.end_angle) / 2)*0.5 + arc.center;
 			}
 			else
 			{
-				middle_point = radius_point(arc.radius, 2*PI -(arc.begin_angle + arc.end_angle) / 2)*0.5 + arc.center;
+				middle_point = Point::radius_point(arc.radius, 2*PI -(arc.begin_angle + arc.end_angle) / 2)*0.5 + arc.center;
 			}
 			flood(path_points, vector<Point>{middle_point}, arc.color, arc.opacity);
 		}
@@ -586,8 +586,8 @@ namespace circos
 		vector<Point> path_points;
 		Arc arc_1(ring.inner_radius, ring.begin_angle, ring.end_angle, ring.center, ring.color);
 		Arc arc_2(ring.outer_radius, ring.begin_angle, ring.end_angle, ring.center, ring.color);
-		Line line_1(radius_point(ring.inner_radius, ring.end_angle, ring.center), radius_point(ring.outer_radius, ring.end_angle, ring.center), ring.color);
-		Line line_2(radius_point(ring.outer_radius, ring.begin_angle, ring.center), radius_point(ring.inner_radius, ring.begin_angle, ring.center), ring.color);
+		Line line_1(Point::radius_point(ring.inner_radius, ring.end_angle, ring.center), Point::radius_point(ring.outer_radius, ring.end_angle, ring.center), ring.color);
+		Line line_2(Point::radius_point(ring.outer_radius, ring.begin_angle, ring.center), Point::radius_point(ring.inner_radius, ring.begin_angle, ring.center), ring.color);
 		auto arc_path1 = path(arc_1);
 		auto arc_path2 = path(arc_2);
 		auto line_path1 = path(line_1);
@@ -611,7 +611,7 @@ namespace circos
 			{
 				middle_angle = 2 * PI - (ring.begin_angle + ring.end_angle) / 2;
 			}
-			auto middle_point = radius_point((ring.inner_radius + ring.outer_radius) / 2, middle_angle, ring.center);
+			auto middle_point = Point::radius_point((ring.inner_radius + ring.outer_radius) / 2, middle_angle, ring.center);
 			flood(path_points, vector<Point>{middle_point}, ring.color, ring.opacity);
 		}
 		return *this;

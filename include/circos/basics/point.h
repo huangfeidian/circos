@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "color.h"
 namespace circos
@@ -62,6 +62,13 @@ namespace circos
 			this->y = this->y - second.y;
 			return *this;
 		}
+		static basic_point radius_point(int radius, double angle, basic_point center = basic_point())
+		{
+			basic_point result;
+			result.x = radius * cos(angle);
+			result.y = radius * sin(angle);
+			return result + center;
+		}
 	};
 	using Point = basic_point<int>;
 	template<typename T1, typename T2>
@@ -72,13 +79,7 @@ namespace circos
 		result.y = static_cast<T2>(in_point.y);
 		return result;
 	}
-	Point radius_point(int radius, double angle, Point center = Point())
-	{
-		Point result;
-		result.x = radius*cos(angle);
-		result.y = radius*sin(angle);
-		return result+center;
-	}
+	
 	struct Colorbasic_point
 	{
 		Point pos;

@@ -1,7 +1,9 @@
-#pragma once
+﻿#pragma once
+#include <vector>
 
 #include "../basics/point.h"
 #include "../basics/color.h"
+#include "line.h"
 
 namespace circos
 {
@@ -38,8 +40,8 @@ namespace circos
 			//代表的是这个bezier的控制点与圆的中心点之间的距离
 			//控制点的角度为这两个角度的中间值
 		{
-			begin_point = center+radius_point(in_on_radius, in_begin_angle);
-			end_point = center+radius_point(in_on_radius, in_end_angle);
+			begin_point = center+Point::radius_point(in_on_radius, in_begin_angle);
+			end_point = center+Point::radius_point(in_on_radius, in_end_angle);
 			double radius_diff = abs(in_end_angle - in_begin_angle);
 			if(abs(radius_diff - PI) < EPS)
 			{
@@ -47,28 +49,28 @@ namespace circos
 				int second_digit = (int(in_begin_angle+in_end_angle * 100) / 10)%10;
 				if(in_begin_angle < PI)
 				{
-					control_point = center+radius_point(in_control_radius, (in_begin_angle + in_end_angle)/2);
+					control_point = center+Point::radius_point(in_control_radius, (in_begin_angle + in_end_angle)/2);
 				}
 				else
 				{
-					control_point = center+radius_point(in_control_radius, (in_begin_angle + in_end_angle) / 2 - PI);
+					control_point = center+Point::radius_point(in_control_radius, (in_begin_angle + in_end_angle) / 2 - PI);
 				}
 			}
 			else
 			{
 				if(radius_diff < PI)
 				{
-					control_point = center+radius_point(in_control_radius, (in_begin_angle + in_end_angle)/2);
+					control_point = center+Point::radius_point(in_control_radius, (in_begin_angle + in_end_angle)/2);
 				}
 				else
 				{
-					control_point = center+radius_point(in_control_radius, (in_begin_angle + in_end_angle) / 2 - PI);
+					control_point = center+Point::radius_point(in_control_radius, (in_begin_angle + in_end_angle) / 2 - PI);
 				}
 			}
 		}
-		vector<Point> path() const
+		std::vector<Point> path() const
 		{
-			vector<Point> result;
+			std::vector<Point> result;
 			const auto& p1 = cast_point<int,double>(begin_point);
 			const auto& p2 = cast_point<int, double>(end_point);
 			const auto& cp = cast_point<int, double>(control_point);

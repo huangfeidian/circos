@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <sstream>
 #include <string>
 #include <vector>
@@ -30,6 +30,8 @@
 
 namespace circos
 {
+	using std::vector;
+	using std::string;
 	//这里png的坐标系同svg的坐标系 左上方为0，0 向右是x正向，向下时y正向
 	class PngImage
 	{
@@ -51,7 +53,7 @@ namespace circos
 		const string description = "Mail:spiritsaway@outlook.com";
 		const string software = "circos implemented in c++";
 		const string title = "circos.png";
-		unordered_map<int, vector<Point>> circle_cache;
+		std::unordered_map<int, vector<Point>> circle_cache;
 		const std::unordered_map<string, std::pair<std::string, std::string>>& font_info;//所有字体相关文件的存储路径映射
 		//下面是跟freetype相关的成员
 #ifdef USE_TEXT

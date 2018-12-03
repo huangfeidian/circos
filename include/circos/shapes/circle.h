@@ -1,7 +1,7 @@
-#pragma once
+﻿#pragma once
 #include <unordered_map>
 #include <vector>
-
+#include <string_view>
 #include "../basics/point.h"
 #include "../basics/color.h"
 
@@ -15,7 +15,7 @@ namespace circos
 		Color color;
 		double opacity;
 		bool filled;
-		Circle(string_view in_id, double in_radius, Point in_center, Color in_color , double in_opacity = 1, bool in_filled = false) 
+		Circle(double in_radius, Point in_center, Color in_color , double in_opacity = 1, bool in_filled = false) 
 		: center(in_center)
 		, radius(in_radius)
 		, color(in_color)

@@ -1,3 +1,4 @@
+﻿#include <iostream>
 #include <circos/drawer/svg_drawer.h>
 
 namespace circos
@@ -15,7 +16,8 @@ namespace circos
 		output << "height=\"" << background_radius * 2 << "px\" ";
 		output << R"(version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">)" << std::endl;
 		output << "<rect x=\"0\" y=\"0\" width=\"" << 2 * background_radius << "\" height=\"" << 2 * background_radius << "\" ";
-		output << "fill=\"" << background_color << "\"/>" << std::endl;
+		*this << "fill=\"" << background_color << "\"/>";
+		output << std::endl;
 	}
 
 	SvgGraph& SvgGraph::operator<<(const string& input_str)
@@ -35,7 +37,7 @@ namespace circos
 	}
 	SvgGraph& SvgGraph::operator<<(Color color)
 	{
-		output << color;
+		output << "rgb("<<color.r<<","<<color.g<<","<<color.b<<")";
 		return *this;
 	}
 	SvgGraph& SvgGraph::operator<<(const Point& point)
@@ -152,8 +154,8 @@ namespace circos
 		auto& graph = *this;
 		Arc arc_1(ring.inner_radius, ring.begin_angle, ring.end_angle, ring.center, ring.color);
 		Arc arc_2(ring.outer_radius, ring.end_angle, ring.begin_angle, ring.center, ring.color);
-		Line line_1(radius_point(ring.inner_radius, ring.end_angle,ring.center), radius_point(ring.outer_radius, ring.end_angle,ring.center), ring.color);
-		Line line_2(radius_point(ring.outer_radius, ring.begin_angle, ring.center), radius_point(ring.inner_radius, ring.begin_angle, ring.center), ring.color);
+		Line line_1(Point::radius_point(ring.inner_radius, ring.end_angle,ring.center), Point::radius_point(ring.outer_radius, ring.end_angle,ring.center), ring.color);
+		Line line_2(Point::radius_point(ring.outer_radius, ring.begin_angle, ring.center), Point::radius_point(ring.inner_radius, ring.begin_angle, ring.center), ring.color);
 		graph << "<path d=\" M" << arc_1.from_point;
 		graph.add_to_path(arc_1);
 		graph.add_to_path(line_1);
