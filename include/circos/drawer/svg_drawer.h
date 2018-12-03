@@ -12,7 +12,6 @@
 #include "../shapes/track.h"
 #include "../shapes/rectangle.h"
 #include "../shapes/line_text.h"
-
 using std::vector;
 using std::endl;
 #define PI 3.1415926

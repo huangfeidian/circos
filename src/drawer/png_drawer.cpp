@@ -1,6 +1,7 @@
 #include <unordered_map>
 #include <string>
 #include <circos/drawer/png_drawer.h>
+#include <circos/shape_collection.h>
 
 namespace circos
 {

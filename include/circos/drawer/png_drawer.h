@@ -20,8 +20,6 @@
 #include "../shapes/track.h"
 #include "../shapes/rectangle.h"
 #include "../shapes/line_text.h"
-#include "../model/circle_desc.h"
-
 
 #ifdef USE_TEXT
 #include <ft2build.h>

@@ -36,14 +36,30 @@ namespace circos
 			arc_1 = Arc(radius, span1_begin, span1_end, center, in_color);
 			if (twist)
 			{
-				arc_2 = Arc(radius, span2_end, span2_begin, center, in_color);
+				std::swap(span2_begin, span2_end);
 			}
-			else
-			{
-				arc_2=Arc(radius, span2_begin, span2_end, center, in_color);
-			}
+			
+			arc_2=Arc(radius, span2_begin, span2_end, center, in_color);
 			bezier_1 = Bezier(center, radius, arc_1.end_angle, arc_2.begin_angle, in_color, control_radius);
 			bezier_2 = Bezier(center, radius, arc_2.end_angle, arc_1.begin_angle, in_color, control_radius);
+		}
+		Track(Point center, int radius1, int radius2, double span1_begin, double span1_end, double span2_begin, double span2_end, Color in_color, int control_radius_percent = 0, bool twist = false,bool in_fill = false, double in_opacity = 1.0)
+			: color(in_color)
+			, fill(in_fill)
+			, opacity(in_opacity)
+
+		{
+			arc_1 = Arc(radius1, span1_begin, span1_end, center, in_color);
+			if (twist)
+			{
+				std::swap(span2_begin, span2_end);
+			}
+			arc_2 = Arc(radius2, span2_begin, span2_end, center, in_color);
+			auto control_point_1 = radius_point((radius1 + radius2) / 2 * control_radius_percent, (span1_end + span2_begin) / 2, center);
+			auto control_point_2 = radius_point((radius1 + radius2) / 2 * control_radius_percent, (span2_end + span1_begin) / 2, center);
+			bezier_1 = Bezier(radius_point(radius1, span1_end, center), radius_point(radius2, span2_begin, center), control_point_1, in_color, in_opacity);
+			bezier_2 = Bezier(radius_point(radius2, span2_end, center), radius_point(radius1, span1_begin, center), control_point_2, in_color, in_opacity);
+
 		}
 	};
 }

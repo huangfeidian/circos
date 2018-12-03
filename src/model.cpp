@@ -53,7 +53,6 @@ namespace circos::model
 			for(auto& one_band: sorted_vector)
 			{	
 				one_band.angle_begin = temp_angle_begin;
-				one_band.angle_per_unit = angle_by_unit;
 				temp_angle_end = temp_angle_begin + angle_by_unit * one_band.width;
 				Ring cur_ring = Ring(config.center, cur_circle.inner_radius, cur_circle.outer_radius, temp_angle_begin, temp_angle_end, one_band.fill_color, 1, one_band.opacity <= 0.001, one_band.opacity);
 				pre_collection.rings.push_back(cur_ring);
@@ -111,21 +110,55 @@ namespace circos::model
 				continue;
 			}
 			const auto& to_band = to_band_iter->second;
-			if(to_band.circle_id != from_band.circle_id)
-			{
-				continue;
-			}
-			const auto& cur_circle = circles[to_band.circle_id];
+			const auto& from_circle = circles[from_band.circle_id];
+			const auto& to_circle = circles[to_band.circle_id];
 			if(cur_point_link.control_radius_percent <= 0)
 			{
-				Line cur_line = Line(radius_point(cur_circle.inner_radius, from_band.angle_begin + cur_circle.angle_per_unit * cur_point_link.from_pos_idx), radius_point(cur_circle.outer_radius, to_band.angle_begin + cur_circle.angle_per_unit * cur_point_link.to_pos_idx), cur_point_link.fill_color, cur_point_link.width, cur_point_link.opacity);
+				// 这个是直线
+				Line cur_line = Line(radius_point(from_circle.inner_radius, from_band.angle_begin + from_circle.angle_per_unit * cur_point_link.from_pos_idx), radius_point(to_circle.outer_radius, to_band.angle_begin + to_circle.angle_per_unit * cur_point_link.to_pos_idx), cur_point_link.fill_color, cur_point_link.width, cur_point_link.opacity);
 			}
 			else
 			{
-				Bezier cur_bezier = Bezier(config.center, cur_circle.inner_radius, from_band.angle_begin + cur_circle.angle_per_unit * cur_point_link.from_pos_idx, to_band.angle_begin + cur_circle.angle_per_unit * cur_point_link.to_pos_idx, cur_point_link.fill_color, cur_circle.inner_radius * cur_point_link.control_radius_percent, cur_point_link.width, cur_point_link.opacity);
-				pre_collection.beziers.push_back(cur_bezier);
+				// 这个是曲线
+				auto from_angle = from_band.angle_begin + from_circle.angle_per_unit * cur_point_link.from_pos_idx;
+				auto to_angle = to_band.angle_begin + to_circle.angle_per_unit * cur_point_link.to_pos_idx;
+				if(to_band.circle_id == from_band.circle_id)
+				{
+					Bezier cur_bezier = Bezier(config.center, from_circle.inner_radius, from_angle, to_angle, cur_point_link.fill_color, from_circle.inner_radius * cur_point_link.control_radius_percent, cur_point_link.width, cur_point_link.opacity);
+					pre_collection.beziers.push_back(cur_bezier);
+				}
+				else
+				{
+					auto control_point = radius_point((from_circle.inner_radius + to_circle.inner_radius) / 2 * cur_point_link.control_radius_percent, (from_angle + to_angle) / 2, config.center);
+					Bezier cur_bezier = Bezier(radius_point(from_circle.inner_radius, from_angle, config.center), radius_point(to_circle.inner_radius, to_angle, config.center), control_point, cur_point_link.fill_color, cur_point_link.opacity);
+					pre_collection.beziers.push_back(cur_bezier);
+				}
 			}
-			
+		}
+		// 5. 处理两个条带之间的连线
+		for(const auto& one_range_link: range_links)
+		{
+			const auto& cur_range_link = one_range_link.second;
+			auto from_band_iter = bands.find(cur_range_link.from_band_id);
+			if(from_band_iter == bands.end())
+			{
+				continue;
+			}
+			const auto& from_band = from_band_iter->second;
+			auto to_band_iter = bands.find(cur_range_link.to_band_id);
+			if(to_band_iter == bands.end())
+			{
+				continue;
+			}
+			const auto& to_band = to_band_iter->second;
+			const auto& from_circle = circles[from_band.circle_id];
+			const auto& to_circle = circles[to_band.circle_id];
+			auto from_begin_angle = from_band.angle_begin + from_circle.angle_per_unit * cur_range_link.from_pos_begin_idx;
+			auto from_end_angle = from_band.angle_begin + from_circle.angle_per_unit * cur_range_link.from_pos_end_idx;
+			auto to_begin_angle = to_band.angle_begin + to_circle.angle_per_unit * cur_range_link.to_pos_begin_idx;
+			auto to_end_angle = to_band.angle_begin + to_circle.angle_per_unit * cur_range_link.to_pos_end_idx;
+			Track cur_track = Track(config.center, from_circle.inner_radius, to_circle.inner_radius, from_begin_angle, from_end_angle, to_begin_angle, to_end_angle, cur_range_link.fill_color, cur_range_link.control_radius_percent, cur_range_link.is_cross, cur_range_link.opacity < 0.001, cur_range_link.opacity);
+			pre_collection.tracks.push_back(cur_track);
 		}
 
 	}

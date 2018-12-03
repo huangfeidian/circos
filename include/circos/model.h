@@ -76,10 +76,11 @@ namespace circos::model
 		bool is_cross;
 		Color fill_color;
 		double opacity;
+		double control_radius_percent;
 
 	};
 
-		struct fill_onband
+	struct fill_onband
 	{
 		std::string_view band_id;
 		int on_band_begin;

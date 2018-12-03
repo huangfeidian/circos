@@ -1,12 +1,4 @@
 ﻿#pragma once
-#include "../shapes/line.h"
-#include "../shapes/circle.h"
-#include "../shapes/arc.h"
-#include "../shapes/bezier.h"
-#include "../shapes/ring.h"
-#include "../shapes/track.h"
-#include "../shapes/rectangle.h"
-#include "../shapes/line_text.h"
 #include <optional>
 #include <xlsx_cell_extend.h>
 #include <vector>
@@ -15,6 +7,16 @@
 #include <string_view>
 #include <tuple>
 #include <xlsx_typed.h>
+
+#include "../shapes/line.h"
+#include "../shapes/circle.h"
+#include "../shapes/arc.h"
+#include "../shapes/bezier.h"
+#include "../shapes/ring.h"
+#include "../shapes/track.h"
+#include "../shapes/rectangle.h"
+#include "../shapes/line_text.h"
+
 namespace circos
 {
 	using namespace xlsx_reader;
@@ -554,6 +556,8 @@ namespace circos
 		sheet_headers["color"] = typed_header(new extend_node_type_descriptor(color_type_detail), "color", "");
 
 		sheet_headers["opacity"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_double), "opacity", "");
+		control_radius_percent
+		sheet_headers["control_radius_percent"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_double), "control_radius_percent", "");
 
 		auto header_match = point_link_sheet.check_header_match(sheet_headers, "link_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
 		if(!header_match)
@@ -640,6 +644,15 @@ namespace circos
 					}
 					cur_point_link.to_pos_idx = opt_to_pos_idx.value();
 				}
+				elif(current_header_name == "control_radius_percent")
+				{
+					auto opt_control_radius_percent = j->second.get_value<bool>();
+					if(!opt_control_radius_percent)
+					{
+						continue;
+					}
+					cur_point_link.control_radius_percent = opt_control_radius_percent.value();
+				}
 			}
 			if(!cur_point_link.link_id)
 			{
@@ -678,6 +691,8 @@ namespace circos
 		sheet_headers["opacity"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_double), "opacity", "");
 
 		sheet_headers["is_cross"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::bool), "is_cross", "");
+		
+		sheet_headers["control_radius_percent"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_double), "control_radius_percent", "");
 
 		auto header_match = range_link_sheet.check_header_match(sheet_headers, "link_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
 		if(!header_match)
@@ -790,6 +805,15 @@ namespace circos
 						continue;
 					}
 					cur_range_link.is_cross = opt_is_cross.value();
+				}
+				elif(current_header_name == "control_radius_percent")
+				{
+					auto opt_control_radius_percent = j->second.get_value<bool>();
+					if(!opt_control_radius_percent)
+					{
+						continue;
+					}
+					cur_range_link.control_radius_percent = opt_control_radius_percent.value();
 				}
 			}
 			if(!cur_range_link.link_id)
