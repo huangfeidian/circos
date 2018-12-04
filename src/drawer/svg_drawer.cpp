@@ -37,7 +37,7 @@ namespace circos
 	}
 	SvgGraph& SvgGraph::operator<<(Color color)
 	{
-		output << "rgb("<<color.r<<","<<color.g<<","<<color.b<<")";
+		output << "rgb("<<int(color.r)<<","<<int(color.g)<<","<<int(color.b)<<")";
 		return *this;
 	}
 	SvgGraph& SvgGraph::operator<<(const Point& point)
