@@ -26,12 +26,12 @@ namespace circos
 		std::vector<std::vector<Point>> paths;
 	};
 	template<typename img>
-	void draw_collections(img& outpt_img, const shape_collection& in_shape_collection)
+	void draw_collections(img& output_img, const shape_collection& in_shape_collection)
 	{
-		for(const auto& one_circle: in_shape_collection.circles)
-		{
-			output_img << one_circle;
-		}
+		//for(const auto& one_circle: in_shape_collection.circles)
+		//{
+		//	output_img << one_circle;
+		//}
 		for(const auto& one_line : in_shape_collection.lines)
 		{
 			output_img << one_line;
@@ -52,7 +52,7 @@ namespace circos
 		{
 			output_img << one_track;
 		}
-		for(const auto& one_ring: in_shape_collection.tracks)
+		for(const auto& one_ring: in_shape_collection.rings)
 		{
 			output_img << one_ring;
 		}

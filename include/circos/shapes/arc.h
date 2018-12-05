@@ -41,30 +41,24 @@ namespace circos
 			sweep_flag = 1; //
 			from_point = Point::radius_point(in_radius, begin_angle) + center;
 			to_point = Point::radius_point(in_radius, end_angle) + center;
-			if (end_angle > begin_angle)
+			// 根据
+			if (abs(end_angle - begin_angle) < EPS)
 			{
-				sweep_flag = 1;
-				if (end_angle - begin_angle >= PI)
-				{
-					large_flag = 1;
-				}
-				else
-				{
-					large_flag = 0;
-				}
-			}
-			else
-			{
+				large_flag = 0;
 				sweep_flag = 0;
-				if (end_angle - begin_angle + 2 * PI > PI)
-				{
-					large_flag = 0;
-				}
-				else
-				{
-					large_flag = 1;
-				}
+				return;
 			}
+			if (abs(abs(end_angle - begin_angle) - 2 * PI) < EPS)
+			{
+				large_flag = 1;
+				sweep_flag = 0;
+				return;
+			}
+			// 根据cross_product来计算sweep_flag
+			auto diff_point_1 = from_point - center;
+			auto diff_point_2 = to_point - center;
+			large_flag = bool(cos(end_angle - begin_angle) < 0);
+			sweep_flag = bool(sin(end_angle - begin_angle) >= 0);
 			
 		}
 		std::vector<Point> path() const

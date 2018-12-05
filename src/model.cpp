@@ -10,16 +10,18 @@ namespace circos::model
 		// 1. 首先输出所有的圆环
 		for(const auto& i: circles)
 		{
-			const auto& cur_circle = i.second;
-			if(cur_circle.opacity <= 0.001)
-			{
-				continue;
-			}
-			auto cur_ring = Ring(config.center, cur_circle.inner_radius, cur_circle.outer_radius, 0, pi() * 2, cur_circle.fill_color, 1, true, cur_circle.opacity);
-			pre_collection.rings.push_back(cur_ring);
+			//const auto& cur_circle = i.second;
+			//if(cur_circle.opacity <= 0.001)
+			//{
+			//	continue;
+			//}
+			//auto cur_arc = Arc((cur_circle.inner_radius + cur_circle.outer_radius) / 2, 0, pi() * 2, config.center, cur_circle.fill_color, (cur_circle.outer_radius - cur_circle.inner_radius) / 2, true, cur_circle.opacity);
+			//cur_arc.sweep_flag = 1;
+			//cur_arc.large_flag = 0;
+			//pre_collection.arcs.push_back(cur_arc);
 		}
 		// 2. 然后计算每个圆环上每条带子的位置
-		unordered_map<string_view, vector<band>> bands_grouped_by_circle;
+		unordered_map<string, vector<band>> bands_grouped_by_circle;
 		for(const auto& i: bands)
 		{
 			auto circle_iter = circles.find(i.second.circle_id);
@@ -31,7 +33,7 @@ namespace circos::model
 			pre_groups.push_back(i.second);
 		}
 		// 分好组之后 再排序然后处理
-		unordered_map<string_view, int> circle_ranges;
+		unordered_map<string, int> circle_ranges;
 		for(auto& i: bands_grouped_by_circle)
 		{
 			auto& cur_circle = circles.find(i.first)->second;
@@ -55,7 +57,7 @@ namespace circos::model
 			{	
 				one_band.angle_begin = temp_angle_begin;
 				temp_angle_end = temp_angle_begin + angle_by_unit * one_band.width;
-				Ring cur_ring = Ring(config.center, cur_circle.inner_radius, cur_circle.outer_radius, temp_angle_begin, temp_angle_end, one_band.fill_color, 1, one_band.opacity <= 0.001, one_band.opacity);
+				Ring cur_ring(config.center, cur_circle.inner_radius, cur_circle.outer_radius, temp_angle_begin, temp_angle_end, one_band.fill_color, 1, (one_band.opacity <= 0.001), one_band.opacity);
 				pre_collection.rings.push_back(cur_ring);
 				temp_angle_begin += cur_circle.gap * angle_by_unit;
 			}

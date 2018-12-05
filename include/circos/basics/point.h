@@ -69,6 +69,16 @@ namespace circos
 			result.y = radius * sin(angle);
 			return result + center;
 		}
+		T operator*(const basic_point& other_point)
+		{
+			// 计算点积
+			return x * other_point.x + y * other_point.y;
+		}
+		static T cross_product(const basic_point& p_a, const basic_point& p_b)
+		{
+			return p_a.x * p_b.y - p_a.y * p_b.x;
+		}
+
 	};
 	using Point = basic_point<int>;
 	template<typename T1, typename T2>
