@@ -7,8 +7,9 @@
 #include "./shapes/line_text.h"
 #include "./shapes/line.h"
 #include "./shapes/rectangle.h"
-#include "./shapes/ring.h"
-#include "./shapes/track.h"
+#include "./shapes/tile.h"
+#include "./shapes/ribbon.h"
+#include "./shapes/annulus.h"
 
 namespace circos
 {
@@ -20,18 +21,24 @@ namespace circos
 		std::vector<Circle> circles;
 		std::vector<Line> lines;
 		std::vector<Rectangle> rectangles;
-		std::vector<Ring> rings;
-		std::vector<Track> tracks;
+		std::vector<Tile> tiles;
+		std::vector<Ribbon> ribbons;
 		std::vector<LineText> line_texts;
 		std::vector<std::vector<Point>> paths;
+		std::vector<Annulus> annuluses;
 	};
 	template<typename img>
 	void draw_collections(img& output_img, const shape_collection& in_shape_collection)
 	{
-		//for(const auto& one_circle: in_shape_collection.circles)
-		//{
-		//	output_img << one_circle;
-		//}
+
+		for(const auto& one_annulus: in_shape_collection.annuluses)
+		{
+			output_img << one_annulus;
+		}
+		for(const auto& one_circle: in_shape_collection.circles)
+		{
+			output_img << one_circle;
+		}
 		for(const auto& one_line : in_shape_collection.lines)
 		{
 			output_img << one_line;
@@ -48,13 +55,13 @@ namespace circos
 		{
 			output_img << one_arc;
 		}
-		for(const auto& one_track: in_shape_collection.tracks)
+		for(const auto& one_ribbon: in_shape_collection.ribbons)
 		{
-			output_img << one_track;
+			output_img << one_ribbon;
 		}
-		for(const auto& one_ring: in_shape_collection.rings)
+		for(const auto& one_tile: in_shape_collection.tiles)
 		{
-			output_img << one_ring;
+			output_img << one_tile;
 		}
 	}
 }

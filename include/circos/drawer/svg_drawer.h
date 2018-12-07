@@ -8,10 +8,12 @@
 #include "../shapes/circle.h"
 #include "../shapes/arc.h"
 #include "../shapes/bezier.h"
-#include "../shapes/ring.h"
-#include "../shapes/track.h"
+#include "../shapes/tile.h"
+#include "../shapes/ribbon.h"
 #include "../shapes/rectangle.h"
 #include "../shapes/line_text.h"
+#include "../shapes/annulus.h"
+
 using std::vector;
 using std::endl;
 namespace circos
@@ -45,9 +47,10 @@ namespace circos
 		void add_to_path(const Bezier& bezier);
 		SvgGraph& operator<<(const Circle& circle);
 		SvgGraph& operator<<(const Rectangle& rect);
-		SvgGraph& operator<<(const Ring& ring);
-		SvgGraph& operator<<(const Track& track);
+		SvgGraph& operator<<(const Tile& ring);
+		SvgGraph& operator<<(const Ribbon& ribbon);
 		SvgGraph& operator<<(const LineText& line_text);
+		SvgGraph& operator<<(const Annulus& annulus);
 		~SvgGraph();
 	};
 }

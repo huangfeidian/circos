@@ -13,7 +13,7 @@
 #include "../shapes/arc.h"
 #include "../shapes/bezier.h"
 #include "../shapes/ring.h"
-#include "../shapes/track.h"
+#include "../shapes/ribbon.h"
 #include "../shapes/rectangle.h"
 #include "../shapes/line_text.h"
 
@@ -24,11 +24,11 @@ namespace circos
 	enum class sheet_type
 	{
 		circle,
-		band,
-		fill_onband,
-		lable_on_band,
-		tick_on_band,
-		value_on_band,
+		tile,
+		fill_ontile,
+		lable_on_tile,
+		tick_on_tile,
+		value_on_tile,
 		colors,
 	}
 	std::optional<Color> read_color_from_cell(const typed_worksheet& cur_worksheet, const typed_cell& cell_value)
@@ -337,13 +337,13 @@ namespace circos
 			}
 		}
 	} 
-	void read_band_sheet(const typed_worksheet& band_sheet, std::unordered_map<std::string_view, model::band_desc>& all_bands)
+	void read_tile_sheet(const typed_worksheet& tile_sheet, std::unordered_map<std::string_view, model::tile_desc>& all_tiles)
 	{
-		// band_desc headers band_id(string) circle_id(string)  width(int) color(RGB) ref_color(ref) opacity(double) sequence(int)
+		// tile_desc headers tile_id(string) circle_id(string)  width(int) color(RGB) ref_color(ref) opacity(double) sequence(int)
 		std::unordered_map<std::string_view, typed_header> sheet_headers;
 		sheet_headers["circle_id"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "circle_id", "");
 
-		sheet_headers["band_id"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "band_id", "");
+		sheet_headers["tile_id"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "tile_id", "");
 
 		sheet_headers["width"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "width", "");
 
@@ -354,16 +354,16 @@ namespace circos
 
 		sheet_headers["opacity"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_double), "opacity", "");
 
-		auto header_match = band_sheet.check_header_match(sheet_headers, "band_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
+		auto header_match = tile_sheet.check_header_match(sheet_headers, "tile_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
 		if(!header_match)
 		{
-			std::cerr<<"header for band description mismatch for sheet "<<band_sheet._name<<std::endl;
+			std::cerr<<"header for tile description mismatch for sheet "<<tile_sheet._name<<std::endl;
 			return;
 		}
 
-		for(const auto& i: band_sheet.get_all_typed_row_info())
+		for(const auto& i: tile_sheet.get_all_typed_row_info())
 		{
-			model::band_desc cur_band;
+			model::tile_desc cur_tile;
 			for(const auto& j: i->second)
 			{
 				auto current_header_name = j->second.header_name;
@@ -374,7 +374,7 @@ namespace circos
 					{
 						continue;
 					}
-					cur_band.circle_id = opt_circle_id.value();
+					cur_tile.circle_id = opt_circle_id.value();
 				}
 				elif(current_header_name == "opacity")
 				{
@@ -383,7 +383,7 @@ namespace circos
 					{
 						continue;
 					}
-					cur_band.opacity = opt_opacity.value();
+					cur_tile.opacity = opt_opacity.value();
 				}
 				elif(current_header_name == "color")
 				{
@@ -392,7 +392,7 @@ namespace circos
 					{
 						continue;
 					}
-					cur_band.fill_color = opt_color.value();
+					cur_tile.fill_color = opt_color.value();
 				}
 				elif(current_header_name == "ref_color")
 				{
@@ -401,7 +401,7 @@ namespace circos
 					{
 						continue;
 					}
-					cur_band.fill_color = opt_color.value();
+					cur_tile.fill_color = opt_color.value();
 				}
 				elif(current_header_name == "width")
 				{
@@ -410,7 +410,7 @@ namespace circos
 					{
 						continue;
 					}
-					cur_band.width = opt_width.value();
+					cur_tile.width = opt_width.value();
 				}
 				elif(current_header_name == "sequence")
 				{
@@ -419,26 +419,26 @@ namespace circos
 					{
 						continue;
 					}
-					cur_band.sequence = opt_seq.value();
+					cur_tile.sequence = opt_seq.value();
 				}
 				
 			}
-			if(!cur_band.band_id)
+			if(!cur_tile.tile_id)
 			{
-				std::cerr<<"cant find band for row "<< i.first<<std::endl;
+				std::cerr<<"cant find tile for row "<< i.first<<std::endl;
 				continue;
 			}
-			if(all_bands.find(cur_band.band_id) != all_bands.end())
+			if(all_tiles.find(cur_tile.tile_id) != all_tiles.end())
 			{
-				std::cerr<<"duplicated band_id "<<cur_band.band_id<<std::endl;
+				std::cerr<<"duplicated tile_id "<<cur_tile.tile_id<<std::endl;
 				continue;
 			}
-			if(!cur_band.circle_id)
+			if(!cur_tile.circle_id)
 			{
-				std::cerr<<"missing circle_id for band "<<cur_band.band_id<<std::endl;
+				std::cerr<<"missing circle_id for tile "<<cur_tile.tile_id<<std::endl;
 			}
 
-			all_bands[cur_band.circle_id] = cur_band;
+			all_tiles[cur_tile.circle_id] = cur_tile;
 		}
 	} 
 
@@ -529,9 +529,9 @@ namespace circos
 				std::cerr<<"cant find circle_tick for row "<< i.first<<std::endl;
 				continue;
 			}
-			if(all_circle_ticks.find(cur_circle_tick.band_id) != all_circle_ticks.end())
+			if(all_circle_ticks.find(cur_circle_tick.tile_id) != all_circle_ticks.end())
 			{
-				std::cerr<<"duplicated band_id "<<cur_circle_tick.band_id<<std::endl;
+				std::cerr<<"duplicated tile_id "<<cur_circle_tick.tile_id<<std::endl;
 				continue;
 			}
 
@@ -541,13 +541,13 @@ namespace circos
 
 	void read_point_link_sheet(const typed_worksheet& point_link_sheet, std::unordered_map<std::string_view, model::point_link>& all_point_links)
 	{
-		// point_link headers link_id(string) from_band_id(string) from_pos_idx(int) to_band_id(string) to_pos_idx(int)  color(RGB) ref_color(ref) opacity(double)
+		// point_link headers link_id(string) from_tile_id(string) from_pos_idx(int) to_tile_id(string) to_pos_idx(int)  color(RGB) ref_color(ref) opacity(double)
 		std::unordered_map<std::string_view, typed_header> sheet_headers;
 		sheet_headers["link_id"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "link_id", "");
 
-		sheet_headers["from_band_id"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "from_band_id", "");
+		sheet_headers["from_tile_id"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "from_tile_id", "");
 
-		sheet_headers["to_band_id"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "to_band_id", "");
+		sheet_headers["to_tile_id"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "to_tile_id", "");
 
 		sheet_headers["from_pos_idx"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "from_pos_idx", "");
 		sheet_headers["to_pos_idx"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "to_pos_idx", "");
@@ -581,23 +581,23 @@ namespace circos
 					}
 					cur_point_link.link_id = opt_link_id.value();
 				}
-				elif(current_header_name == "from_band_id")
+				elif(current_header_name == "from_tile_id")
 				{
-					auto opt_band_id = j->second.get_value<std::string_view>();
-					if(!opt_band_id)
+					auto opt_tile_id = j->second.get_value<std::string_view>();
+					if(!opt_tile_id)
 					{
 						continue;
 					}
-					cur_point_link.from_band_id = opt_band_id.value();
+					cur_point_link.from_tile_id = opt_tile_id.value();
 				}
-				elif(current_header_name == "to_band_id")
+				elif(current_header_name == "to_tile_id")
 				{
-					auto opt_band_id = j->second.get_value<std::string_view>();
-					if(!opt_band_id)
+					auto opt_tile_id = j->second.get_value<std::string_view>();
+					if(!opt_tile_id)
 					{
 						continue;
 					}
-					cur_point_link.to_band_id = opt_band_id.value();
+					cur_point_link.to_tile_id = opt_tile_id.value();
 				}
 				elif(current_header_name == "opacity")
 				{
@@ -661,7 +661,7 @@ namespace circos
 			}
 			if(all_point_links.find(cur_point_link.link_id) != all_point_links.end())
 			{
-				std::cerr<<"duplicated link_id "<<cur_point_link.band_id<<std::endl;
+				std::cerr<<"duplicated link_id "<<cur_point_link.tile_id<<std::endl;
 				continue;
 			}
 
@@ -671,13 +671,13 @@ namespace circos
 
 	void read_range_link_sheet(const typed_worksheet& range_link_sheet, std::unordered_map<std::string_view, model::range_link>& all_range_links)
 	{
-		// point_link headers link_id(string) from_band_id(string) from_pos_idx(int) to_band_id(string) to_pos_idx(int)  color(RGB) ref_color(ref) opacity(double)
+		// point_link headers link_id(string) from_tile_id(string) from_pos_idx(int) to_tile_id(string) to_pos_idx(int)  color(RGB) ref_color(ref) opacity(double)
 		std::unordered_map<std::string_view, typed_header> sheet_headers;
 		sheet_headers["link_id"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "link_id", "");
 
-		sheet_headers["from_band_id"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "from_band_id", "");
+		sheet_headers["from_tile_id"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "from_tile_id", "");
 
-		sheet_headers["to_band_id"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "to_band_id", "");
+		sheet_headers["to_tile_id"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "to_tile_id", "");
 
 		sheet_headers["from_pos_idx_begin"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "from_pos_idx_begin", "");
 		sheet_headers["to_pos_idx_begin"] = typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "to_pos_idx_begin", "");
@@ -716,23 +716,23 @@ namespace circos
 					}
 					cur_range_link.link_id = opt_link_id.value();
 				}
-				elif(current_header_name == "from_band_id")
+				elif(current_header_name == "from_tile_id")
 				{
-					auto opt_band_id = j->second.get_value<std::string_view>();
-					if(!opt_band_id)
+					auto opt_tile_id = j->second.get_value<std::string_view>();
+					if(!opt_tile_id)
 					{
 						continue;
 					}
-					cur_range_link.from_band_id = opt_band_id.value();
+					cur_range_link.from_tile_id = opt_tile_id.value();
 				}
-				elif(current_header_name == "to_band_id")
+				elif(current_header_name == "to_tile_id")
 				{
-					auto opt_band_id = j->second.get_value<std::string_view>();
-					if(!opt_band_id)
+					auto opt_tile_id = j->second.get_value<std::string_view>();
+					if(!opt_tile_id)
 					{
 						continue;
 					}
-					cur_range_link.to_band_id = opt_band_id.value();
+					cur_range_link.to_tile_id = opt_tile_id.value();
 				}
 				elif(current_header_name == "opacity")
 				{
@@ -823,7 +823,7 @@ namespace circos
 			}
 			if(all_range_links.find(cur_range_link.link_id) != all_range_links.end())
 			{
-				std::cerr<<"duplicated link_id "<<cur_range_link.band_id<<std::endl;
+				std::cerr<<"duplicated link_id "<<cur_range_link.tile_id<<std::endl;
 				continue;
 			}
 

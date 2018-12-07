@@ -1,6 +1,9 @@
 ﻿#pragma once
 
 #include "color.h"
+#include "constants.h"
+#include "amplify_angle.h"
+
 namespace circos
 {
 	template<typename T>
@@ -62,9 +65,10 @@ namespace circos
 			this->y = this->y - second.y;
 			return *this;
 		}
-		static basic_point radius_point(int radius, double angle, basic_point center = basic_point())
+		static basic_point radius_point(T radius, std::uint16_t in_amplified_angle, basic_point center = basic_point())
 		{
 			basic_point result;
+			float angle = amplify_angle::angle_percent_to_rad(in_amplified_angle);
 			result.x = radius * cos(angle);
 			result.y = radius * sin(angle);
 			return result + center;
@@ -80,7 +84,7 @@ namespace circos
 		}
 
 	};
-	using Point = basic_point<int>;
+	using Point = basic_point<std::int16_t>;
 	template<typename T1, typename T2>
 	basic_point<T2> cast_point(const basic_point<T1>& in_point)
 	{

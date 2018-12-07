@@ -5,30 +5,29 @@
 #include "../basics/point.h"
 #include "../basics/color.h"
 #include "circle.h"
+#include "line.h"
 
 namespace circos
 {
-#define EPS 0.01
-#define PI 3.14159f
 	struct Arc
 	{
 		Point from_point;
 		Point to_point;
 		Point center;
-		double begin_angle;
-		double end_angle;
-		double radius;
+		std::uint16_t begin_angle;
+		std::uint16_t end_angle;
+		std::uint16_t radius;
 		int large_flag;
 		int sweep_flag;//clock_wise or inverse_clock_wise
 		bool fill_flag;
 		Color color;
-		double opacity;
-		int stroke;
+		float opacity;
+		std::uint16_t stroke;
 		Arc()
 		{
 
 		}
-		Arc(double in_radius, double begin_angle, double end_angle, Point in_center, Color in_color, bool in_fill_flag=false, double in_opacity = 1.0,int in_stroke = 1)
+		Arc(std::uint16_t in_radius, std::uint16_t begin_angle, std::uint16_t end_angle, Point in_center, Color in_color, bool in_fill_flag=false, float in_opacity = 1.0, std::uint16_t in_stroke = 1)
 			: fill_flag(in_fill_flag)
 			, radius(in_radius)
 			, begin_angle(begin_angle)
@@ -42,13 +41,13 @@ namespace circos
 			from_point = Point::radius_point(in_radius, begin_angle) + center;
 			to_point = Point::radius_point(in_radius, end_angle) + center;
 			// 根据
-			if (abs(end_angle - begin_angle) < EPS)
+			if (abs(end_angle - begin_angle) < amplify_angle::factor)
 			{
 				large_flag = 0;
 				sweep_flag = 0;
 				return;
 			}
-			if (abs(abs(end_angle - begin_angle) - 2 * PI) < EPS)
+			if (abs(abs(end_angle - begin_angle) - 360 * amplify_angle::factor) < amplify_angle::factor)
 			{
 				large_flag = 1;
 				sweep_flag = 0;
@@ -57,27 +56,31 @@ namespace circos
 			// 根据cross_product来计算sweep_flag
 			auto diff_point_1 = from_point - center;
 			auto diff_point_2 = to_point - center;
-			large_flag = bool(cos(end_angle - begin_angle) < 0);
-			sweep_flag = bool(sin(end_angle - begin_angle) >= 0);
+			large_flag = bool(cos(amplify_angle::angle_percent_to_rad(end_angle - begin_angle)) < 0);
+			sweep_flag = bool(sin(amplify_angle::angle_percent_to_rad(end_angle - begin_angle))>= 0);
 			
 		}
 		std::vector<Point> path() const
 		{
 			std::vector<Point> result;
-			if(abs(begin_angle-end_angle) < EPS)
+			if(abs(begin_angle-end_angle) < amplify_angle::factor)
 			{
 				return result;
 			} 
 			const auto& points = Circle::get_circle(radius);
 			if(begin_angle >end_angle)
 			{
-				auto result_1 = Arc(radius,begin_angle,PI*2,center,color).path();
+				auto result_1 = Arc(radius,begin_angle,360 * amplify_angle::factor,center,color).path();
 				auto result_2 = Arc(radius,0,end_angle,center,color).path();
-				copy(result_2.begin(),result_2.end(), back_inserter(result_1));
-				return result_1;
+				std::vector<std::vector<Point>> temp_result;
+				temp_result.emplace_back(std::move(result_1));
+				Line::connect_paths(temp_result, result_2);
+				std::vector<Point> final_result;
+				std::copy(temp_result[0].begin(), temp_result[0].end(), std::back_inserter(temp_result[1]));
+				return temp_result[1];
 			}
-			int begin_idx = begin_angle*4/PI;
-			int end_idx = end_angle*4/PI;
+			int begin_idx = begin_angle / (45 * amplify_angle::factor);
+			int end_idx = end_angle / (45 * amplify_angle::factor);
 			if(begin_idx == end_idx)
 			{
 				result = arc_path(begin_angle,end_angle, radius);
@@ -89,16 +92,20 @@ namespace circos
 			}
 			else
 			{
-				result = arc_path(begin_angle+EPS, (begin_idx+1)*PI/4-EPS, radius);
+				std::vector<std::vector<Point>> temp_result;
+				temp_result.push_back(arc_path(begin_angle, (begin_idx+1) * (45 * amplify_angle::factor), radius));
 				begin_idx++;
 				while(begin_idx < end_idx)
 				{
-					auto temp = arc_path(begin_idx*PI/4+EPS, (begin_idx+1)*PI/4-EPS, radius);
-					copy(temp.begin(),temp.end(), back_inserter(result));
+					Line::connect_paths(temp_result, arc_path(begin_idx*(45 * amplify_angle::factor), (begin_idx + 1)*(45 * amplify_angle::factor), radius));
 					begin_idx++;
 				}
-				auto temp = arc_path(begin_idx*PI/4+EPS, end_angle, radius);
-				copy(temp.begin(),temp.end(), back_inserter(result));
+				Line::connect_paths(temp_result, arc_path(begin_idx*(45 * amplify_angle::factor), end_angle, radius));
+				result.swap(temp_result[0]);
+				for (int i = 1; i < temp_result.size(); i++)
+				{
+					std::copy(temp_result[i].begin(), temp_result[i].end(), std::back_inserter(result));
+				}
 				for (auto& i : result)
 				{
 					i += center;
@@ -107,59 +114,49 @@ namespace circos
 			}
 		}
 
-		static std::vector<Point> arc_path(double angle_begin, double angle_end, int radius)
+		static std::vector<Point> arc_path(std::uint16_t angle_begin, std::uint16_t angle_end, std::uint16_t radius)
 		{
 			//这个函数只负责不大于PI/4区域的路径
-			if (abs(angle_end - angle_begin) < EPS)
+			if (angle_end - angle_begin < 1)
 			{
 				return std::vector<Point>();
 			}
-			int idx = angle_begin * 4 / PI;
+			bool negative_y = false;
+			bool negative_x = false;
+			bool swap_x_y = false;
+
+			int idx = angle_begin / (45 * amplify_angle::factor);
 			if (idx >= 4)
 			{
 				//大于半圆的话 直接反转
-				angle_begin = 2 * PI - angle_begin;
-				angle_end = 2 * PI - angle_end;
-				auto result = arc_path(angle_end,angle_begin, radius);
-				//将y轴坐标反转
-				for (auto & i : result)
-				{
-					i.y = -i.y;
-				}
-				return result;
+				std::swap(angle_begin, angle_end);
+				angle_begin = 360 * amplify_angle::factor - angle_begin;
+				angle_end = 360 * amplify_angle::factor - angle_end;
+				negative_y = true;
+				idx = angle_begin / (45 * amplify_angle::factor);
+
 			}
 			if (idx >= 2)
 			{
 				//在左半球的话，直接向右折叠
-				angle_begin = PI - angle_begin;
-				angle_end = PI - angle_end;
-				auto result = arc_path(angle_end,angle_begin,  radius);
-				//将x坐标反转
-				for (auto& i : result)
-				{
-					i.x = -i.x;
-				}
-				return result;
+				std::swap(angle_begin, angle_end);
+				angle_begin = 180 * amplify_angle::factor - angle_begin;
+				angle_end = 180 * amplify_angle::factor - angle_end;
+				negative_x = true;
+				idx = angle_begin / (45 * amplify_angle::factor);
 			}
 			if (idx == 0)
 			{
 				//如果在第一象限右半区的话 对折到第一象限的上半区
-				angle_begin = PI / 2 - angle_begin;
-				angle_end = PI / 2 - angle_end;
-				auto result = arc_path(angle_end,angle_begin, radius);
-				for (auto& i : result)
-				{
-					auto temp = i.x;
-					i.x = i.y;
-					i.y = temp;
-				}
-				return result;
+				angle_begin = 90 * amplify_angle::factor - angle_begin;
+				angle_end = 90 * amplify_angle::factor - angle_end;
+				swap_x_y = true;
+				std::swap(angle_begin, angle_end);
 			}
 			//现在确信是在第一象限上半区
-
 			const auto& cache = Circle::get_circle(radius);
-			double begin_x = radius*cos(angle_end);
-			double end_x = radius*cos(angle_begin);
+			double begin_x = radius*cos(amplify_angle::angle_percent_to_rad(angle_end));
+			double end_x = radius*cos(amplify_angle::angle_percent_to_rad(angle_begin ));
 			auto begin_iter = std::lower_bound(cache.begin(), cache.end(), begin_x, [](const Point& a, double x)
 			{
 				return a.x < x;
@@ -170,6 +167,26 @@ namespace circos
 			});
 			std::vector<Point> result;
 			std::copy(begin_iter, end_iter, back_inserter(result));
+			std::transform(result.begin(), result.end(), result.begin(), [=](const Point& origin_p)
+			{
+				Point new_p = origin_p;
+				if (swap_x_y)
+				{
+					auto temp = new_p.x;
+					new_p.x = new_p.y;
+					new_p.y = temp;
+				}
+				if (negative_x)
+				{
+					new_p.x = -new_p.x;
+				}
+				if (negative_y)
+				{
+					new_p.y = -new_p.y;
+				}
+				return new_p;
+
+			});
 			return result;
 		}
 	};

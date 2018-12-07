@@ -16,10 +16,11 @@
 #include "../shapes/circle.h"
 #include "../shapes/arc.h"
 #include "../shapes/bezier.h"
-#include "../shapes/ring.h"
-#include "../shapes/track.h"
+#include "../shapes/tile.h"
+#include "../shapes/ribbon.h"
 #include "../shapes/rectangle.h"
 #include "../shapes/line_text.h"
+#include "../shapes/annulus.h"
 
 #ifdef USE_TEXT
 #include <ft2build.h>
@@ -65,9 +66,9 @@ namespace circos
 #ifdef USE_TEXT
 		const vector<unsigned char>& get_font_mem(const string& font_name);
 #endif
-		void plot(Colorbasic_point input, float blend = 1.0);
-		void plot(Point pos, Color color,float blend = 1.0);
-		void plot(int x, int y, Color color, float blend=1.0);
+		void plot(Colorbasic_point input, float opacity = 1.0);
+		void plot(Point pos, Color color,float opacity = 1.0);
+		void plot(int x, int y, Color color, float opacity=1.0);
 		Color read(Point pos);
 		void draw_path(const vector<Point>& path, Color color, int stroke = 1, float opacity = 1.0);
 		~PngImage();
@@ -78,7 +79,7 @@ namespace circos
 		bool can_flood(Point current);
 
 		//要求interior一定在boundary里面
-		void flood(const vector<Point> boundary, vector<Point> interiors, Color fill_color, double opacity =1.0);
+		void flood(const vector<vector<Point>>& boundary, vector<Point> interiors, Color fill_color, float opacity =1.0);
 			
 #ifdef USE_TEXT
 		vector<uint32_t> utf8_to_uint(const string& text) const;
@@ -99,7 +100,8 @@ namespace circos
 		PngImage& operator<<(const Rectangle& rect);
 		vector<Point> path(const Circle& circle) const;
 		PngImage& operator<<(const Circle& circle);
-		PngImage& operator<<(const Ring& ring);
-		PngImage& operator<<(const Track& track);
+		PngImage& operator<<(const Tile& tile);
+		PngImage& operator<<(const Ribbon& ribbon);
+		PngImage& operator<<(const Annulus& annulus);
 	};
 }

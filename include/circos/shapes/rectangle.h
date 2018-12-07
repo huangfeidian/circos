@@ -8,16 +8,16 @@ namespace circos
 	{
 		Point left;
 		Point right;
-		int height;
+		std::uint16_t height;
 		Color color;
-		double opacity;
+		float opacity;
 		bool fill;
 		Rectangle()
 			:left(), right(), color(), opacity(1)
 		{
 		
 		}
-		Rectangle(Point in_left, Point in_right, Color in_color, int in_height, bool in_fill = false, double in_opacity =1.0)
+		Rectangle(Point in_left, Point in_right, Color in_color, std::uint16_t in_height, bool in_fill = false, float in_opacity =1.0)
 			: left(in_left)
 			, right(in_right)
 			, color(in_color)

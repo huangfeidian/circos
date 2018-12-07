@@ -53,9 +53,9 @@ void pi_test_1(void)
         pre_char = cur_char;
     }
     // 位置处理结束 开始生成所有链接
-    float gap = PI/4;
+    float gap = pi()/4;
     auto total_size = std::accumulate(chunk_size.begin(), chunk_size.end(), 0);
-    float angle_per_size = (2*PI - gap)/total_size;
+    float angle_per_size = (2* pi() - gap)/total_size;
     vector<circos::Color> strand_color(10, Color());
     strand_color[0] = Color(15, 66, 90);
     strand_color[1] = Color(50, 163, 231);
@@ -83,50 +83,52 @@ void pi_test_1(void)
 	cur_circle.outer_radius = outer_radius;
 	cur_circle.gap = pi_str.size() / 10;
 	cur_circle.fill_color = Color(125, 145, 130);
-	cur_circle.opacity = 1.0;
+	cur_circle.opacity = 0.0;
 	pi_model.circles["pi"] = cur_circle;
 
 	int id_count = 1;
 
-	vector<model::band> bands(10, model::band());
+	vector<model::tile> tiles(10, model::tile());
 
     int _pre_total_size = 0;
     for(i =0; i< 10; i++)
     {
-		bands[i].circle_id = "pi";
-		bands[i].band_id = to_string(i);
-		bands[i].width = chunk_size[i];
-		bands[i].fill_color = strand_color[i];
-		bands[i].opacity = 1.0;
-		bands[i].sequence = i;
-		pi_model.bands[to_string(i)] = bands[i];
+		tiles[i].circle_id = "pi";
+		tiles[i].tile_id = to_string(i);
+		tiles[i].width = chunk_size[i];
+		tiles[i].fill_color = strand_color[i];
+		tiles[i].opacity = 1.0;
+		tiles[i].sequence = i;
+		bool is_fill = true;
+		tiles[i].is_fill = is_fill;
+		pi_model.tiles[to_string(i)] = tiles[i];
     }
-	//for (int i = 0; i < 10; i++)
-	//{
-	//	string from_band_id = to_string(i);
-	//	for (const auto& one_link : connections[i])
-	//	{
-	//		auto from_pos_idx = one_link.first;
-	//		auto to_band_id = to_string(one_link.second.first);
-	//		auto to_pos_idx = one_link.second.second;
-	//		model::point_link temp_link;
-	//		temp_link.link_id = to_string(id_count++);
-	//		temp_link.from_band_id = from_band_id;
-	//		temp_link.from_pos_idx = from_pos_idx;
-	//		temp_link.to_band_id = to_band_id;
-	//		temp_link.to_pos_idx = to_pos_idx;
-	//		temp_link.control_radius_percent = control_radius_ration;
-	//		temp_link.fill_color = strand_color[one_link.second.first];
-	//		temp_link.opacity = 0.5;
-	//		temp_link.width = 1;
-	//		pi_model.point_links[temp_link.link_id] = temp_link;
-	//	}
-	//
-	//}
+	for (int i = 0; i < 10; i++)
+	{
+		string from_tile_id = to_string(i);
+		for (const auto& one_link : connections[i])
+		{
+			auto from_pos_idx = one_link.first;
+			auto to_tile_id = to_string(one_link.second.first);
+			auto to_pos_idx = one_link.second.second;
+			model::point_link temp_link;
+			temp_link.link_id = to_string(id_count++);
+			temp_link.from_tile_id = from_tile_id;
+			temp_link.from_pos_idx = from_pos_idx;
+			temp_link.to_tile_id = to_tile_id;
+			temp_link.to_pos_idx = to_pos_idx;
+			temp_link.control_radius_percent = control_radius_ration;
+			temp_link.fill_color = strand_color[one_link.second.first];
+			temp_link.opacity = 0.1;
+			temp_link.width = 1;
+			pi_model.point_links[temp_link.link_id] = temp_link;
+		}
+	
+	}
     
     Point center(radius, radius);
 
-    Color background_color = Color(0,0,0);
+    Color background_color = Color(255,255,255);
 	pi_model.config.background_color = background_color;
 	pi_model.config.center = center;
 	pi_model.config.radius = radius;
@@ -139,12 +141,5 @@ void pi_test_1(void)
 	pi_model.to_shapes(cur_collection);
 	draw_collections(svg_graph, cur_collection);
 	draw_collections(png_image, cur_collection);
-	// draw strands
-    //for(int i=0; i<10; i++)
-    //{
-    //    Ring cur_ring(center, inner_radius, outer_radius, all_strands[i].angle_begin, all_strands[i].angle_end, all_strands[i].strand_color, 1, true);
-    //    svg_graph<<cur_ring;
-    //    png_image<<cur_ring;
-    //}
 
 }

@@ -12,7 +12,7 @@ namespace circos
 		left,
 		right,
 	};
-	enum class value_on_band_draw_type: std::uint8_t
+	enum class value_on_tile_draw_type: std::uint8_t
 	{
 		point,
 		link,
@@ -20,5 +20,4 @@ namespace circos
 		link_shadow,
 		
 	};
-
 }

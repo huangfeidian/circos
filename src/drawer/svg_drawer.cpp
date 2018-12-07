@@ -120,7 +120,7 @@ namespace circos
 	{
 		auto& graph = *this;
 		graph << "<circle cx=\"" << circle.center.x << "\" cy=\"" << circle.center.y << "\" r=\"" << circle.radius<<"\" ";
-		graph << "stroke=\"" << circle.color << "\" stroke-width=\"" << 1 <<"\" ";
+		graph << "stroke=\"" << circle.color << "\" stroke-width=\"" << circle.stroke_width <<"\" ";
 		if(circle.filled)
 		{
 			graph << "fill=\""<<circle.color<<"\" ";
@@ -137,7 +137,7 @@ namespace circos
 		auto& graph = *this;
 		Line edge(rect.left, rect.right,rect.color);
 		double len = edge.len();
-		double theta = 180*std::asin(-(rect.left.y - rect.right.y) / len)/PI;
+		double theta = 180*std::asin(-(rect.left.y - rect.right.y) / len)/pi();
 		graph<< "<rect x=\""<<rect.left.x<<"\" y=\""<<rect.left.y<<"\" ";
 		graph<<"width=\""<<len<<"\" height = \""<<rect.height<<"\" ";
 		if (rect.fill)
@@ -149,51 +149,51 @@ namespace circos
 		graph<<"/>\n";
 		return graph;
 	}
-	SvgGraph& SvgGraph::operator<<(const Ring& ring)
+	SvgGraph& SvgGraph::operator<<(const Tile& tile)
 	{
 		auto& graph = *this;
-		Arc arc_1(ring.inner_radius, ring.begin_angle, ring.end_angle, ring.center, ring.color);
-		Arc arc_2(ring.outer_radius, ring.end_angle, ring.begin_angle, ring.center, ring.color);
-		Line line_1(Point::radius_point(ring.inner_radius, ring.end_angle,ring.center), Point::radius_point(ring.outer_radius, ring.end_angle,ring.center), ring.color);
-		Line line_2(Point::radius_point(ring.outer_radius, ring.begin_angle, ring.center), Point::radius_point(ring.inner_radius, ring.begin_angle, ring.center), ring.color);
+		Arc arc_1(tile.inner_radius, tile.begin_angle, tile.end_angle, tile.center, tile.color);
+		Arc arc_2(tile.outer_radius, tile.end_angle, tile.begin_angle, tile.center, tile.color);
+		Line line_1(Point::radius_point(tile.inner_radius, tile.end_angle,tile.center), Point::radius_point(tile.outer_radius, tile.end_angle,tile.center), tile.color);
+		Line line_2(Point::radius_point(tile.outer_radius, tile.begin_angle, tile.center), Point::radius_point(tile.inner_radius, tile.begin_angle, tile.center), tile.color);
 		graph << "<path d=\" M" << arc_1.from_point;
 		graph.add_to_path(arc_1);
 		graph.add_to_path(line_1);
 		graph.add_to_path(arc_2);
 		graph.add_to_path(line_2);
 		graph << "\" ";
-		graph << "stroke=\"" << ring.color << "\" stroke-width=\"" << ring.stroke << "\" ";
-		if (ring.fill)
+		graph << "stroke=\"" << tile.color << "\" stroke-width=\"" << tile.stroke << "\" ";
+		if (tile.fill)
 		{
-			graph << "fill=\"" << ring.color << "\"";
+			graph << "fill=\"" << tile.color << "\"";
 		}
 		else
 		{
 			graph << "fill=\"none\" ";
 		}
-		graph << " opacity=\"" << ring.opacity << "\"";
+		graph << " opacity=\"" << tile.opacity << "\"";
 		graph << "/>\n";
 		return graph;
 	}
-	SvgGraph& SvgGraph::operator<<(const Track& track)
+	SvgGraph& SvgGraph::operator<<(const Ribbon& ribbon)
 	{
 		auto& graph = *this;
-		graph<<"<path d=\" M" << track.arc_1.from_point;
-		graph.add_to_path(track.arc_1);
-		graph.add_to_path(track.bezier_1);
-		graph.add_to_path(track.arc_2);
-		graph.add_to_path(track.bezier_2);
+		graph<<"<path d=\" M" << ribbon.arc_1.from_point;
+		graph.add_to_path(ribbon.arc_1);
+		graph.add_to_path(ribbon.bezier_1);
+		graph.add_to_path(ribbon.arc_2);
+		graph.add_to_path(ribbon.bezier_2);
 		graph<<"\" ";
-		graph << "stroke=\"" << track.color << "\" stroke-width=\"" << track.arc_1.stroke << "\" ";
-		if(track.fill)
+		graph << "stroke=\"" << ribbon.color << "\" stroke-width=\"" << ribbon.arc_1.stroke << "\" ";
+		if(ribbon.fill)
 		{
-			graph<<"fill=\""<<track.color<<"\" ";
+			graph<<"fill=\""<<ribbon.color<<"\" ";
 		}
 		else
 		{
 			graph << "fill=\"none\" ";
 		}
-		graph << "opacity=\"" << track.opacity << "\"";
+		graph << "opacity=\"" << ribbon.opacity << "\"";
 		graph<<"/>\n";
 		return graph;
 	}
@@ -201,7 +201,7 @@ namespace circos
 	{
 		const Line& base_line = line_text.on_line;
 		auto& graph = *this;
-		double angle = atan2(base_line.to.y - base_line.from.y, base_line.to.x - base_line.from.x)*180/PI;
+		double angle = atan2(base_line.to.y - base_line.from.y, base_line.to.x - base_line.from.x)*180/pi();
 		graph << "<text x=\"" << base_line.from.x << "\" y=\"" << base_line.from.y << "\" ";
 		//graph << "font-family=\"" << line_text.font_name << "\" " << "font-size=\"" << line_text.font_size << "\" ";
 		graph << "font-family=\"" << get_font_name(line_text.font_name) << "\" " << "font-size=\"" << line_text.font_size << "\" ";
@@ -210,6 +210,23 @@ namespace circos
 		graph << "transform=\"rotate(" << angle << " " << base_line.from.x << " " << base_line.from.y << ")\"";
 		graph <<">\n" << line_text.utf8_text << "\n</text>\n";
 		return graph;
+	}
+	SvgGraph& SvgGraph::operator<<(const Annulus& annulus)
+	{
+		if(!annulus.filled)
+		{
+			// 简化为两个空心圆
+			Circle circle_1(annulus.inner_radius, annulus.center, annulus.color, annulus.opacity, false);
+			Circle circle_2(annulus.outer_radius, annulus.center, annulus.color, annulus.opacity, false);
+			*this<< circle_1<< circle_2;
+		}
+		else
+		{
+			// 简化为一个空心圆
+			Circle circle_1((annulus.inner_radius + annulus.outer_radius) / 2, annulus.center, annulus.color, annulus.opacity, false, (annulus.outer_radius - annulus.inner_radius) / 2);
+			*this<< circle_1;
+		}
+		return *this;
 	}
 	SvgGraph::~SvgGraph()
 	{

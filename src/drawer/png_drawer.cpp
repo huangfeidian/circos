@@ -2,13 +2,11 @@
 #include <string>
 #include <circos/drawer/png_drawer.h>
 #include <circos/shape_collection.h>
+#include <iostream>
 
 namespace circos
 {
 	using namespace std;
-#define PI 3.1415926
-#define EPS 0.0001
-
 	PngImage::PngImage(const unordered_map<string, pair<string, string>>& in_font_info, string in_file_name, int in_radius, Color back_color, int compress)
 	: font_info(in_font_info)
 	,file_name(in_file_name)
@@ -79,17 +77,17 @@ namespace circos
 
 	}
 #endif
-	void PngImage::plot(Colorbasic_point input, float blend)
+	void PngImage::plot(Colorbasic_point input, float opacity)
 	{
-		_image[input.pos.y][input.pos.x].blend(input.color, blend);
+		_image[input.pos.y][input.pos.x].blend(input.color, opacity);
 	}
-	void PngImage::plot(Point pos, Color color,float blend)
+	void PngImage::plot(Point pos, Color color,float opacity)
 	{
-		_image[pos.y][pos.x].blend(color,blend);
+		_image[pos.y][pos.x].blend(color,opacity);
 	}
-	void PngImage::plot(int x, int y, Color color, float blend)
+	void PngImage::plot(int x, int y, Color color, float opacity)
 	{
-		_image[y][x].blend(color,blend);
+		_image[y][x].blend(color, opacity);
 	}
 	Color PngImage::read(Point pos)
 	{
@@ -108,6 +106,7 @@ namespace circos
 		int offset_left = (stroke / 2) * -1;
 		int offset_right = (stroke + 1) / 2;
 		vector<Point> final_path;
+		final_path.reserve(stroke * stroke * path.size());
 		for (const auto& i : path)
 		{
 			for (int j = offset_left;j < offset_right;j++)
@@ -125,6 +124,7 @@ namespace circos
 		for (const auto& i : final_path)
 		{
 			plot(i, color, opacity);
+			flood_map[i.y][i.x] = 0;
 		}
 	}
 	PngImage::~PngImage()
@@ -219,22 +219,57 @@ namespace circos
 		return true;
 
 	}
-	void PngImage::flood(const vector<Point> boundary, vector<Point> interiors, Color fill_color, double opacity)
+	void PngImage::flood(const vector<vector<Point>>& boundary, vector<Point> interiors, Color fill_color, float opacity)
 		//要求interior一定在boundary里面
 	{
+		// 首先补全缺失的点
 		vector<Point> fill_points;
-		for (const auto& i : boundary)
+		vector<int> fill_index;
+		int count = 0;
+		for(int i = 0; i < boundary.size(); i++)
 		{
-			flood_map[i.y][i.x] = 2;//2代表边界，1代表已经着色，0 代表还未访问
-			fill_points.push_back(i);
+			if(boundary[i].size())
+			{
+				fill_index.push_back(i);
+				//cout << "begin_point " << boundary[i].front().x << " "<<boundary[i].front().y << " end point " << boundary[i].back().x << " " << boundary[i].back().y << endl;
+			}
 		}
-		//下面的这两个点一定在track内部
+		if (fill_index.size())
+		{
+			fill_index.push_back(fill_index[0]);
+		}
+		for(int i = 0; i< fill_index.size() - 1; i++)
+		{
+			auto pre_point = boundary[fill_index[i]].back();
+			auto next_point = boundary[fill_index[i + 1]].front();
+			auto gap_points = Line::connect_points(pre_point, next_point);
+
+			for (const auto& one_gap_point : gap_points)
+			{
+				flood_map[one_gap_point.y][one_gap_point.x] = 2;//2代表边界，1代表已经着色，0 代表还未访问
+				plot(one_gap_point, fill_color, opacity);
+				fill_points.push_back(one_gap_point);
+			}
+			//if (gap_points.size() > 10)
+			//{
+			//	cout << "new point:" << gap_points[0].x << " " << gap_points[0].y << endl;
+			//	cout << "new point:" << gap_points.back().x << " " << gap_points.back().y << endl;
+			//}
+		}
+		for (const auto& one_boundary : boundary)
+		{
+			for (const auto& i : one_boundary)
+			{
+				flood_map[i.y][i.x] = 2;//2代表边界，1代表已经着色，0 代表还未访问
+				fill_points.push_back(i);
+			}
+		}
+		//下面的这两个点一定在ribbon内部
 		stack<Point> all_points;
-		for (const auto& i : interiors)
+		for (auto one_point : interiors)
 		{
-			all_points.push(i);
+			all_points.push(one_point);
 		}
-		
 		while (!all_points.empty())
 		{
 			auto current = all_points.top();
@@ -245,8 +280,8 @@ namespace circos
 			}
 			fill_points.push_back(current);
 			plot(current, fill_color, opacity);
+			count += 1;
 			flood_map[current.y][current.x] = 1;
-			
 			if (can_flood(current))
 			{
 				Point up(current.x, current.y + 1);
@@ -264,6 +299,7 @@ namespace circos
 		{
 			flood_map[i.y][i.x] = 0;
 		}
+		// cout << "flood count " << count << endl;
 	}
 #ifdef USE_TEXT
 	vector<uint32_t> PngImage::utf8_to_uint(const string& text) const
@@ -423,70 +459,7 @@ namespace circos
 #endif
 	vector<Point> PngImage::path(const Line& line) const
 	{
-		vector<Point> result;
-		int xfrom = line.from.x;
-		int yfrom = line.from.y;
-		int xto = line.to.x;
-		int yto = line.to.y;
-		//  Bresenham Algorithm.
-		//
-		int dy = yto - yfrom;
-		int dx = xto - xfrom;
-		int stepx, stepy;
-
-		if (dy < 0)
-		{
-			dy = -dy;
-			stepy = -1;
-		}
-		else
-		{
-			stepy = 1;
-		}
-		if (dx < 0)
-		{
-			dx = -dx;
-			stepx = -1;
-		}
-		else
-		{
-			stepx = 1;
-		}
-		dy <<= 1;     // dy is now 2*dy
-		dx <<= 1;     // dx is now 2*dx
-		
-		result.emplace_back(xfrom, yfrom);
-		if (dx > dy)
-		{
-			int fraction = dy - (dx >> 1);
-			while (xfrom != xto)
-			{
-				if (fraction >= 0)
-				{
-					yfrom += stepy;
-					fraction -= dx;
-				}
-				xfrom += stepx;
-				fraction += dy;
-				result.emplace_back(xfrom , yfrom);
-			}
-		}
-		else
-		{
-			int fraction = dx - (dy >> 1);
-			while (yfrom != yto)
-			{
-				if (fraction >= 0)
-				{
-					xfrom += stepx;
-					fraction -= dy;
-				}
-				yfrom += stepy;
-				fraction += dx;
-				result.emplace_back(xfrom, yfrom);
-			}
-		}
-		return result;
+		return line.path();
 	}
 	PngImage& PngImage::operator<<( const Line& line)
 	{
@@ -500,17 +473,19 @@ namespace circos
 	}
 	PngImage& PngImage::operator<<(const Arc& arc)
 	{
-		auto path_points = path(arc);
-		draw_path(path_points, arc.color, arc.stroke, arc.opacity);
+		auto arc_points = path(arc);
+		draw_path(arc_points, arc.color, arc.stroke, arc.opacity);
 		if (arc.fill_flag)
 		{
+			vector<vector<Point>> flood_points;
 			auto line_1 = Line(arc.center, arc.from_point, arc.color);
-			auto line_2 = Line(arc.center, arc.to_point, arc.color);
+			auto line_2 = Line(arc.to_point, arc.center, arc.color);
 			*this << line_1 << line_2;
 			auto path_line1 = path(line_1);
 			auto path_line2 = path(line_2);
-			copy(path_line1.begin(), path_line1.end(), back_inserter(path_points));
-			copy(path_line2.begin(), path_line2.end(), back_inserter(path_points));
+			Line::connect_paths(flood_points, path_line1);
+			Line::connect_paths(flood_points, arc_points);
+			Line::connect_paths(flood_points, path_line2);
 			Point middle_point;
 			if (arc.begin_angle < arc.end_angle)
 			{
@@ -518,9 +493,9 @@ namespace circos
 			}
 			else
 			{
-				middle_point = Point::radius_point(arc.radius, 2*PI -(arc.begin_angle + arc.end_angle) / 2)*0.5 + arc.center;
+				middle_point = Point::radius_point(arc.radius, 360 * amplify_angle::factor -(arc.begin_angle + arc.end_angle) / 2)*0.5 + arc.center;
 			}
-			flood(path_points, vector<Point>{middle_point}, arc.color, arc.opacity);
+			flood(flood_points, vector<Point>{middle_point}, arc.color, arc.opacity);
 		}
 		return *this;
 	}
@@ -540,8 +515,8 @@ namespace circos
 		Point diff = rect.right - rect.left;
 		//由于我们当前的坐标系的设置，diff向量的up方向是(diff.y,diff.x) 而不是(diff.y,-diff.x)
 		Point cur = rect.left;
-		Line up_vec(rect.left, rect.left + Point(-diff.y, diff.x), rect.color);
-		Line up_right(rect.left + Point(-diff.y, diff.x), rect.right + Point(-diff.y, diff.x), rect.color);
+		Line up_vec(rect.left + Point(-diff.y, diff.x), rect.left, rect.color);
+		Line up_right(rect.right + Point(-diff.y, diff.x), rect.left + Point(-diff.y, diff.x),rect.color);
 		Line right_up(rect.right, rect.right + Point(-diff.y, diff.x), rect.color);
 		*this << right_vec << up_vec << up_right << right_up;
 		if (rect.fill)
@@ -551,11 +526,11 @@ namespace circos
 			auto path_up = path(up_vec);
 			auto path_up_right = path(up_right);
 			auto path_right_up = path(right_up);
-			vector<Point> path_points;
-			std::copy(path_right.begin(), path_right.end(), std::back_inserter(path_points));
-			std::copy(path_up.begin(), path_up.end(), std::back_inserter(path_points));
-			std::copy(path_up_right.begin(), path_up_right.end(), std::back_inserter(path_points));
-			std::copy(path_right_up.begin(), path_right_up.end(), std::back_inserter(path_points));
+			vector<vector<Point>> path_points;
+			path_points.push_back(std::move(path_right));
+			path_points.push_back(std::move(path_right_up));
+			path_points.push_back(std::move(path_up_right));
+			path_points.push_back(std::move(path_up));
 			Point center = (right_vec.from + up_right.to)*0.5;
 			flood(path_points, vector<Point>(1, center), rect.color, rect.opacity);
 		}
@@ -577,69 +552,94 @@ namespace circos
 		}
 		if (circle.filled)
 		{
-			flood(one_total, vector<Point>{circle.center}, circle.color, circle.opacity);
+			flood(vector<vector<Point>>{one_total}, vector<Point>{circle.center}, circle.color, circle.opacity);
 		}
 		return *this;
 	}
-	PngImage& PngImage::operator<<(const Ring& ring)
+	PngImage& PngImage::operator<<(const Tile& tile)
 	{
 		vector<Point> path_points;
-		Arc arc_1(ring.inner_radius, ring.begin_angle, ring.end_angle, ring.center, ring.color);
-		Arc arc_2(ring.outer_radius, ring.begin_angle, ring.end_angle, ring.center, ring.color);
-		Line line_1(Point::radius_point(ring.inner_radius, ring.end_angle, ring.center), Point::radius_point(ring.outer_radius, ring.end_angle, ring.center), ring.color);
-		Line line_2(Point::radius_point(ring.outer_radius, ring.begin_angle, ring.center), Point::radius_point(ring.inner_radius, ring.begin_angle, ring.center), ring.color);
+		Arc arc_1(tile.inner_radius, tile.begin_angle, tile.end_angle, tile.center, tile.color);
+		Arc arc_2(tile.outer_radius, tile.begin_angle, tile.end_angle, tile.center, tile.color);
+		Line line_1(Point::radius_point(tile.inner_radius, tile.end_angle, tile.center), Point::radius_point(tile.outer_radius, tile.end_angle, tile.center), tile.color);
+		Line line_2(Point::radius_point(tile.outer_radius, tile.begin_angle, tile.center), Point::radius_point(tile.inner_radius, tile.begin_angle, tile.center), tile.color);
 		auto arc_path1 = path(arc_1);
 		auto arc_path2 = path(arc_2);
+		reverse(arc_path2.begin(), arc_path2.end());
 		auto line_path1 = path(line_1);
 		auto line_path2 = path(line_2);
-		copy(arc_path1.begin(), arc_path1.end(), back_inserter(path_points));
-		copy(arc_path2.begin(), arc_path2.end(), back_inserter(path_points));
-		copy(line_path1.begin(), line_path1.end(), back_inserter(path_points));
-		copy(line_path2.begin(), line_path2.end(), back_inserter(path_points));
-		draw_path(path_points, ring.color, ring.stroke, ring.opacity);
-		if (ring.fill)
+		draw_path(arc_path1, tile.color, tile.stroke, tile.opacity);
+		draw_path(arc_path2, tile.color, tile.stroke, tile.opacity);
+		draw_path(line_path1, tile.color, tile.stroke, tile.opacity);
+		draw_path(line_path2, tile.color, tile.stroke, tile.opacity);
+
+		if (tile.fill)
 		{
-			double middle_angle = 0;
-			double in_end_angle = ring.end_angle;
-			double in_begin_angle = ring.begin_angle;
-			double radius_diff = in_end_angle - in_begin_angle;
-			if (ring.end_angle > ring.begin_angle)
+			uint16_t middle_angle = 0;
+			uint16_t in_end_angle = tile.end_angle;
+			uint16_t in_begin_angle = tile.begin_angle;
+			if (tile.end_angle > tile.begin_angle)
 			{
-				middle_angle = (ring.end_angle + ring.begin_angle) / 2;
+				middle_angle = (tile.end_angle + tile.begin_angle) / 2;
 			}
 			else
 			{
-				middle_angle = 2 * PI - (ring.begin_angle + ring.end_angle) / 2;
+				middle_angle = 360 * amplify_angle::factor - (tile.begin_angle + tile.end_angle) / 2;
 			}
-			auto middle_point = Point::radius_point((ring.inner_radius + ring.outer_radius) / 2, middle_angle, ring.center);
-			flood(path_points, vector<Point>{middle_point}, ring.color, ring.opacity);
+			auto middle_point = Point::radius_point((tile.inner_radius + tile.outer_radius) / 2, middle_angle, tile.center);
+			vector<vector<Point>> flood_points;
+			Line::connect_paths(flood_points, arc_path1);
+			Line::connect_paths(flood_points, line_path1);
+			Line::connect_paths(flood_points, arc_path2);
+			Line::connect_paths(flood_points, line_path2);
+			flood(flood_points, vector<Point>{middle_point}, tile.color, tile.opacity);
 		}
 		return *this;
 	}
-	PngImage& PngImage::operator<<(const Track& track)
+	PngImage& PngImage::operator<<(const Ribbon& ribbon)
 	{
-		const auto& arc_1 = path(track.arc_1);
-		const auto& arc_2 = path(track.arc_2);
-		const auto& bezier_1 = path(track.bezier_1);
-		const auto& bezier_2 = path(track.bezier_2);
-		vector<Point> path_points;
-		path_points.reserve(arc_1.size() + arc_2.size() + bezier_1.size()+bezier_2.size());
-		copy(arc_1.begin(), arc_1.end(), back_inserter(path_points));
-		copy(arc_2.begin(), arc_2.end(), back_inserter(path_points));
-		copy(bezier_1.begin(), bezier_1.end(), back_inserter(path_points));
-		copy(bezier_2.begin(), bezier_2.end(), back_inserter(path_points));
-		for (const auto& i : path_points)
+		auto arc_1 = path(ribbon.arc_1);
+		auto arc_2 = path(ribbon.arc_2);
+		auto bezier_1 = path(ribbon.bezier_1);
+		auto bezier_2 = path(ribbon.bezier_2);
+		draw_path(arc_1, ribbon.color, 1, ribbon.opacity);
+		draw_path(arc_2, ribbon.color, 1, ribbon.opacity);
+		draw_path(bezier_1, ribbon.color, 1, ribbon.opacity);
+		draw_path(bezier_2, ribbon.color, 1, ribbon.opacity);
+		
+		if (ribbon.fill)
 		{
-			plot(i, track.color, track.opacity);
+			vector<vector<Point>> flood_points;
+			Line::connect_paths(flood_points, arc_1);
+			Line::connect_paths(flood_points, bezier_2);
+			Line::connect_paths(flood_points, arc_2);
+			Line::connect_paths(flood_points, bezier_2);
+			//下面的这两个点一定在ribbon内部
+			Point middle_1 = (ribbon.arc_1.from_point + ribbon.arc_1.to_point)*0.5;
+			Point middle_2 = (ribbon.arc_2.from_point + ribbon.arc_2.to_point)*0.5;
+			flood(flood_points, vector<Point>{middle_1, middle_2}, ribbon.color, ribbon.opacity);
 		}
-		if (track.fill)
+		return *this;
+	}
+	PngImage& PngImage::operator<<(const Annulus& annulus)
+	{
+		if (annulus.opacity < 0.01)
 		{
-			vector<Point> fill_points;
-
-			//下面的这两个点一定在track内部
-			Point middle_1 = (track.arc_1.from_point + track.arc_1.to_point)*0.5;
-			Point middle_2 = (track.arc_2.from_point + track.arc_2.to_point)*0.5;
-			flood(path_points, vector<Point>{middle_1, middle_2}, track.color, track.opacity);
+			return *this;
+		}
+		Arc arc_1(annulus.inner_radius, 0, 360 * amplify_angle::factor, annulus.center, annulus.color);
+		Arc arc_2(annulus.outer_radius, 0, 360 * amplify_angle::factor, annulus.center, annulus.color);
+		auto arc_path1 = path(arc_1);
+		auto arc_path2 = path(arc_2);
+		draw_path(arc_path1, annulus.color, 1, annulus.opacity);
+		draw_path(arc_path2, annulus.color, 1, annulus.opacity);
+		if(annulus.filled)
+		{
+			Point middle_point = Point::radius_point((annulus.inner_radius + annulus.outer_radius) / 2, 0, annulus.center);
+			vector<vector<Point>> flood_points;
+			flood_points.emplace_back(move(arc_path1));
+			flood_points.emplace_back(move(arc_path2));
+			flood(flood_points, vector<Point>{middle_point}, annulus.color, annulus.opacity);
 		}
 		return *this;
 	}

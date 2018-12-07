@@ -10,24 +10,26 @@ namespace circos
 {
 	struct Circle
 	{
-		double radius;
+		std::uint16_t radius;
 		Point center;
 		Color color;
-		double opacity;
+		float opacity;
 		bool filled;
-		Circle(double in_radius, Point in_center, Color in_color , double in_opacity = 1, bool in_filled = false) 
+		std::uint16_t stroke_width;
+		Circle(std::uint16_t in_radius, Point in_center, Color in_color , double in_opacity = 1, bool in_filled = false, std::uint16_t in_stroke_width = 1)
 		: center(in_center)
 		, radius(in_radius)
 		, color(in_color)
 		, opacity(in_opacity)
 		, filled(in_filled)
+		, stroke_width(in_stroke_width)
 		{
 			
 		}
-		static const std::vector<Point>& get_circle(int radius)
+		static const std::vector<Point>& get_circle(std::uint16_t radius)
 		// 这里返回的是1/8个圆
 		{
-			static std::unordered_map<int, std::vector<Point>> circle_cache;
+			static std::unordered_map<std::uint16_t, std::vector<Point>> circle_cache;
 			if (circle_cache.find(radius) != circle_cache.end())
 			{
 				return circle_cache[radius];
@@ -35,6 +37,7 @@ namespace circos
 			std::vector<Point> path_points;
 			int x = 0;
 			int y = radius;
+			path_points.emplace_back(x, y);
 			int p = (5-radius*4) / 4;
 			while(x<y)
 			{
@@ -50,6 +53,7 @@ namespace circos
 				}
 				path_points.emplace_back(x,y);
 			}
+			path_points.emplace_back(x, y);
 			circle_cache[radius] = std::move(path_points);
 			return circle_cache[radius];
 		}

@@ -2,7 +2,6 @@
 
 #include <vector>
 #include <string>
-#include <string>
 
 #include "basics/point.h"
 #include "basics/color.h"
@@ -12,7 +11,7 @@
 #include "shapes/circle.h"
 #include "shapes/line.h"
 #include "shapes/arc.h"
-#include "shapes/ring.h"
+#include "shapes/tile.h"
 
 
 namespace circos::model
@@ -25,19 +24,22 @@ namespace circos::model
 		int outer_radius;
 		int gap;
 		Color fill_color;
-		double opacity;
+		bool filled;
+		float opacity;
 		double angle_per_unit;
+
 	};
-	struct band
+	struct tile
 	{
 		std::string circle_id;
-		std::string band_id;
+		std::string tile_id;
 		int width;
 		Color fill_color;
-		double opacity;
+		float opacity;
+		bool is_fill;
 		int sequence; // must not be duplicated
 		//calculated
-		double angle_begin;
+		float angle_begin;
 	};
 	struct circle_tick
 	{
@@ -47,74 +49,74 @@ namespace circos::model
 		Color fill_color;
 		int width;
 		int height;
-		double opacity;
+		float opacity;
 	};
 
 	struct point_link
 	{
 		// 两点之间的连线
 		std::string link_id;
-		std::string from_band_id;
+		std::string from_tile_id;
 		int from_pos_idx;
-		std::string to_band_id;
+		std::string to_tile_id;
 		int to_pos_idx;
-		double control_radius_percent; //negative for direct link
+		float control_radius_percent; //negative for direct link
 		Color fill_color;
-		double opacity;
+		float opacity;
 		int width;
 
 	};
 	struct range_link
 	{
 		std::string link_id;
-		std::string from_band_id;
+		std::string from_tile_id;
 		int from_pos_begin_idx;
 		int from_pos_end_idx;
-		std::string to_band_id;
+		std::string to_tile_id;
 		int to_pos_begin_idx;
 		int to_pos_end_idx;
 		bool is_cross;
 		Color fill_color;
-		double opacity;
-		double control_radius_percent;
+		float opacity;
+		float control_radius_percent;
 
 	};
 
-	struct fill_onband
+	struct fill_ontile
 	{
-		std::string band_id;
-		int on_band_begin;
-		int on_band_end;
+		std::string tile_id;
+		int on_tile_begin;
+		int on_tile_end;
 		Color fill_color;
 	};
 
-	struct text_onband:public fill_onband
+	struct text_ontile:public fill_ontile
 	{
 		std::string text;
 		int font_size;
 		std::string font_name;
 		text_align_type align_type;
 	};
-	struct tick_onband: public fill_onband
+	struct tick_ontile: public fill_ontile
 	{
 		int tick_gap;
 		int width;
 		int height;
 	};
-	struct value_onband: public fill_onband
+	struct value_ontile: public fill_ontile
 	{
-		double value;
+		float value;
 	};
 	
-	struct value_onband_config
+	struct value_ontile_config
 	{
-		circos::value_on_band_draw_type draw_type;
-		double base_value;
-		double max_value;
-		double scale;
+		circos::value_on_tile_draw_type draw_type;
+		float base_value;
+		float max_value;
+		float scale;
 		Color base_color;
 		Color max_color;
-		std::string band_id;
+		std::string tile_id;
 	};
 
 	struct model_config
@@ -129,7 +131,7 @@ namespace circos::model
 		// 这些是原始的输入数据
 		model_config config;
 		std::unordered_map<std::string, circle> circles;
-		std::unordered_map<std::string, band> bands;
+		std::unordered_map<std::string, tile> tiles;
 		std::unordered_map<std::string, circle_tick> circle_ticks;
 		std::unordered_map<std::string, point_link> point_links;
 		std::unordered_map<std::string, range_link> range_links;
