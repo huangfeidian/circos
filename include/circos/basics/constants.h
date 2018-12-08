@@ -20,4 +20,5 @@ namespace circos
 		link_shadow,
 		
 	};
+	#define WITH_XLSX_SUPPORT 1
 }
