@@ -15,7 +15,7 @@ namespace circos::model
 			pre_collection.annuluses.push_back(cur_annulus);
 		}
 		// 2. 然后计算每个圆环上每条带子的位置
-		unordered_map<string, vector<tile>> tiles_grouped_by_circle;
+		unordered_map<string_view, vector<tile>> tiles_grouped_by_circle;
 		for(const auto& i: tiles)
 		{
 			auto circle_iter = circles.find(i.second.circle_id);
@@ -27,7 +27,7 @@ namespace circos::model
 			pre_groups.push_back(i.second);
 		}
 		// 分好组之后 再排序然后处理
-		unordered_map<string, int> circle_ranges;
+		unordered_map<string_view, int> circle_ranges;
 		for(auto& i: tiles_grouped_by_circle)
 		{
 			auto& cur_circle = circles.find(i.first)->second;

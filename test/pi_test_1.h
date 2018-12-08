@@ -37,6 +37,7 @@ void pi_test_1(void)
 		}
 
 	}
+	vector<string> all_temp_string;
 	i = 0;
 	vector<int> chunk_size(10, 0); // 记录每个块的大小
 	chunk_size[3] = 1;
@@ -78,13 +79,14 @@ void pi_test_1(void)
 
 	model::model pi_model;
 	model::circle cur_circle;
-	cur_circle.circle_id = "pi";
+	all_temp_string.push_back("pi");
+	cur_circle.circle_id = all_temp_string.back();
 	cur_circle.inner_radius = inner_radius;
 	cur_circle.outer_radius = outer_radius;
 	cur_circle.gap = pi_str.size() / 10;
 	cur_circle.fill_color = Color(125, 145, 130);
 	cur_circle.opacity = 0.0;
-	pi_model.circles["pi"] = cur_circle;
+	pi_model.circles[cur_circle.circle_id] = cur_circle;
 
 	int id_count = 1;
 
@@ -93,8 +95,9 @@ void pi_test_1(void)
 	int _pre_total_size = 0;
 	for (i = 0; i < 10; i++)
 	{
-		tiles[i].circle_id = "pi";
-		tiles[i].tile_id = to_string(i);
+		tiles[i].circle_id = cur_circle.circle_id;
+		all_temp_string.push_back(to_string(i));
+		tiles[i].tile_id = all_temp_string.back();
 		tiles[i].width = chunk_size[i];
 		tiles[i].fill_color = strand_color[i];
 		tiles[i].opacity = 1.0;
@@ -105,14 +108,15 @@ void pi_test_1(void)
 	}
 	for (int i = 0; i < 10; i++)
 	{
-		string from_tile_id = to_string(i);
+		string_view from_tile_id = tiles[i].tile_id;
 		for (const auto& one_link : connections[i])
 		{
 			auto from_pos_idx = one_link.first;
-			auto to_tile_id = to_string(one_link.second.first);
+			auto to_tile_id = tiles[one_link.second.first].tile_id;
 			auto to_pos_idx = one_link.second.second;
 			model::point_link temp_link;
-			temp_link.link_id = to_string(id_count++);
+			all_temp_string.push_back(to_string(id_count++));
+			temp_link.link_id = all_temp_string.back();
 			temp_link.from_tile_id = from_tile_id;
 			temp_link.from_pos_idx = from_pos_idx;
 			temp_link.to_tile_id = to_tile_id;

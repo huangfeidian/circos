@@ -12,8 +12,8 @@
 #include "../shapes/circle.h"
 #include "../shapes/arc.h"
 #include "../shapes/bezier.h"
-#include "../shapes/ring.h"
 #include "../shapes/ribbon.h"
+#include "../shapes/tile.h"
 #include "../shapes/rectangle.h"
 #include "../shapes/line_text.h"
 
