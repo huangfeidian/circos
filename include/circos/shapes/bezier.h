@@ -4,11 +4,9 @@
 #include "../basics/point.h"
 #include "../basics/color.h"
 #include "line.h"
-#include <iostream>
 
 namespace circos
 {
-#define EPS 100
 	struct Bezier
 	{
 		Point begin_point;
@@ -48,51 +46,50 @@ namespace circos
 			}
 			auto angle_diff = in_end_angle - in_begin_angle;
 			auto middle = amplify_angle::middle(in_begin_angle, in_end_angle);
-			if(abs(angle_diff - 180 * amplify_angle::factor) < EPS)
+				
+			auto final_angle = middle;
+			if(abs(angle_diff - 180 * amplify_angle::factor) < 3 * amplify_angle::factor)
 			{
 				
 				// 这里我们要随机的让他翻转
-				auto final_angle = middle;
 				if (angle_diff % 2)
 				{
 					final_angle = (middle + 180 * amplify_angle::factor) % (360 * amplify_angle::factor);
 				}
-				control_point = center + Point::radius_point(in_control_radius, final_angle);
-				std::cout << "final angle " << final_angle <<"middle" <<middle<< "angle diff"<< angle_diff<<std::endl;
+				
 			}
 			else
 			{
-				if(angle_diff < 180 * amplify_angle::factor)
+				if(angle_diff >= 180 * amplify_angle::factor)
 				{
-					control_point = center+Point::radius_point(in_control_radius, middle);
-				}
-				else
-				{
-					control_point = center+Point::radius_point(in_control_radius, 360 * amplify_angle::factor - middle);
+					final_angle = (middle + 180 * amplify_angle::factor) % (360 * amplify_angle::factor);
 				}
 			}
+			/*std::cout << "begin " << in_begin_angle << " end " << in_end_angle << " middle " << middle <<"diff"<<angle_diff<< " final " << final_angle << std::endl;*/
+			control_point = center + Point::radius_point(in_control_radius, final_angle);
 		}
 		std::vector<Point> path() const
 		{
 			std::vector<Point> result;
-			const auto& p1 = cast_point<std::int16_t,double>(begin_point);
-			const auto& p2 = cast_point<std::int16_t, double>(end_point);
-			const auto& cp = cast_point<std::int16_t, double>(control_point);
-			basic_point<double> c1;
-			basic_point<double> c2;
-			basic_point<double> double_px;
+			const auto& p1 = cast_point<std::int16_t, float>(begin_point);
+			const auto& p2 = cast_point<std::int16_t, float>(end_point);
+			const auto& cp = cast_point<std::int16_t, float>(control_point);
+			basic_point<float> c1;
+			basic_point<float> c2;
+			basic_point<float> double_px;
 			Point px;
-			int total_len = (Line(begin_point, control_point).len() + Line(control_point, end_point).len());
+			int total_len = (Line(begin_point, control_point).len() + Line(control_point, end_point).len()) * 1.5;
 			if (total_len == 0)
 			{
 				return result;
 			}
-			double step = 1.0 / total_len;
-			double inc = 0;
+			result.reserve(total_len);
+			float step = 1.0 / total_len;
+			float inc = 0;
 			c1 = p1 + (cp - p1)*inc;
 			c2 = cp + (p2 - cp)*inc;
 			double_px = c1 + (c2 - c1)*inc;
-			px = cast_point<double, std::int16_t>(double_px);
+			px = cast_point<float, std::int16_t>(double_px);
 			result.push_back(px);
 			inc += step;
 			while (inc <= 1)
@@ -100,14 +97,15 @@ namespace circos
 				c1 = p1 + (cp - p1)*inc;
 				c2 = cp + (p2 - cp)*inc;
 				double_px = c1 + (c2 - c1)*inc;
-				px = cast_point<double,std::int16_t>(double_px);
-				if (!(px==result.back()))
+				px = cast_point<float, std::int16_t>(double_px);
+				if (!(px == result.back()))
 				{
 					result.push_back(px);
 				}
 				inc += step;
 			}
 			return result;
+
 		}
 	};
 }
