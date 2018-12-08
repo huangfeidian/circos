@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <cmath>
 #include <cstdint>
 #include "constants.h"
@@ -6,7 +6,7 @@ namespace circos
 {
 	struct amplify_angle
 	{
-		static const int factor = 100;
+		static const int factor = 80; //再往上就可能导致两个角度相加溢出
 		static double angle_percent_to_rad(std::uint16_t in_angle_with_percent)
 		{
 			return pi() / (180 * factor) * in_angle_with_percent;
