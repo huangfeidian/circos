@@ -71,7 +71,7 @@ namespace circos::model
 		// 3. 然后处理圆上的刻度
 		for(const auto& one_tick: circle_ticks)
 		{
-			const auto& circle_id = one_tick.first;
+			const auto& circle_id = one_tick.second.circle_id;
 			const auto& circle_iter = circles.find(circle_id);
 			if(circle_iter == circles.end())
 			{

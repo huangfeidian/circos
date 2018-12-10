@@ -44,6 +44,7 @@ namespace circos::model
 	struct circle_tick
 	{
 		// 处理圆环上的刻度
+		std::string_view circle_tick_id;
 		std::string_view circle_id;
 		int gap;
 		Color fill_color;
