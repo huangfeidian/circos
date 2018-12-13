@@ -12,8 +12,8 @@
 #include <circos/xlsx/file_convert.h>
 
 #ifdef WITH_XLSX_SUPPORT
-#include <xlsx_reader/xlsx_typed.h>
-#include <xlsx_reader/xlsx_cell_extend.h>
+#include <xlsx_reader/xlsx_typed_worksheet.h>
+#include <xlsx_reader/xlsx_typed_cell.h>
 #include <xlsx_reader/xlsx_workbook.h>
 
 namespace 
