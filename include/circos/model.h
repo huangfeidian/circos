@@ -125,6 +125,10 @@ namespace circos::model
 		int radius;
 		Color background_color;
 		Point center;
+		model_config()
+		{
+			radius = 0;
+		}
 	};
 	class model
 	{
