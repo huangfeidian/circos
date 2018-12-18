@@ -153,9 +153,9 @@ namespace
 		const auto& cur_worksheet = cur_workbook.get_worksheet(sheet_idx);
 		const auto& cur_headers = cur_worksheet.get_typed_headers();
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
-		auto id_header = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "id", "");
-		auto type_header = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "sheet_type", "");
-		auto name_header = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "sheet_name", "");
+		auto id_header = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::number_32), "id", "");
+		auto type_header = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::string), "sheet_type", "");
+		auto name_header = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::string), "sheet_name", "");
 		sheet_headers["id"] = id_header;
 		sheet_headers["sheet_type"] = type_header;
 		sheet_headers["sheet_name"] = name_header;
@@ -209,17 +209,17 @@ namespace
 		// circle headers circle_id(string) inner_radius(int) outer_radius(int) gap(int) color(RGB) ref_color(ref) opacity(float) filled(bool)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
 		auto circle_id_header = 
-		sheet_headers["circle_id"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "circle_id", "");
-		sheet_headers["inner_radius"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "inner_radius", "");
-		sheet_headers["outer_radius"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "outer_radius", "");
+		sheet_headers["circle_id"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::string), "circle_id", "");
+		sheet_headers["inner_radius"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::number_32), "inner_radius", "");
+		sheet_headers["outer_radius"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::number_32), "outer_radius", "");
 		
-		auto color_type_detail = make_tuple(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), 3, ',');
-		sheet_headers["color"] = new typed_header(new extend_node_type_descriptor(color_type_detail), "color", "");
+		auto color_type_detail = make_tuple(new typed_node_type_descriptor(basic_node_type_descriptor::number_32), 3, ',');
+		sheet_headers["color"] = new typed_header(new typed_node_type_descriptor(color_type_detail), "color", "");
 
-		sheet_headers["opacity"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_float), "opacity", "");
+		sheet_headers["opacity"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::number_float), "opacity", "");
 
-		sheet_headers["gap"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "gap", "");
-		sheet_headers["filled"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_bool), "filled", "");
+		sheet_headers["gap"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::number_32), "gap", "");
+		sheet_headers["filled"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::number_bool), "filled", "");
 
 		auto header_match = circle_sheet.check_header_match(sheet_headers, "circle_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
 		
@@ -337,20 +337,20 @@ namespace
 	{
 		// tile_desc headers tile_id(string) circle_id(string)  width(int) color(RGB) ref_color(ref) opacity(float) sequence(int) filled(bool)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
-		sheet_headers["circle_id"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "circle_id", "");
+		sheet_headers["circle_id"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::string), "circle_id", "");
 
-		sheet_headers["tile_id"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "tile_id", "");
+		sheet_headers["tile_id"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::string), "tile_id", "");
 
-		sheet_headers["width"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "width", "");
+		sheet_headers["width"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::number_32), "width", "");
 
-		sheet_headers["sequence"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "sequence", "");
+		sheet_headers["sequence"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::number_32), "sequence", "");
 		
-		auto color_type_detail = make_tuple(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), 3, ',');
-		sheet_headers["color"] = new typed_header(new extend_node_type_descriptor(color_type_detail), "color", "");
+		auto color_type_detail = make_tuple(new typed_node_type_descriptor(basic_node_type_descriptor::number_32), 3, ',');
+		sheet_headers["color"] = new typed_header(new typed_node_type_descriptor(color_type_detail), "color", "");
 
-		sheet_headers["opacity"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_float), "opacity", "");
+		sheet_headers["opacity"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::number_float), "opacity", "");
 
-		sheet_headers["filled"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_bool), "filled", "");
+		sheet_headers["filled"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::number_bool), "filled", "");
 
 		auto header_match = tile_sheet.check_header_match(sheet_headers, "tile_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
 		if(!header_match)
@@ -451,17 +451,17 @@ namespace
 	{
 		// circle_tick headers tick_id(string) circle_id(string)  width(int) height(int) color(RGB) ref_color(ref) opacity(float)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
-		sheet_headers["tick_id"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "tick_id", "");
+		sheet_headers["tick_id"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::string), "tick_id", "");
 
-		sheet_headers["circle_id"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "circle_id", "");
+		sheet_headers["circle_id"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::string), "circle_id", "");
 
-		sheet_headers["width"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "width", "");
-		sheet_headers["height"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "height", "");
+		sheet_headers["width"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::number_32), "width", "");
+		sheet_headers["height"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::number_32), "height", "");
 		
-		auto color_type_detail = make_tuple(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), 3, ',');
-		sheet_headers["color"] = new typed_header(new extend_node_type_descriptor(color_type_detail), "color", "");
+		auto color_type_detail = make_tuple(new typed_node_type_descriptor(basic_node_type_descriptor::number_32), 3, ',');
+		sheet_headers["color"] = new typed_header(new typed_node_type_descriptor(color_type_detail), "color", "");
 
-		sheet_headers["opacity"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_float), "opacity", "");
+		sheet_headers["opacity"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::number_float), "opacity", "");
 
 		auto header_match = tick_sheet.check_header_match(sheet_headers, "circle_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
 		if(!header_match)
@@ -565,21 +565,21 @@ namespace
 	{
 		// point_link headers link_id(string) from_tile_id(string) from_pos_idx(int) to_tile_id(string) to_pos_idx(int)  color(RGB) ref_color(ref) opacity(float)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
-		sheet_headers["link_id"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "link_id", "");
+		sheet_headers["link_id"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::string), "link_id", "");
 
-		sheet_headers["from_tile_id"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "from_tile_id", "");
+		sheet_headers["from_tile_id"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::string), "from_tile_id", "");
 
-		sheet_headers["to_tile_id"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "to_tile_id", "");
+		sheet_headers["to_tile_id"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::string), "to_tile_id", "");
 
-		sheet_headers["from_pos_idx"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "from_pos_idx", "");
-		sheet_headers["to_pos_idx"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "to_pos_idx", "");
+		sheet_headers["from_pos_idx"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::number_32), "from_pos_idx", "");
+		sheet_headers["to_pos_idx"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::number_32), "to_pos_idx", "");
 		
-		auto color_type_detail = make_tuple(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), 3, ',');
-		sheet_headers["color"] = new typed_header(new extend_node_type_descriptor(color_type_detail), "color", "");
+		auto color_type_detail = make_tuple(new typed_node_type_descriptor(basic_node_type_descriptor::number_32), 3, ',');
+		sheet_headers["color"] = new typed_header(new typed_node_type_descriptor(color_type_detail), "color", "");
 
-		sheet_headers["opacity"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_float), "opacity", "");
+		sheet_headers["opacity"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::number_float), "opacity", "");
 
-		sheet_headers["control_radius_percent"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_float), "control_radius_percent", "");
+		sheet_headers["control_radius_percent"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::number_float), "control_radius_percent", "");
 
 		auto header_match = point_link_sheet.check_header_match(sheet_headers, "link_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
 		if(!header_match)
@@ -701,26 +701,26 @@ namespace
 	{
 		// point_link headers link_id(string) from_tile_id(string) from_pos_idx_begin(int) from_pos_idx_end(int) to_tile_id(string) to_pos_idx_begin(int)  to_pos_idx_end(int) color(RGB) ref_color(ref) opacity(float)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
-		sheet_headers["link_id"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "link_id", "");
+		sheet_headers["link_id"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::string), "link_id", "");
 
-		sheet_headers["from_tile_id"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "from_tile_id", "");
+		sheet_headers["from_tile_id"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::string), "from_tile_id", "");
 
-		sheet_headers["to_tile_id"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "to_tile_id", "");
+		sheet_headers["to_tile_id"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::string), "to_tile_id", "");
 
-		sheet_headers["from_pos_idx_begin"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "from_pos_idx_begin", "");
-		sheet_headers["to_pos_idx_begin"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "to_pos_idx_begin", "");
+		sheet_headers["from_pos_idx_begin"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::number_32), "from_pos_idx_begin", "");
+		sheet_headers["to_pos_idx_begin"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::number_32), "to_pos_idx_begin", "");
 
-		sheet_headers["from_pos_idx_end"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "from_pos_idx_end", "");
-		sheet_headers["to_pos_idx_end"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "to_pos_idx_end", "");
+		sheet_headers["from_pos_idx_end"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::number_32), "from_pos_idx_end", "");
+		sheet_headers["to_pos_idx_end"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::number_32), "to_pos_idx_end", "");
 		
-		auto color_type_detail = make_tuple(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), 3, ',');
-		sheet_headers["color"] = new typed_header(new extend_node_type_descriptor(color_type_detail), "color", "");
+		auto color_type_detail = make_tuple(new typed_node_type_descriptor(basic_node_type_descriptor::number_32), 3, ',');
+		sheet_headers["color"] = new typed_header(new typed_node_type_descriptor(color_type_detail), "color", "");
 
-		sheet_headers["opacity"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_float), "opacity", "");
+		sheet_headers["opacity"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::number_float), "opacity", "");
 
-		sheet_headers["is_cross"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_bool), "is_cross", "");
+		sheet_headers["is_cross"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::number_bool), "is_cross", "");
 		
-		sheet_headers["control_radius_percent"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_float), "control_radius_percent", "");
+		sheet_headers["control_radius_percent"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::number_float), "control_radius_percent", "");
 
 		auto header_match = range_link_sheet.check_header_match(sheet_headers, "link_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
 		if(!header_match)
@@ -869,15 +869,15 @@ namespace
 		}
 	} 
 
-	unordered_map<string_view, extend_node_value*> get_config_values_from_sheet(const typed_worksheet& config_sheet)
+	unordered_map<string_view, typed_value*> get_config_values_from_sheet(const typed_worksheet& config_sheet)
 	{
 
 		// config_key(str), config_value(str), config_value_type(str)
-		unordered_map<string_view, extend_node_value*> config_values;
+		unordered_map<string_view, typed_value*> config_values;
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
-		sheet_headers["config_key"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "config_key", "");
-		sheet_headers["config_value"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "config_value", "");
-		sheet_headers["config_value_type"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "config_value_type", "");
+		sheet_headers["config_key"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::string), "config_key", "");
+		sheet_headers["config_value"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::string), "config_value", "");
+		sheet_headers["config_value_type"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::string), "config_value_type", "");
 		auto header_match = config_sheet.check_header_match(sheet_headers, "config_key", std::vector<std::string_view>({}), std::vector<std::string_view>({}));
 		if(!header_match)
 		{
@@ -948,14 +948,14 @@ namespace
 				cout<<"value for "<< empty_key <<" is empty"<<endl;
 				continue;
 			}
-			auto current_parsed_type = extend_node_value_constructor::parse_type(cur_config_value_type);
-			auto current_parsed_value = extend_node_value_constructor::parse_value_with_type(current_parsed_type, cur_config_value);
+			auto current_parsed_type = typed_node_value_constructor::parse_type(cur_config_value_type);
+			auto current_parsed_value = typed_node_value_constructor::parse_value_with_type(current_parsed_type, cur_config_value);
 			if(!current_parsed_value)
 			{
 				cout<<"cant parse "<< cur_config_value << " for type "<< cur_config_value_type<<endl;
 				if(current_parsed_type)
 				{
-					current_parsed_type->~extend_node_type_descriptor();
+					current_parsed_type->~typed_node_type_descriptor();
 				}
 				continue;
 			}
@@ -963,7 +963,7 @@ namespace
 		}
 		return config_values;
 	}
-	bool convert_config_to_model(unordered_map<string_view, extend_node_value*> config_values, model::model_config& cur_config)
+	bool convert_config_to_model(unordered_map<string_view, typed_value*> config_values, model::model_config& cur_config)
 	{
 		model::model_config new_model_config;
 		auto radius_value_ptr = config_values["radius"];
@@ -975,6 +975,7 @@ namespace
 				return false;
 			}
 			new_model_config.radius = cur_radius_opt.value();
+			new_model_config.center = Point(new_model_config.radius, new_model_config.radius);
 		}
 		else
 		{
@@ -1007,8 +1008,8 @@ namespace
 		}
 		for(const auto& i: config_map)
 		{
-			i.second->type_desc->~extend_node_type_descriptor();
-			i.second->~extend_node_value();
+			i.second->type_desc->~typed_node_type_descriptor();
+			i.second->~typed_value();
 		}
 		config_map.clear();
 
@@ -1047,9 +1048,9 @@ namespace
 	{
 		// headers sheet_name(string) role(string)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
-		sheet_headers["sheet_name"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "sheet_name", "");
+		sheet_headers["sheet_name"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::string), "sheet_name", "");
 
-		sheet_headers["role"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::string), "role", "");
+		sheet_headers["role"] = new typed_header(new typed_node_type_descriptor(basic_node_type_descriptor::string), "role", "");
 		auto header_match = role_sheet.check_header_match(sheet_headers, "sheet_name", std::vector<std::string_view>({}), std::vector<std::string_view>({}));
 		if(!header_match)
 		{
