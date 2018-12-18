@@ -1,4 +1,4 @@
-#include <optional>
+﻿#include <optional>
 #include <vector>
 #include <unordered_map>
 #include <map>
@@ -213,7 +213,7 @@ namespace
 		sheet_headers["inner_radius"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "inner_radius", "");
 		sheet_headers["outer_radius"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "outer_radius", "");
 		
-		auto color_type_detail = make_tuple(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), 2, ',');
+		auto color_type_detail = make_tuple(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), 3, ',');
 		sheet_headers["color"] = new typed_header(new extend_node_type_descriptor(color_type_detail), "color", "");
 
 		sheet_headers["opacity"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_float), "opacity", "");
@@ -345,7 +345,7 @@ namespace
 
 		sheet_headers["sequence"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "sequence", "");
 		
-		auto color_type_detail = make_tuple(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), 2, ',');
+		auto color_type_detail = make_tuple(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), 3, ',');
 		sheet_headers["color"] = new typed_header(new extend_node_type_descriptor(color_type_detail), "color", "");
 
 		sheet_headers["opacity"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_float), "opacity", "");
@@ -458,7 +458,7 @@ namespace
 		sheet_headers["width"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "width", "");
 		sheet_headers["height"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "height", "");
 		
-		auto color_type_detail = make_tuple(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), 2, ',');
+		auto color_type_detail = make_tuple(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), 3, ',');
 		sheet_headers["color"] = new typed_header(new extend_node_type_descriptor(color_type_detail), "color", "");
 
 		sheet_headers["opacity"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_float), "opacity", "");
@@ -574,7 +574,7 @@ namespace
 		sheet_headers["from_pos_idx"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "from_pos_idx", "");
 		sheet_headers["to_pos_idx"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "to_pos_idx", "");
 		
-		auto color_type_detail = make_tuple(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), 2, ',');
+		auto color_type_detail = make_tuple(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), 3, ',');
 		sheet_headers["color"] = new typed_header(new extend_node_type_descriptor(color_type_detail), "color", "");
 
 		sheet_headers["opacity"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_float), "opacity", "");
@@ -713,7 +713,7 @@ namespace
 		sheet_headers["from_pos_idx_end"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "from_pos_idx_end", "");
 		sheet_headers["to_pos_idx_end"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), "to_pos_idx_end", "");
 		
-		auto color_type_detail = make_tuple(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), 2, ',');
+		auto color_type_detail = make_tuple(new extend_node_type_descriptor(basic_node_type_descriptor::number_32), 3, ',');
 		sheet_headers["color"] = new typed_header(new extend_node_type_descriptor(color_type_detail), "color", "");
 
 		sheet_headers["opacity"] = new typed_header(new extend_node_type_descriptor(basic_node_type_descriptor::number_float), "opacity", "");
@@ -1147,6 +1147,7 @@ namespace circos
 			const auto& temp_sheet_content = in_workbook.get_worksheet(temp_sheet_idx.value());
 			read_sheet_content_by_role(sheet_role, temp_sheet_content, result);
 		}
+		return result;
 		
 	}
 	void read_xlsx_and_draw(const string& xlsx_path, const string& png_output_file, const string& svg_output_file)
