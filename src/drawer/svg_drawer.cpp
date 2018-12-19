@@ -223,7 +223,7 @@ namespace circos
 		else
 		{
 			// 简化为一个空心圆
-			Circle circle_1((annulus.inner_radius + annulus.outer_radius) / 2, annulus.center, annulus.color, annulus.opacity, false, (annulus.outer_radius - annulus.inner_radius) / 2);
+			Circle circle_1((annulus.inner_radius + annulus.outer_radius) / 2, annulus.center, annulus.color, annulus.opacity, false, (annulus.outer_radius - annulus.inner_radius));
 			*this<< circle_1;
 		}
 		return *this;

@@ -635,7 +635,7 @@ namespace circos
 		draw_path(arc_path2, annulus.color, 1, annulus.opacity);
 		if(annulus.filled)
 		{
-			Point middle_point = Point::radius_point((annulus.inner_radius + annulus.outer_radius) / 2, 0, annulus.center);
+			Point middle_point = Point::radius_point((annulus.inner_radius + annulus.outer_radius) / 2, 180 * amplify_angle::factor, annulus.center);
 			vector<vector<Point>> flood_points;
 			flood_points.emplace_back(move(arc_path1));
 			flood_points.emplace_back(move(arc_path2));
