@@ -66,3 +66,5 @@ IF(USE_XLSX)
 		target_link_libraries(xlsx_test xlsx_reader ${ZLIB_LIBRARIES} ${PNG_LIBRARIES})
 	ENDIF(USE_TEXT)
 ENDIF(USE_XLSX)
+
+ADD_EXECUTABLE("pi_csv" ${CIRCOS_TEST_DIR}/pi_csv.cpp)

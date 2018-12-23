@@ -372,7 +372,16 @@ namespace
 				}
 				uint32_t column_idx = cur_cell_pointer->_column;
 				string_view current_header_name = all_headers[column_idx - 1]->header_name;
-				if(current_header_name == "circle_id")
+				if (current_header_name == "tile_id")
+				{
+					auto opt_tile_id = cur_cell_pointer->expect_value<std::string_view>();
+					if (!opt_tile_id)
+					{
+						continue;
+					}
+					cur_tile.tile_id = opt_tile_id.value();
+				}
+				else if(current_header_name == "circle_id")
 				{
 					auto opt_circle_id = cur_cell_pointer->expect_value<std::string_view>();
 					if(!opt_circle_id)
@@ -443,7 +452,7 @@ namespace
 				std::cerr<<"missing circle_id for tile "<<cur_tile.tile_id<<std::endl;
 			}
 
-			all_tiles[cur_tile.circle_id] = cur_tile;
+			all_tiles[cur_tile.tile_id] = cur_tile;
 		}
 	} 
 
