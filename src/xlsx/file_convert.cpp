@@ -683,7 +683,7 @@ namespace
 				}
 				else if(current_header_name == "control_radius_percent")
 				{
-					auto opt_control_radius_percent = cur_cell_pointer->expect_value<bool>();
+					auto opt_control_radius_percent = cur_cell_pointer->expect_value<float>();
 					if(!opt_control_radius_percent)
 					{
 						continue;
@@ -855,7 +855,7 @@ namespace
 				}
 				else if(current_header_name == "control_radius_percent")
 				{
-					auto opt_control_radius_percent = cur_cell_pointer->expect_value<bool>();
+					auto opt_control_radius_percent = cur_cell_pointer->expect_value<float>();
 					if(!opt_control_radius_percent)
 					{
 						continue;
@@ -1043,9 +1043,9 @@ namespace
 		case sheet_type::tile:
 			read_tile_sheet(sheet_content, in_model.tiles);
 			break;
-		case sheet_type::point_link:
-			read_point_link_sheet(sheet_content, in_model.point_links);
-			break;
+		//case sheet_type::point_link:
+		//	read_point_link_sheet(sheet_content, in_model.point_links);
+		//	break;
 		case sheet_type::range_link:
 			read_range_link_sheet(sheet_content, in_model.range_links);
 			break;
