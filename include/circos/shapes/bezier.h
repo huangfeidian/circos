@@ -29,7 +29,7 @@ namespace circos
 		{
 
 		}
-		Bezier(Point center,std::uint16_t in_on_radius, std::uint16_t in_begin_angle, std::uint16_t in_end_angle, Color in_color,std::uint16_t in_control_radius=0,
+		Bezier(Point center,std::uint16_t in_on_radius, amplify_angle in_begin_angle, amplify_angle in_end_angle, Color in_color,std::uint16_t in_control_radius=0,
 		 std::uint16_t in_stroke_width = 1, float in_opacity = 1.0)
 			: stroke_width(in_stroke_width)
 			, color(in_color)
@@ -45,24 +45,24 @@ namespace circos
 				std::swap(in_begin_angle, in_end_angle);
 			}
 			auto angle_diff = in_end_angle - in_begin_angle;
-			auto middle = amplify_angle::middle(in_begin_angle, in_end_angle);
+			auto middle = (in_begin_angle + in_end_angle) / 2;
 				
 			auto final_angle = middle;
-			if(abs(angle_diff - 180 * amplify_angle::factor) < 3 * amplify_angle::factor)
+			if(abs(angle_diff.value - 180 * amplify_angle::factor) < 3 * amplify_angle::factor)
 			{
 				
 				// 这里我们要随机的让他翻转
-				if (angle_diff % 2)
+				if (angle_diff.value % 2)
 				{
-					final_angle = (middle + 180 * amplify_angle::factor) % (360 * amplify_angle::factor);
+					final_angle = middle + amplify_angle::from_angle(180);
 				}
 				
 			}
 			else
 			{
-				if(angle_diff >= 180 * amplify_angle::factor)
+				if(angle_diff >= amplify_angle::from_angle(180))
 				{
-					final_angle = (middle + 180 * amplify_angle::factor) % (360 * amplify_angle::factor);
+					final_angle = middle + amplify_angle::from_angle(180);
 				}
 			}
 			/*std::cout << "begin " << in_begin_angle << " end " << in_end_angle << " middle " << middle <<"diff"<<angle_diff<< " final " << final_angle << std::endl;*/

@@ -493,7 +493,7 @@ namespace circos
 			}
 			else
 			{
-				middle_point = Point::radius_point(arc.radius, 360 * amplify_angle::factor -(arc.begin_angle + arc.end_angle) / 2)*0.5 + arc.center;
+				middle_point = Point::radius_point(arc.radius, amplify_angle::from_angle(360) -(arc.begin_angle + arc.end_angle) / 2)*0.5 + arc.center;
 			}
 			flood(flood_points, vector<Point>{middle_point}, arc.color, arc.opacity);
 		}
@@ -575,16 +575,16 @@ namespace circos
 
 		if (tile.fill)
 		{
-			uint16_t middle_angle = 0;
-			uint16_t in_end_angle = tile.end_angle;
-			uint16_t in_begin_angle = tile.begin_angle;
+			amplify_angle middle_angle;
+			amplify_angle in_end_angle = tile.end_angle;
+			amplify_angle in_begin_angle = tile.begin_angle;
 			if (tile.end_angle > tile.begin_angle)
 			{
 				middle_angle = (tile.end_angle + tile.begin_angle) / 2;
 			}
 			else
 			{
-				middle_angle = 360 * amplify_angle::factor - (tile.begin_angle + tile.end_angle) / 2;
+				middle_angle = amplify_angle::from_angle(360) - (tile.begin_angle + tile.end_angle) / 2;
 			}
 			auto middle_point = Point::radius_point((tile.inner_radius + tile.outer_radius) / 2, middle_angle, tile.center);
 			vector<vector<Point>> flood_points;
@@ -627,15 +627,15 @@ namespace circos
 		{
 			return *this;
 		}
-		Arc arc_1(annulus.inner_radius, 0, 360 * amplify_angle::factor, annulus.center, annulus.color);
-		Arc arc_2(annulus.outer_radius, 0, 360 * amplify_angle::factor, annulus.center, annulus.color);
+		Arc arc_1(annulus.inner_radius, amplify_angle::from_angle(0), amplify_angle::from_angle(360), annulus.center, annulus.color);
+		Arc arc_2(annulus.outer_radius, amplify_angle::from_angle(0), amplify_angle::from_angle(360), annulus.center, annulus.color);
 		auto arc_path1 = path(arc_1);
 		auto arc_path2 = path(arc_2);
 		draw_path(arc_path1, annulus.color, 1, annulus.opacity);
 		draw_path(arc_path2, annulus.color, 1, annulus.opacity);
 		if(annulus.filled)
 		{
-			Point middle_point = Point::radius_point((annulus.inner_radius + annulus.outer_radius) / 2, 180 * amplify_angle::factor, annulus.center);
+			Point middle_point = Point::radius_point((annulus.inner_radius + annulus.outer_radius) / 2, amplify_angle::from_angle(180), annulus.center);
 			vector<vector<Point>> flood_points;
 			flood_points.emplace_back(move(arc_path1));
 			flood_points.emplace_back(move(arc_path2));

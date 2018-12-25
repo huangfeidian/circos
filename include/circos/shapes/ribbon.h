@@ -28,7 +28,7 @@ namespace circos
 		{
 			
 		}
-		Ribbon(Point center, std::uint16_t radius, std::uint16_t span1_begin, std::uint16_t span1_end, std::uint16_t span2_begin, std::uint16_t span2_end, Color in_color, std::uint16_t control_radius =0, bool twist = false,bool in_fill = false, float in_opacity = 1.0)
+		Ribbon(Point center, std::uint16_t radius, amplify_angle span1_begin, amplify_angle span1_end, amplify_angle span2_begin, amplify_angle span2_end, Color in_color, std::uint16_t control_radius =0, bool twist = false,bool in_fill = false, float in_opacity = 1.0)
 			: color(in_color)
 			, fill(in_fill)
 			, opacity(in_opacity)
@@ -43,7 +43,7 @@ namespace circos
 			bezier_1 = Bezier(center, radius, arc_1.end_angle, arc_2.begin_angle, in_color, control_radius);
 			bezier_2 = Bezier(center, radius, arc_2.end_angle, arc_1.begin_angle, in_color, control_radius);
 		}
-		Ribbon(Point center, std::uint16_t radius1, std::uint16_t radius2, std::uint16_t span1_begin, std::uint16_t span1_end, std::uint16_t span2_begin, std::uint16_t span2_end, Color in_color, float control_radius_percent = 0, bool twist = false,bool in_fill = false, float in_opacity = 1.0)
+		Ribbon(Point center, std::uint16_t radius1, std::uint16_t radius2, amplify_angle span1_begin, amplify_angle span1_end, amplify_angle span2_begin, amplify_angle span2_end, Color in_color, float control_radius_percent = 0, bool twist = false,bool in_fill = false, float in_opacity = 1.0)
 			: color(in_color)
 			, fill(in_fill)
 			, opacity(in_opacity)

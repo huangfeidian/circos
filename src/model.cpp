@@ -52,7 +52,7 @@ namespace circos::model
 			{	
 				one_tile.angle_begin = temp_angle_begin;
 				temp_angle_end = temp_angle_begin + angle_by_unit * one_tile.width;
-				Tile cur_tile(config.center, cur_circle.inner_radius, cur_circle.outer_radius, amplify_angle::rad_to_angle_percent(temp_angle_begin), amplify_angle::rad_to_angle_percent(temp_angle_end), one_tile.fill_color, 1, one_tile.is_fill, one_tile.opacity);
+				Tile cur_tile(config.center, cur_circle.inner_radius, cur_circle.outer_radius, amplify_angle::from_rad(temp_angle_begin), amplify_angle::from_rad(temp_angle_end), one_tile.fill_color, 1, one_tile.is_fill, one_tile.opacity);
 				pre_collection.tiles.push_back(cur_tile);
 				temp_angle_end +=  temp_gap;
 				temp_angle_begin = temp_angle_end;
@@ -87,7 +87,7 @@ namespace circos::model
 			double angle_by_unit = pi() * 2 / circle_ranges[circle_id];
 			for(int i = 0; i < total_count; i++)
 			{
-				Line cur_tick_line = Line(Point::radius_point(cur_circle.outer_radius, amplify_angle::rad_to_angle_percent(i * cur_circle.gap * angle_by_unit)), Point::radius_point(cur_circle.outer_radius + cur_tick.height, amplify_angle::rad_to_angle_percent(i * cur_circle.gap * angle_by_unit)), cur_tick.fill_color, cur_tick.width, cur_tick.opacity);
+				Line cur_tick_line = Line(Point::radius_point(cur_circle.outer_radius, amplify_angle::from_rad(i * cur_circle.gap * angle_by_unit)), Point::radius_point(cur_circle.outer_radius + cur_tick.height, amplify_angle::from_rad(i * cur_circle.gap * angle_by_unit)), cur_tick.fill_color, cur_tick.width, cur_tick.opacity);
 				pre_collection.lines.push_back(cur_tick_line);
 			}
 		}
@@ -114,7 +114,7 @@ namespace circos::model
 			if(cur_point_link.control_radius_percent <= 0)
 			{
 				// 这个是直线
-				Line cur_line = Line(Point::radius_point(from_circle.inner_radius, amplify_angle::rad_to_angle_percent(from_tile.angle_begin + from_circle.angle_per_unit * cur_point_link.from_pos_idx)), Point::radius_point(to_circle.outer_radius, amplify_angle::rad_to_angle_percent(to_tile.angle_begin + to_circle.angle_per_unit * cur_point_link.to_pos_idx)), cur_point_link.fill_color, cur_point_link.width, cur_point_link.opacity);
+				Line cur_line = Line(Point::radius_point(from_circle.inner_radius, amplify_angle::from_rad(from_tile.angle_begin + from_circle.angle_per_unit * cur_point_link.from_pos_idx)), Point::radius_point(to_circle.outer_radius, amplify_angle::from_rad(to_tile.angle_begin + to_circle.angle_per_unit * cur_point_link.to_pos_idx)), cur_point_link.fill_color, cur_point_link.width, cur_point_link.opacity);
 			}
 			else
 			{
@@ -123,13 +123,13 @@ namespace circos::model
 				auto to_angle = to_tile.angle_begin + to_circle.angle_per_unit * cur_point_link.to_pos_idx;
 				if(to_tile.circle_id == from_tile.circle_id)
 				{
-					Bezier cur_bezier = Bezier(config.center, from_circle.inner_radius, amplify_angle::rad_to_angle_percent(from_angle), amplify_angle::rad_to_angle_percent(to_angle), cur_point_link.fill_color, from_circle.inner_radius * cur_point_link.control_radius_percent, cur_point_link.width, cur_point_link.opacity);
+					Bezier cur_bezier = Bezier(config.center, from_circle.inner_radius, amplify_angle::from_rad(from_angle), amplify_angle::from_rad(to_angle), cur_point_link.fill_color, from_circle.inner_radius * cur_point_link.control_radius_percent, cur_point_link.width, cur_point_link.opacity);
 					pre_collection.beziers.push_back(cur_bezier);
 				}
 				else
 				{
-					auto control_point = Point::radius_point((from_circle.inner_radius + to_circle.inner_radius) / 2 * cur_point_link.control_radius_percent, amplify_angle::rad_to_angle_percent((from_angle + to_angle) / 2), config.center);
-					Bezier cur_bezier = Bezier(Point::radius_point(from_circle.inner_radius, amplify_angle::rad_to_angle_percent(from_angle), config.center), Point::radius_point(to_circle.inner_radius, amplify_angle::rad_to_angle_percent(to_angle), config.center), control_point, cur_point_link.fill_color, cur_point_link.opacity);
+					auto control_point = Point::radius_point((from_circle.inner_radius + to_circle.inner_radius) / 2 * cur_point_link.control_radius_percent, amplify_angle::from_rad((from_angle + to_angle) / 2), config.center);
+					Bezier cur_bezier = Bezier(Point::radius_point(from_circle.inner_radius, amplify_angle::from_rad(from_angle), config.center), Point::radius_point(to_circle.inner_radius, amplify_angle::from_rad(to_angle), config.center), control_point, cur_point_link.fill_color, cur_point_link.opacity);
 					pre_collection.beziers.push_back(cur_bezier);
 				}
 			}
@@ -156,7 +156,7 @@ namespace circos::model
 			auto from_end_angle = from_tile.angle_begin + from_circle.angle_per_unit * cur_range_link.from_pos_end_idx;
 			auto to_begin_angle = to_tile.angle_begin + to_circle.angle_per_unit * cur_range_link.to_pos_begin_idx;
 			auto to_end_angle = to_tile.angle_begin + to_circle.angle_per_unit * cur_range_link.to_pos_end_idx;
-			Ribbon cur_ribbon(config.center, from_circle.inner_radius, to_circle.inner_radius, amplify_angle::rad_to_angle_percent(from_begin_angle), amplify_angle::rad_to_angle_percent(from_end_angle), amplify_angle::rad_to_angle_percent(to_begin_angle), amplify_angle::rad_to_angle_percent(to_end_angle), cur_range_link.fill_color, cur_range_link.control_radius_percent, cur_range_link.is_cross, cur_range_link.opacity < 0.001, cur_range_link.opacity);
+			Ribbon cur_ribbon(config.center, from_circle.inner_radius, to_circle.inner_radius, amplify_angle::from_rad(from_begin_angle), amplify_angle::from_rad(from_end_angle), amplify_angle::from_rad(to_begin_angle), amplify_angle::from_rad(to_end_angle), cur_range_link.fill_color, cur_range_link.control_radius_percent, cur_range_link.is_cross, cur_range_link.opacity < 0.001, cur_range_link.opacity);
 			pre_collection.ribbons.push_back(cur_ribbon);
 		}
 

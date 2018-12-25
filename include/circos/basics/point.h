@@ -65,12 +65,11 @@ namespace circos
 			this->y = this->y - second.y;
 			return *this;
 		}
-		static basic_point radius_point(T radius, std::uint16_t in_amplified_angle, basic_point center = basic_point())
+		static basic_point radius_point(T radius, amplify_angle in_angle, basic_point center = basic_point())
 		{
 			basic_point result;
-			float angle = amplify_angle::angle_percent_to_rad(in_amplified_angle);
-			result.x = radius * cos(angle);
-			result.y = radius * sin(angle);
+			result.x = static_cast<uint16_t>(radius * in_angle.cos());
+			result.y = static_cast<uint16_t>(radius * in_angle.sin());
 			return result + center;
 		}
 		T operator*(const basic_point& other_point)

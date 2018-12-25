@@ -92,7 +92,7 @@ namespace
 					else
 					{
 						vector<uint32_t> rgb_values;
-						for (int i = 2; i < 5; i++)
+						for (int i = 1; i < 4; i++)
 						{
 							auto cur_cell_value_iter = row_value.find(i);
 							if (cur_cell_value_iter == row_value.end())
