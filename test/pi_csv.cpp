@@ -10,7 +10,7 @@ using namespace std;
 using namespace circos;
 int main()
 {
-	ifstream pi_file("../data/pi100000.txt");
+	ifstream pi_file("../data/pi10000.txt");
 	string pi_str((istreambuf_iterator<char>(pi_file)), istreambuf_iterator<char>());
 	vector<uint8_t> pi_digits;
     vector<circos::Color> strand_color(10, Color());
