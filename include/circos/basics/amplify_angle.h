@@ -32,7 +32,7 @@ namespace circos
 		static amplify_angle from_rad(float rad)
 		{
 			amplify_angle result;
-			result.value = static_cast<int>(rad / pi() * factor);
+			result.value = static_cast<int>(rad / pi() * factor * 180);
 			return result;
 		}
 		static amplify_angle from_angle(float angle)

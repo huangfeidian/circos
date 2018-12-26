@@ -600,6 +600,7 @@ namespace
 		for(const auto& i: point_link_sheet.get_all_typed_row_info())
 		{
 			model::point_link cur_point_link;
+			cur_point_link.width = 1;
 			for(const auto& j: i.second)
 			{
 				auto cur_cell_pointer = j.second;
@@ -1043,9 +1044,9 @@ namespace
 		case sheet_type::tile:
 			read_tile_sheet(sheet_content, in_model.tiles);
 			break;
-		//case sheet_type::point_link:
-		//	read_point_link_sheet(sheet_content, in_model.point_links);
-		//	break;
+		case sheet_type::point_link:
+			read_point_link_sheet(sheet_content, in_model.point_links);
+			break;
 		case sheet_type::range_link:
 			read_range_link_sheet(sheet_content, in_model.range_links);
 			break;

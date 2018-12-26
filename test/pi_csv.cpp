@@ -64,7 +64,7 @@ int main()
     ofstream link_file("../data/pi_links.csv");
     link_file<<"link_id, from_tile_id, from_pos_idx, to_tile_id, to_pos_idx, control_radius_percent, color, ref_color, opacity"<<endl;
     float control_radius_percent = 0.3;
-	float opacity = 0.3;
+	float opacity = 0.1;
 	for (i = 0; i < pi_digits.size(); i++)
 	{
 		auto cur_char = pi_digits[i];
