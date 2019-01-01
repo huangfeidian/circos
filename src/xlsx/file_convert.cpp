@@ -1099,6 +1099,30 @@ namespace circos
 		}
 
 	}
+	template <typename args..., size_t... arg_idx>
+	tuple<optional<args>...> try_convert_row(const vector<typed_header*> headers, const vector<typed_value>& all_values, const unordered_map<string_view, uint32_t>& name_to_column, std::index_sequence<arg_idx...>)
+	{
+		if(sizeof...(args) != headers.size())
+		{
+			return make_tuple(optional<args>()...);
+		}
+		return make_tuple(try_convert_cell<args>(headers[arg_idx], all_values, name_to_column));
+	}
+	template <typename T>
+	optional<T> try_convert_cell(const typed_header* cur_header, const vector<typed_value>& all_values, const unordered_map<string_view, uint32_t>& name_to_column)
+	{
+		auto column_iter = name_to_column.find(cur_header->name);
+		if(column_iter == name_to_column.end())
+		{
+			return nullopt;
+		}
+		uint32_t column_idx = column_iter->second;
+		if(column_idx >= all_values.size())
+		{
+			return nullopt;
+		}
+		return all_values[column_idx].expect_value<T>();
+	}
 }
 #endif
 
