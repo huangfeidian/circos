@@ -34,83 +34,45 @@ namespace
 		range_link,
 		config,
 	};
-	std::optional<Color> read_color_from_cell(const typed_worksheet& cur_worksheet, const typed_value& cell_value)
+	std::optional<Color> read_ref_color(const typed_worksheet& cur_worksheet, uint32_t ref_header_idx, string_view color_name)
 	{
-		if (!cell_value.type_desc)
+		auto ref_header = cur_worksheet.get_typed_headers()[ref_header_idx];
+		if (!ref_header)
+		{
+			return nullopt;
+		}
+		if (color_name.empty())
+		{
+			return nullopt;
+		}
+		auto cur_type_detail = ref_header->type_desc->get_ref_detail_t();
+		if (!cur_type_detail)
 		{
 			return std::nullopt;
 		}
-		switch(cell_value.type_desc->_type)
+		auto ref_detail = cur_type_detail.value();
+
+		auto[cur_wb_name, cur_ws_name, cur_ref_type] = ref_detail;
+		typed_value cur_ref_value(color_name);
+		const auto& row_value = cur_worksheet.get_ref_row(cur_ws_name, &cur_ref_value);
+		if (row_value.size() != 5)
 		{
-			case basic_value_type::list:
-			case basic_value_type::tuple:
-			{
-				auto opt_color = cell_value.expect_value<std::tuple<int, int, int>>();
-				if(!opt_color)
-				{
-					return std::nullopt;
-				}
-				auto real_color = opt_color.value();
-				return Color(get<0>(real_color), get<1>(real_color), get<2>(real_color));
-			}
-			
-			case basic_value_type::ref_id:
-			{
-				auto cur_type_detail = cell_value.type_desc->get_ref_detail_t();
-				if (!cur_type_detail)
-				{
-					return std::nullopt;
-				}
-				auto ref_detail = cur_type_detail.value();
-
-				auto [cur_wb_name, cur_ws_name, cur_ref_type] = ref_detail;
-				const auto& row_value = cur_worksheet.get_ref_row(cur_ws_name, &cell_value);
-				if (row_value.size() <= 2)
-				{
-					return std::nullopt;
-				}
-
-				if (row_value.size() == 3)
-				{
-					auto cur_workbook = cur_worksheet.get_workbook();
-					auto other_sheet_idx = cur_workbook->get_sheet_index_by_name(cur_ws_name);
-					if (!other_sheet_idx)
-					{
-						return std::nullopt;
-					}
-					const auto& other_sheet = cur_workbook->get_worksheet(other_sheet_idx.value());
-					return read_color_from_cell(other_sheet, &row_value[2]);
-				}
-				else
-				{
-					if (row_value.size() < 5)
-					{
-						return std::nullopt;
-					}
-					else
-					{
-						vector<uint32_t> rgb_values;
-						for (int i = 2; i < 5; i++)
-						{
-
-							const auto& cur_cell_value = row_value[i];
-							auto cur_int_opt = cur_cell_value.expect_value<std::uint32_t>();
-							if (!cur_int_opt)
-							{
-								return std::nullopt;
-							}
-							rgb_values.push_back(cur_int_opt.value());
-						}
-						return Color(rgb_values[0], rgb_values[1], rgb_values[2]);
-					}
-				}
-
-			}
-			default:
-				return std::nullopt;
-				
+			return nullopt;
 		}
-		return std::nullopt;
+
+		vector<uint32_t> rgb_values;
+		for (int i = 2; i < 5; i++)
+		{
+
+			const auto& cur_cell_value = row_value[i];
+			auto cur_int_opt = cur_cell_value.expect_value<std::uint32_t>();
+			if (!cur_int_opt)
+			{
+				return std::nullopt;
+			}
+			rgb_values.push_back(cur_int_opt.value());
+		}
+		return Color(rgb_values[0], rgb_values[1], rgb_values[2]);
 	}
 
 	std::optional<Point> read_point_from_cell(const typed_worksheet& cur_worksheet, const typed_cell& cell_value)
@@ -132,7 +94,7 @@ namespace
 		}
 	}
 
-	void read_circle_sheet(const typed_worksheet& circle_sheet, std::unordered_map<std::string_view, model::circle>& all_circles)
+	void read_circle_sheet(const typed_worksheet& current_sheet, std::unordered_map<std::string_view, model::circle>& all_circles)
 	{
 		// circle headers circle_id(string) inner_radius(int) outer_radius(int) gap(int) color(RGB) ref_color(ref) opacity(float) filled(bool)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
@@ -149,95 +111,50 @@ namespace
 		sheet_headers["gap"] = new typed_header(new typed_node_type_descriptor(basic_value_type::number_32), "gap", "");
 		sheet_headers["filled"] = new typed_header(new typed_node_type_descriptor(basic_value_type::number_bool), "filled", "");
 
-		auto header_match = circle_sheet.check_header_match(sheet_headers, "circle_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
+		auto header_match = current_sheet.check_header_match(sheet_headers, "circle_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
 		
 		if(!header_match)
 		{
-			std::cerr<<"header for circle description mismatch for sheet "<<circle_sheet._name<<std::endl;
+			std::cerr<<"header for circle description mismatch for sheet "<<current_sheet._name<<std::endl;
 			return;
 		}
-		const vector<const typed_header*>& all_headers = circle_sheet.get_typed_headers();
-		const auto& all_row_info = circle_sheet.get_all_typed_row_info();
+		const vector<const typed_header*>& all_headers = current_sheet.get_typed_headers();
+		vector<string_view> header_names = { "circle_id", "inner_radius", "outer_radius", "color", "ref_color", "opacity", "gap", "filled" };
+		const vector<uint32_t>& header_indexes = current_sheet.get_header_index_vector(header_names);
+		if (header_indexes.empty())
+		{
+			return;
+		}
+		uint32_t ref_color_idx = header_indexes[4];
+		const auto& all_row_info = current_sheet.get_all_typed_row_info();
 		for(int i=1; i< all_row_info.size(); i++)
 		{
 			model::circle cur_circle;
-			for(int j = 1; j< all_row_info[i].size(); j++)
+			auto[opt_cirlce_id, opt_inner_radius, opt_outer_radius, opt_color, opt_ref_color, opt_opacity, opt_gap, opt_filled] = 
+				current_sheet.try_convert_row<string_view, int, int, tuple<int, int, int>, string_view, float, int, bool>(i, header_indexes);
+			if (!(opt_cirlce_id && opt_inner_radius && opt_outer_radius && opt_opacity && opt_gap && opt_filled))
 			{
+				continue;
+			}
+			cur_circle.circle_id = opt_cirlce_id.value();
+			cur_circle.inner_radius = opt_inner_radius.value();
+			cur_circle.outer_radius = opt_outer_radius.value();
+			cur_circle.opacity = opt_opacity.value();
+			cur_circle.gap = opt_gap.value();
+			cur_circle.filled = opt_filled.value();
 
-				uint32_t column_idx = j;
-				const auto& cur_cell_value = all_row_info[i][j];
-				string_view current_header_name = all_headers[column_idx - 1]->header_name;
-				if(current_header_name == "circle_id")
+			if (opt_color)
+			{
+				auto color_value = opt_color.value();
+				cur_circle.fill_color = Color(get<0>(color_value), get<1>(color_value), get<2>(color_value));
+			}
+			if (opt_ref_color)
+			{
+				auto temp_color = read_ref_color(current_sheet
+					, ref_color_idx, opt_ref_color.value());
+				if (temp_color)
 				{
-					auto opt_circle_id = cur_cell_value.expect_value<std::string_view>();
-					if(!opt_circle_id)
-					{
-						continue;
-					}
-					cur_circle.circle_id = opt_circle_id.value();
-				}
-				else if(current_header_name == "opacity")
-				{
-					auto opt_opacity = cur_cell_value.expect_value<float>();
-					if(!opt_opacity)
-					{
-						continue;
-					}
-					cur_circle.opacity = opt_opacity.value();
-				}
-				else if(current_header_name == "color")
-				{
-					auto opt_color = read_color_from_cell(circle_sheet, cur_cell_value);
-					if(!opt_color)
-					{
-						continue;
-					}
-					cur_circle.fill_color = opt_color.value();
-				}
-				else if(current_header_name == "ref_color")
-				{
-					auto opt_color = read_color_from_cell(circle_sheet, cur_cell_value);
-					if(!opt_color)
-					{
-						continue;
-					}
-					cur_circle.fill_color = opt_color.value();
-				}
-				else if(current_header_name == "gap")
-				{
-					auto opt_gap = cur_cell_value.expect_value<int>();
-					if(!opt_gap)
-					{
-						continue;
-					}
-					cur_circle.gap = opt_gap.value();
-				}
-				else if(current_header_name == "inner_radius")
-				{
-					auto opt_radius = cur_cell_value.expect_value<int>();
-					if(!opt_radius)
-					{
-						continue;
-					}
-					cur_circle.inner_radius = opt_radius.value();
-				}
-				else if(current_header_name == "outer_radius")
-				{
-					auto opt_radius = cur_cell_value.expect_value<int>();
-					if(!opt_radius)
-					{
-						continue;
-					}
-					cur_circle.outer_radius = opt_radius.value();
-				}
-				else if(current_header_name == "filled")
-				{
-					auto opt_filled = cur_cell_value.expect_value<bool>();
-					if(!opt_filled)
-					{
-						continue;
-					}
-					cur_circle.filled = opt_filled.value();
+					cur_circle.fill_color = temp_color.value();
 				}
 			}
 			if(cur_circle.circle_id.empty())
@@ -259,7 +176,7 @@ namespace
 			}
 		}
 	} 
-	void read_tile_sheet(const typed_worksheet& tile_sheet, std::unordered_map<std::string_view, model::tile>& all_tiles)
+	void read_tile_sheet(const typed_worksheet& current_sheet, std::unordered_map<std::string_view, model::tile>& all_tiles)
 	{
 		// tile_desc headers tile_id(string) circle_id(string)  width(int) color(RGB) ref_color(ref) opacity(float) sequence(int) filled(bool)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
@@ -278,88 +195,53 @@ namespace
 
 		sheet_headers["filled"] = new typed_header(new typed_node_type_descriptor(basic_value_type::number_bool), "filled", "");
 
-		auto header_match = tile_sheet.check_header_match(sheet_headers, "tile_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
+		auto header_match = current_sheet.check_header_match(sheet_headers, "tile_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
 		if(!header_match)
 		{
-			std::cerr<<"header for tile description mismatch for sheet "<<tile_sheet._name<<std::endl;
+			std::cerr<<"header for tile description mismatch for sheet "<<current_sheet._name<<std::endl;
 			return;
 		}
-		const vector<const typed_header*>& all_headers = tile_sheet.get_typed_headers();
-		const auto& all_row_info = tile_sheet.get_all_typed_row_info();
+		const vector<const typed_header*>& all_headers = current_sheet.get_typed_headers();
+		vector<string_view> header_names = { "tile_id", "circle_id", "width", "sequence", "color", "ref_color", "opacity", "filled" };
+		const vector<uint32_t>& header_indexes = current_sheet.get_header_index_vector(header_names);
+		if (header_indexes.empty())
+		{
+			return;
+		}
+		uint32_t ref_color_idx = header_indexes[5];
+		const auto& all_row_info = current_sheet.get_all_typed_row_info();
 		for(int i=1; i< all_row_info.size(); i++)
 		{
 			model::tile cur_tile;
 
-			for(int j = 1; j< all_row_info[i].size(); j++)
+			auto[opt_tile_id, opt_circle_id, opt_width, opt_seq, opt_color, opt_ref_color, opt_opacity, opt_filled] = 
+				current_sheet.try_convert_row<string_view, string_view, int, int, tuple<int, int, int>, string_view, float, bool>(i, header_indexes);
+			if (!(opt_tile_id && opt_circle_id && opt_width && opt_seq && opt_opacity && opt_filled))
 			{
-				const auto& cur_cell_value = all_row_info[i][j];
-				uint32_t column_idx = j;
-				string_view current_header_name = all_headers[column_idx - 1]->header_name;
-				if (current_header_name == "tile_id")
-				{
-					auto opt_tile_id = cur_cell_value.expect_value<std::string_view>();
-					if (!opt_tile_id)
-					{
-						continue;
-					}
-					cur_tile.tile_id = opt_tile_id.value();
-				}
-				else if(current_header_name == "circle_id")
-				{
-					auto opt_circle_id = cur_cell_value.expect_value<std::string_view>();
-					if(!opt_circle_id)
-					{
-						continue;
-					}
-					cur_tile.circle_id = opt_circle_id.value();
-				}
-				else if(current_header_name == "opacity")
-				{
-					auto opt_opacity = cur_cell_value.expect_value<float>();
-					if(!opt_opacity)
-					{
-						continue;
-					}
-					cur_tile.opacity = opt_opacity.value();
-				}
-				else if(current_header_name == "color")
-				{
-					auto opt_color = read_color_from_cell(tile_sheet, cur_cell_value);
-					if(!opt_color)
-					{
-						continue;
-					}
-					cur_tile.fill_color = opt_color.value();
-				}
-				else if(current_header_name == "ref_color")
-				{
-					auto opt_color = read_color_from_cell(tile_sheet, cur_cell_value);
-					if(!opt_color)
-					{
-						continue;
-					}
-					cur_tile.fill_color = opt_color.value();
-				}
-				else if(current_header_name == "width")
-				{
-					auto opt_width = cur_cell_value.expect_value<int>();
-					if(!opt_width)
-					{
-						continue;
-					}
-					cur_tile.width = opt_width.value();
-				}
-				else if(current_header_name == "sequence")
-				{
-					auto opt_seq = cur_cell_value.expect_value<int>();
-					if(!opt_seq)
-					{
-						continue;
-					}
-					cur_tile.sequence = opt_seq.value();
-				}
-				
+				continue;
 			}
+			cur_tile.tile_id = opt_tile_id.value();
+			cur_tile.circle_id = opt_circle_id.value();
+			cur_tile.width = opt_width.value();
+			cur_tile.sequence = opt_seq.value();
+			cur_tile.opacity = opt_opacity.value();
+			cur_tile.is_fill = opt_filled.value();
+
+			if(opt_color)
+			{
+				auto color_value = opt_color.value();
+				cur_tile.fill_color = Color(get<0>(color_value), get<1>(color_value), get<2>(color_value));
+			}
+			if (opt_ref_color)
+			{
+				auto temp_color = read_ref_color(current_sheet
+					, ref_color_idx, opt_ref_color.value());
+				if (temp_color)
+				{
+					cur_tile.fill_color = temp_color.value();
+				}
+			}
+
 			if(cur_tile.tile_id.empty())
 			{
 				std::cerr<<"cant find tile for row "<< i <<std::endl;
@@ -373,13 +255,14 @@ namespace
 			if(cur_tile.circle_id.empty())
 			{
 				std::cerr<<"missing circle_id for tile "<<cur_tile.tile_id<<std::endl;
+				continue;
 			}
 
 			all_tiles[cur_tile.tile_id] = cur_tile;
 		}
 	} 
 
-	void read_circle_tick_sheet(const typed_worksheet& tick_sheet, std::unordered_map<std::string_view, model::circle_tick>& all_circle_ticks)
+	void read_circle_tick_sheet(const typed_worksheet& current_sheet, std::unordered_map<std::string_view, model::circle_tick>& all_circle_ticks)
 	{
 		// circle_tick headers tick_id(string) circle_id(string)  width(int) height(int) color(RGB) ref_color(ref) opacity(float)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
@@ -395,85 +278,48 @@ namespace
 
 		sheet_headers["opacity"] = new typed_header(new typed_node_type_descriptor(basic_value_type::number_float), "opacity", "");
 
-		auto header_match = tick_sheet.check_header_match(sheet_headers, "circle_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
+		auto header_match = current_sheet.check_header_match(sheet_headers, "circle_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
 		if(!header_match)
 		{
-			std::cerr<<"header for circle_tick description mismatch for sheet "<<tick_sheet._name<<std::endl;
+			std::cerr<<"header for circle_tick description mismatch for sheet "<<current_sheet._name<<std::endl;
 			return;
 		}
-		const vector<const typed_header*>& all_headers = tick_sheet.get_typed_headers();
-		const auto& all_row_info = tick_sheet.get_all_typed_row_info();
+		const vector<const typed_header*>& all_headers = current_sheet.get_typed_headers();
+		vector<string_view> header_names = { "tick_id", "circle_id", "width", "height", "color", "ref_color", "opacity"};
+		const vector<uint32_t>& header_indexes = current_sheet.get_header_index_vector(header_names);
+		if (header_indexes.empty())
+		{
+			return;
+		}
+		uint32_t ref_color_idx = header_indexes[5];
+		const auto& all_row_info = current_sheet.get_all_typed_row_info();
 		for(int i = 1; i< all_row_info.size(); i++)
 		{
 			model::circle_tick cur_circle_tick;
-			for(int j = 1; j< all_row_info[i].size(); j++)
+			auto[opt_tick_id, opt_circle_id, opt_width, opt_height, opt_color, opt_ref_color, opt_opacity] =
+				current_sheet.try_convert_row<string_view, string_view, int, int, tuple<int, int, int>, string_view, float>(i, header_indexes);
+			if (!(opt_tick_id && opt_circle_id && opt_width && opt_height && opt_opacity))
 			{
-				const auto&  cur_cell_value = all_row_info[i][j];
+				continue;
+			}
 
-				uint32_t column_idx = j;
-				string_view current_header_name = all_headers[column_idx - 1]->header_name;
-				if(current_header_name == "tick_id")
+			cur_circle_tick.circle_tick_id = opt_tick_id.value();
+			cur_circle_tick.circle_id = opt_circle_id.value();
+			cur_circle_tick.height = opt_height.value();
+			cur_circle_tick.opacity = opt_opacity.value();
+			cur_circle_tick.width = opt_width.value();
+			if (opt_color)
+			{
+				auto color_value = opt_color.value();
+				cur_circle_tick.fill_color = Color(get<0>(color_value), get<1>(color_value), get<2>(color_value));
+			}
+			if (opt_ref_color)
+			{
+				auto temp_color = read_ref_color(current_sheet
+					, ref_color_idx, opt_ref_color.value());
+				if (temp_color)
 				{
-					auto opt_tick_id = cur_cell_value.expect_value<std::string_view>();
-					if(!opt_tick_id)
-					{
-						continue;
-					}
-					cur_circle_tick.circle_tick_id = opt_tick_id.value();
-				}
-				else if(current_header_name == "circle_id")
-				{
-					auto opt_circle_id = cur_cell_value.expect_value<std::string_view>();
-					if(!opt_circle_id)
-					{
-						continue;
-					}
-					cur_circle_tick.circle_id = opt_circle_id.value();
-				}
-				else if(current_header_name == "opacity")
-				{
-					auto opt_opacity = cur_cell_value.expect_value<float>();
-					if(!opt_opacity)
-					{
-						continue;
-					}
-					cur_circle_tick.opacity = opt_opacity.value();
-				}
-				else if(current_header_name == "color")
-				{
-					auto opt_color = read_color_from_cell(tick_sheet, cur_cell_value);
-					if(!opt_color)
-					{
-						continue;
-					}
-					cur_circle_tick.fill_color = opt_color.value();
-				}
-				else if(current_header_name == "ref_color")
-				{
-					auto opt_color = read_color_from_cell(tick_sheet, cur_cell_value);
-					if(!opt_color)
-					{
-						continue;
-					}
-					cur_circle_tick.fill_color = opt_color.value();
-				}
-				else if(current_header_name == "width")
-				{
-					auto opt_width = cur_cell_value.expect_value<int>();
-					if(!opt_width)
-					{
-						continue;
-					}
-					cur_circle_tick.width = opt_width.value();
-				}
-				else if(current_header_name == "height")
-				{
-					auto opt_height = cur_cell_value.expect_value<int>();
-					if(!opt_height)
-					{
-						continue;
-					}
-					cur_circle_tick.height = opt_height.value();
+					cur_circle_tick.fill_color = temp_color.value();
 				}
 			}
 			if(cur_circle_tick.circle_id.empty())
@@ -491,7 +337,7 @@ namespace
 		}
 	} 
 
-	void read_point_link_sheet(const typed_worksheet& point_link_sheet, std::unordered_map<std::string_view, model::point_link>& all_point_links)
+	void read_point_link_sheet(const typed_worksheet& current_sheet, std::unordered_map<std::string_view, model::point_link>& all_point_links)
 	{
 		// point_link headers link_id(string) from_tile_id(string) from_pos_idx(int) to_tile_id(string) to_pos_idx(int)  color(RGB) ref_color(ref) opacity(float)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
@@ -511,104 +357,50 @@ namespace
 
 		sheet_headers["control_radius_percent"] = new typed_header(new typed_node_type_descriptor(basic_value_type::number_float), "control_radius_percent", "");
 
-		auto header_match = point_link_sheet.check_header_match(sheet_headers, "link_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
+		auto header_match = current_sheet.check_header_match(sheet_headers, "link_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
 		if(!header_match)
 		{
-			std::cerr<<"header for point_link description mismatch for sheet "<<point_link_sheet._name<<std::endl;
+			std::cerr<<"header for point_link description mismatch for sheet "<<current_sheet._name<<std::endl;
 			return;
 		}
-		const vector<const typed_header*>& all_headers = point_link_sheet.get_typed_headers();
-		const auto& all_row_info = point_link_sheet.get_all_typed_row_info();
+		const vector<const typed_header*>& all_headers = current_sheet.get_typed_headers();
+		vector<string_view> header_names = { "link_id", "from_tile_id", "to_tile_id", "from_pos_idx", "to_pos_idx", "color", "ref_color", "opacity" , "control_radius_percent"};
+		const vector<uint32_t>& header_indexes = current_sheet.get_header_index_vector(header_names);
+		if (header_indexes.empty())
+		{
+			return;
+		}
+		uint32_t ref_color_idx = header_indexes[6];
+		const auto& all_row_info = current_sheet.get_all_typed_row_info();
 		for (int i = 1; i < all_row_info.size(); i++)
 		{
 			model::point_link cur_point_link;
 			cur_point_link.width = 1;
-			for (int j = 1; j < all_row_info[i].size(); j++)
+			auto[opt_link_id, opt_from_tile, opt_to_tile, opt_from_pos, opt_to_pos, opt_color, opt_ref_color, opt_opacity, opt_control] =
+				current_sheet.try_convert_row<string_view, string_view, string_view, int, int, tuple<int, int, int>, string_view, float, float>(i, header_indexes);
+			if (!(opt_link_id && opt_from_tile && opt_from_pos && opt_to_tile && opt_to_pos && opt_opacity && opt_control))
 			{
-				const auto&  cur_cell_value = all_row_info[i][j];
-
-				uint32_t column_idx = j;
-				string_view current_header_name = all_headers[column_idx - 1]->header_name;
-				if(current_header_name == "link_id")
+				continue;
+			}
+			cur_point_link.link_id = opt_link_id.value();
+			cur_point_link.from_tile_id = opt_from_tile.value();
+			cur_point_link.to_tile_id = opt_to_tile.value();
+			cur_point_link.from_pos_idx = opt_from_pos.value();
+			cur_point_link.to_pos_idx = opt_to_pos.value();
+			cur_point_link.opacity = opt_opacity.value();
+			cur_point_link.control_radius_percent = opt_control.value();
+			if (opt_color)
+			{
+				auto color_value = opt_color.value();
+				cur_point_link.fill_color = Color(get<0>(color_value), get<1>(color_value), get<2>(color_value));
+			}
+			if (opt_ref_color)
+			{
+				auto temp_color = read_ref_color(current_sheet
+					, ref_color_idx, opt_ref_color.value());
+				if (temp_color)
 				{
-					auto opt_link_id = cur_cell_value.expect_value<std::string_view>();
-					if(!opt_link_id)
-					{
-						continue;
-					}
-					cur_point_link.link_id = opt_link_id.value();
-				}
-				else if(current_header_name == "from_tile_id")
-				{
-					auto opt_tile_id = cur_cell_value.expect_value<std::string_view>();
-					if(!opt_tile_id)
-					{
-						continue;
-					}
-					cur_point_link.from_tile_id = opt_tile_id.value();
-				}
-				else if(current_header_name == "to_tile_id")
-				{
-					auto opt_tile_id = cur_cell_value.expect_value<std::string_view>();
-					if(!opt_tile_id)
-					{
-						continue;
-					}
-					cur_point_link.to_tile_id = opt_tile_id.value();
-				}
-				else if(current_header_name == "opacity")
-				{
-					auto opt_opacity = cur_cell_value.expect_value<float>();
-					if(!opt_opacity)
-					{
-						continue;
-					}
-					cur_point_link.opacity = opt_opacity.value();
-				}
-				else if(current_header_name == "color")
-				{
-					auto opt_color = read_color_from_cell(point_link_sheet, cur_cell_value);
-					if(!opt_color)
-					{
-						continue;
-					}
-					cur_point_link.fill_color = opt_color.value();
-				}
-				else if(current_header_name == "ref_color")
-				{
-					auto opt_color = read_color_from_cell(point_link_sheet, cur_cell_value);
-					if(!opt_color)
-					{
-						continue;
-					}
-					cur_point_link.fill_color = opt_color.value();
-				}
-				else if(current_header_name == "from_pos_idx")
-				{
-					auto opt_from_pos_idx = cur_cell_value.expect_value<int>();
-					if(!opt_from_pos_idx)
-					{
-						continue;
-					}
-					cur_point_link.from_pos_idx = opt_from_pos_idx.value();
-				}
-				else if(current_header_name == "to_pos_idx")
-				{
-					auto opt_to_pos_idx = cur_cell_value.expect_value<int>();
-					if(!opt_to_pos_idx)
-					{
-						continue;
-					}
-					cur_point_link.to_pos_idx = opt_to_pos_idx.value();
-				}
-				else if(current_header_name == "control_radius_percent")
-				{
-					auto opt_control_radius_percent = cur_cell_value.expect_value<float>();
-					if(!opt_control_radius_percent)
-					{
-						continue;
-					}
-					cur_point_link.control_radius_percent = opt_control_radius_percent.value();
+					cur_point_link.fill_color = temp_color.value();
 				}
 			}
 			if(cur_point_link.link_id.empty())
@@ -626,7 +418,7 @@ namespace
 		}
 	} 
 
-	void read_range_link_sheet(const typed_worksheet& range_link_sheet, std::unordered_map<std::string_view, model::range_link>& all_range_links)
+	void read_range_link_sheet(const typed_worksheet& current_sheet, std::unordered_map<std::string_view, model::range_link>& all_range_links)
 	{
 		// point_link headers link_id(string) from_tile_id(string) from_pos_idx_begin(int) from_pos_idx_end(int) to_tile_id(string) to_pos_idx_begin(int)  to_pos_idx_end(int) color(RGB) ref_color(ref) opacity(float)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
@@ -651,129 +443,51 @@ namespace
 		
 		sheet_headers["control_radius_percent"] = new typed_header(new typed_node_type_descriptor(basic_value_type::number_float), "control_radius_percent", "");
 
-		auto header_match = range_link_sheet.check_header_match(sheet_headers, "link_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
+		auto header_match = current_sheet.check_header_match(sheet_headers, "link_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
 		if(!header_match)
 		{
-			std::cerr<<"header for range_link description mismatch for sheet "<<range_link_sheet._name<<std::endl;
+			std::cerr<<"header for range_link description mismatch for sheet "<<current_sheet._name<<std::endl;
 			return;
 		}
-		const vector<const typed_header*>& all_headers = range_link_sheet.get_typed_headers();
-		const auto& all_row_info = range_link_sheet.get_all_typed_row_info();
+		const vector<const typed_header*>& all_headers = current_sheet.get_typed_headers();
+		vector<string_view> header_names = { "link_id", "from_tile_id", "to_tile_id", "from_pos_idx_begin", "to_pos_idx_begin", "from_pos_idx_end", "to_pos_idx_end", "color", "ref_color", "opacity" , "control_radius_percent" , "is_cross"};
+		const vector<uint32_t>& header_indexes = current_sheet.get_header_index_vector(header_names);
+		if (header_indexes.empty())
+		{
+			return;
+		}
+		uint32_t ref_color_idx = header_indexes[7];
+		const auto& all_row_info = current_sheet.get_all_typed_row_info();
 		for(int i = 1; i< all_row_info.size(); i++)
 		{
 			model::range_link cur_range_link;
-			for(int j = 1; j< all_row_info[i].size(); j++)
+			auto[opt_link_id, opt_from_tile, opt_to_tile, opt_from_pos_begin, opt_to_pos_begin, opt_from_pos_end, opt_to_pos_end, opt_color, opt_ref_color, opt_opacity, opt_control, opt_cross] =
+				current_sheet.try_convert_row<string_view, string_view, string_view, int, int,int, int,  tuple<int, int, int>, string_view, float, float, bool>(i, header_indexes);
+			if (!(opt_link_id && opt_from_tile && opt_to_tile && opt_from_pos_begin && opt_from_pos_end && opt_to_pos_begin && opt_to_pos_end && opt_opacity && opt_opacity && opt_cross))
 			{
-				const auto& cur_cell_value = all_row_info[i][j];
-				uint32_t column_idx = j;
-				string_view current_header_name = all_headers[column_idx - 1]->header_name;
-				if(current_header_name == "link_id")
+				continue;
+			}
+			cur_range_link.link_id = opt_link_id.value();
+			cur_range_link.from_tile_id = opt_from_tile.value();
+			cur_range_link.from_pos_begin_idx = opt_from_pos_begin.value();
+			cur_range_link.to_pos_begin_idx = opt_to_pos_begin.value();
+			cur_range_link.from_pos_end_idx = opt_from_pos_end.value();
+			cur_range_link.to_pos_end_idx = opt_to_pos_end.value();
+			cur_range_link.opacity = opt_opacity.value();
+			cur_range_link.control_radius_percent = opt_control.value();
+			cur_range_link.is_cross = opt_cross.value();
+			if (opt_color)
+			{
+				auto color_value = opt_color.value();
+				cur_range_link.fill_color = Color(get<0>(color_value), get<1>(color_value), get<2>(color_value));
+			}
+			if (opt_ref_color)
+			{
+				auto temp_color = read_ref_color(current_sheet
+					, ref_color_idx, opt_ref_color.value());
+				if (temp_color)
 				{
-					auto opt_link_id = cur_cell_value.expect_value<std::string_view>();
-					if(!opt_link_id)
-					{
-						continue;
-					}
-					cur_range_link.link_id = opt_link_id.value();
-				}
-				else if(current_header_name == "from_tile_id")
-				{
-					auto opt_tile_id = cur_cell_value.expect_value<std::string_view>();
-					if(!opt_tile_id)
-					{
-						continue;
-					}
-					cur_range_link.from_tile_id = opt_tile_id.value();
-				}
-				else if(current_header_name == "to_tile_id")
-				{
-					auto opt_tile_id = cur_cell_value.expect_value<std::string_view>();
-					if(!opt_tile_id)
-					{
-						continue;
-					}
-					cur_range_link.to_tile_id = opt_tile_id.value();
-				}
-				else if(current_header_name == "opacity")
-				{
-					auto opt_opacity = cur_cell_value.expect_value<float>();
-					if(!opt_opacity)
-					{
-						continue;
-					}
-					cur_range_link.opacity = opt_opacity.value();
-				}
-				else if(current_header_name == "color")
-				{
-					auto opt_color = read_color_from_cell(range_link_sheet, cur_cell_value);
-					if(!opt_color)
-					{
-						continue;
-					}
-					cur_range_link.fill_color = opt_color.value();
-				}
-				else if(current_header_name == "ref_color")
-				{
-					auto opt_color = read_color_from_cell(range_link_sheet, cur_cell_value);
-					if(!opt_color)
-					{
-						continue;
-					}
-					cur_range_link.fill_color = opt_color.value();
-				}
-				else if(current_header_name == "from_pos_begin_idx")
-				{
-					auto opt_from_pos_idx = cur_cell_value.expect_value<int>();
-					if(!opt_from_pos_idx)
-					{
-						continue;
-					}
-					cur_range_link.from_pos_begin_idx = opt_from_pos_idx.value();
-				}
-				else if(current_header_name == "to_pos_begin_idx")
-				{
-					auto opt_to_pos_idx = cur_cell_value.expect_value<int>();
-					if(!opt_to_pos_idx)
-					{
-						continue;
-					}
-					cur_range_link.to_pos_begin_idx = opt_to_pos_idx.value();
-				}
-				else if(current_header_name == "from_pos_end_idx")
-				{
-					auto opt_from_pos_idx = cur_cell_value.expect_value<int>();
-					if(!opt_from_pos_idx)
-					{
-						continue;
-					}
-					cur_range_link.from_pos_end_idx = opt_from_pos_idx.value();
-				}
-				else if(current_header_name == "to_pos_end_idx")
-				{
-					auto opt_to_pos_idx = cur_cell_value.expect_value<int>();
-					if(!opt_to_pos_idx)
-					{
-						continue;
-					}
-					cur_range_link.to_pos_end_idx = opt_to_pos_idx.value();
-				}
-				else if(current_header_name == "is_cross")
-				{
-					auto opt_is_cross = cur_cell_value.expect_value<bool>();
-					if(!opt_is_cross)
-					{
-						continue;
-					}
-					cur_range_link.is_cross = opt_is_cross.value();
-				}
-				else if(current_header_name == "control_radius_percent")
-				{
-					auto opt_control_radius_percent = cur_cell_value.expect_value<float>();
-					if(!opt_control_radius_percent)
-					{
-						continue;
-					}
-					cur_range_link.control_radius_percent = opt_control_radius_percent.value();
+					cur_range_link.fill_color = temp_color.value();
 				}
 			}
 			if(cur_range_link.link_id.empty())
@@ -816,7 +530,7 @@ namespace
 			{
 				const auto& cur_cell_value = all_row_info[i][j];
 				uint32_t column_idx = j;
-				string_view current_header_name = all_headers[column_idx - 1]->header_name;
+				string_view current_header_name = all_headers[column_idx]->header_name;
 				if(current_header_name == "config_key")
 				{
 					auto opt_config_key = cur_cell_value.expect_value<string_view>();
@@ -985,7 +699,7 @@ namespace
 			{
 				const auto&  cur_cell_value = all_row_info[i][j];
 				uint32_t column_idx = j;
-				string_view current_header_name = all_headers[column_idx - 1]->header_name;
+				string_view current_header_name = all_headers[column_idx]->header_name;
 				if(current_header_name == "sheet_name")
 				{
 					auto opt_sheet_name = cur_cell_value.expect_value<string_view>();
@@ -1098,30 +812,6 @@ namespace circos
 			draw_collections(svg_graph, cur_collection);
 		}
 
-	}
-	template <typename args..., size_t... arg_idx>
-	tuple<optional<args>...> try_convert_row(const vector<typed_header*> headers, const vector<typed_value>& all_values, const unordered_map<string_view, uint32_t>& name_to_column, std::index_sequence<arg_idx...>)
-	{
-		if(sizeof...(args) != headers.size())
-		{
-			return make_tuple(optional<args>()...);
-		}
-		return make_tuple(try_convert_cell<args>(headers[arg_idx], all_values, name_to_column));
-	}
-	template <typename T>
-	optional<T> try_convert_cell(const typed_header* cur_header, const vector<typed_value>& all_values, const unordered_map<string_view, uint32_t>& name_to_column)
-	{
-		auto column_iter = name_to_column.find(cur_header->name);
-		if(column_iter == name_to_column.end())
-		{
-			return nullopt;
-		}
-		uint32_t column_idx = column_iter->second;
-		if(column_idx >= all_values.size())
-		{
-			return nullopt;
-		}
-		return all_values[column_idx].expect_value<T>();
 	}
 }
 #endif
