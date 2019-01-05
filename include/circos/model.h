@@ -117,7 +117,9 @@ namespace circos::model
 		float scale;
 		Color base_color;
 		Color max_color;
-		std::string_view tile_id;
+		std::uint32_t point_size;
+		std::uint32_t stroke_size;
+
 	};
 
 	struct model_config

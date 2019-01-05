@@ -33,6 +33,7 @@ namespace
 		point_link,
 		range_link,
 		config,
+		circle_tick,
 	};
 	std::optional<Color> read_ref_color(const typed_worksheet& cur_worksheet, uint32_t ref_header_idx, string_view color_name)
 	{
@@ -272,7 +273,7 @@ namespace
 
 		sheet_headers["width"] = new typed_header(new typed_node_type_descriptor(basic_value_type::number_32), "width", "");
 		sheet_headers["height"] = new typed_header(new typed_node_type_descriptor(basic_value_type::number_32), "height", "");
-		
+		sheet_headers["gap"] = new typed_header(new typed_node_type_descriptor(basic_value_type::number_32), "gap", "");
 		auto color_type_detail = make_tuple(new typed_node_type_descriptor(basic_value_type::number_32), 3, ',');
 		sheet_headers["color"] = new typed_header(new typed_node_type_descriptor(color_type_detail), "color", "");
 
@@ -285,7 +286,7 @@ namespace
 			return;
 		}
 		const vector<const typed_header*>& all_headers = current_sheet.get_typed_headers();
-		vector<string_view> header_names = { "tick_id", "circle_id", "width", "height", "color", "ref_color", "opacity"};
+		vector<string_view> header_names = { "tick_id", "circle_id", "width", "height", "color", "ref_color", "opacity", "gap"};
 		const vector<uint32_t>& header_indexes = current_sheet.get_header_index_vector(header_names);
 		if (header_indexes.empty())
 		{
@@ -296,9 +297,9 @@ namespace
 		for(int i = 1; i< all_row_info.size(); i++)
 		{
 			model::circle_tick cur_circle_tick;
-			auto[opt_tick_id, opt_circle_id, opt_width, opt_height, opt_color, opt_ref_color, opt_opacity] =
-				current_sheet.try_convert_row<string_view, string_view, int, int, tuple<int, int, int>, string_view, float>(i, header_indexes);
-			if (!(opt_tick_id && opt_circle_id && opt_width && opt_height && opt_opacity))
+			auto[opt_tick_id, opt_circle_id, opt_width, opt_height, opt_color, opt_ref_color, opt_opacity, opt_gap] =
+				current_sheet.try_convert_row<string_view, string_view, int, int, tuple<int, int, int>, string_view, float, int>(i, header_indexes);
+			if (!(opt_tick_id && opt_circle_id && opt_width && opt_height && opt_opacity&& opt_gap))
 			{
 				continue;
 			}
@@ -308,6 +309,7 @@ namespace
 			cur_circle_tick.height = opt_height.value();
 			cur_circle_tick.opacity = opt_opacity.value();
 			cur_circle_tick.width = opt_width.value();
+			cur_circle_tick.gap = opt_gap.value()
 			if (opt_color)
 			{
 				auto color_value = opt_color.value();
@@ -672,6 +674,9 @@ namespace
 			break;
 		case sheet_type::range_link:
 			read_range_link_sheet(sheet_content, in_model.range_links);
+			break;
+		case sheet_type::circle_tick:
+			read_circle_tick_sheet(sheet_content, in_model.circle_ticks);
 			break;
 		default:
 			break;
