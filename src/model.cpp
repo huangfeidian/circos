@@ -83,11 +83,11 @@ namespace circos::model
 			{
 				continue;
 			}
-			int total_count = circle_ranges[circle_id] / cur_circle.gap;
+			int total_count = circle_ranges[circle_id] / cur_tick.gap;
 			double angle_by_unit = pi() * 2 / circle_ranges[circle_id];
 			for(int i = 0; i < total_count; i++)
 			{
-				Line cur_tick_line = Line(Point::radius_point(cur_circle.outer_radius, amplify_angle::from_rad(i * cur_circle.gap * angle_by_unit)), Point::radius_point(cur_circle.outer_radius + cur_tick.height, amplify_angle::from_rad(i * cur_circle.gap * angle_by_unit)), cur_tick.fill_color, cur_tick.width, cur_tick.opacity);
+				Line cur_tick_line = Line(Point::radius_point(cur_circle.outer_radius, amplify_angle::from_rad(i * cur_tick.gap * angle_by_unit), config.center), Point::radius_point(cur_circle.outer_radius + cur_tick.height, amplify_angle::from_rad(i * cur_tick.gap * angle_by_unit), config.center), cur_tick.fill_color, cur_tick.width, cur_tick.opacity);
 				pre_collection.lines.push_back(cur_tick_line);
 			}
 		}

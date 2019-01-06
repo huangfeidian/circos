@@ -279,7 +279,7 @@ namespace
 
 		sheet_headers["opacity"] = new typed_header(new typed_node_type_descriptor(basic_value_type::number_float), "opacity", "");
 
-		auto header_match = current_sheet.check_header_match(sheet_headers, "circle_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
+		auto header_match = current_sheet.check_header_match(sheet_headers, "tick_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
 		if(!header_match)
 		{
 			std::cerr<<"header for circle_tick description mismatch for sheet "<<current_sheet._name<<std::endl;
@@ -309,7 +309,7 @@ namespace
 			cur_circle_tick.height = opt_height.value();
 			cur_circle_tick.opacity = opt_opacity.value();
 			cur_circle_tick.width = opt_width.value();
-			cur_circle_tick.gap = opt_gap.value()
+			cur_circle_tick.gap = opt_gap.value();
 			if (opt_color)
 			{
 				auto color_value = opt_color.value();
@@ -335,7 +335,7 @@ namespace
 				continue;
 			}
 
-			all_circle_ticks[cur_circle_tick.circle_id] = cur_circle_tick;
+			all_circle_ticks[cur_circle_tick.circle_tick_id] = cur_circle_tick;
 		}
 	} 
 
@@ -651,7 +651,7 @@ namespace
 	}
 	void read_sheet_content_by_role(string_view sheet_role, const typed_worksheet& sheet_content, model::model& in_model)
 	{
-		const static unordered_map<string_view, sheet_type> avail_types = {{string_view("config"), sheet_type::config}, {string_view("circle"), sheet_type::circle}, {string_view("tile"), sheet_type::tile}, {string_view("point_link"), sheet_type::point_link}, {string_view("range_link"), sheet_type::range_link}, {string_view("color"), sheet_type::colors}};
+		const static unordered_map<string_view, sheet_type> avail_types = { {string_view("config"), sheet_type::config}, {string_view("circle"), sheet_type::circle}, {string_view("tile"), sheet_type::tile}, {string_view("point_link"), sheet_type::point_link}, {string_view("range_link"), sheet_type::range_link}, {string_view("color"), sheet_type::colors}, {string_view("circle_tick"), sheet_type::circle_tick} };
 		auto sheet_type_iter = avail_types.find(sheet_role);
 		if(sheet_type_iter == avail_types.cend())
 		{
