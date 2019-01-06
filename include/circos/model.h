@@ -82,7 +82,16 @@ namespace circos::model
 		float control_radius_percent;
 
 	};
-
+	struct tick_on_tile
+	{
+		std::string_view tick_tile_id;
+		std::string_view tile_id;
+		int gap;
+		int height;
+		int width;
+		Color fill_color;
+		float opacity;
+	};
 	struct fill_ontile
 	{
 		std::string_view tile_id;
@@ -98,17 +107,17 @@ namespace circos::model
 		std::string_view font_name;
 		text_align_type align_type;
 	};
-	struct tick_ontile: public fill_ontile
-	{
-		int tick_gap;
-		int width;
-		int height;
-	};
-	struct value_ontile: public fill_ontile
+
+	struct single_value_ontile: public fill_ontile
 	{
 		float value;
 	};
 	
+	struct two_value_ontile : public fill_ontile
+	{
+		float value_1;
+		float value_2;
+	};
 	struct value_ontile_config
 	{
 		circos::value_on_tile_draw_type draw_type;
@@ -142,6 +151,7 @@ namespace circos::model
 		std::unordered_map<std::string_view, circle_tick> circle_ticks;
 		std::unordered_map<std::string_view, point_link> point_links;
 		std::unordered_map<std::string_view, range_link> range_links;
+		std::unordered_map<std::string_view, tick_on_tile> tile_ticks;
 		void to_shapes(shape_collection& pre_collection);
 	};
 }

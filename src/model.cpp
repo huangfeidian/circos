@@ -160,5 +160,26 @@ namespace circos::model
 			pre_collection.ribbons.push_back(cur_ribbon);
 		}
 
+		// 6. 处理tile上的刻度
+		for (const auto& i : tile_ticks)
+		{
+			const auto& cur_tick = i.second;
+			auto tile_id = cur_tick.tile_id;
+			auto cur_tile_iter = tiles.find(tile_id);
+			if (cur_tile_iter == tiles.end())
+			{
+				continue;
+			}
+			const auto& from_tile = cur_tile_iter->second;
+			const auto& from_circle = circles[from_tile.circle_id];
+			int total_count = from_tile.width / cur_tick.gap;
+			double angle_by_unit = from_circle.angle_per_unit;
+			for (int i = 0; i < total_count; i++)
+			{
+				Line cur_tick_line = Line(Point::radius_point(from_circle.outer_radius, amplify_angle::from_rad(i * cur_tick.gap * angle_by_unit + from_tile.angle_begin), config.center), Point::radius_point(from_circle.outer_radius + cur_tick.height, amplify_angle::from_rad(i * cur_tick.gap * angle_by_unit + from_tile.angle_begin), config.center), cur_tick.fill_color, cur_tick.width, cur_tick.opacity);
+				pre_collection.lines.push_back(cur_tick_line);
+			}
+		}
+
 	}
 }
