@@ -186,5 +186,20 @@ namespace circos
 				pre_paths.emplace_back(std::move(new_path));
 			}
 		}
+
+		static Line cacl_tangent_clock_wise(Point center, Point tangent_point)
+		{
+			// 计算圆上的一点的顺时针切线
+			int diff_x = tangent_point.x - center.x;
+			int diff_y = tangent_point.y - center.y;
+			int new_diff_x = -1 * diff_y;
+			int new_diff_y = diff_x;
+			if ((diff_x * new_diff_y - new_diff_x * diff_y) < 0)
+			{
+				new_diff_x *= -1;
+				new_diff_y *= -1;
+			}
+			return Line(tangent_point, tangent_point + Point(new_diff_x, new_diff_y));
+		}
 	};
 }

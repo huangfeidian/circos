@@ -181,5 +181,38 @@ namespace circos::model
 			}
 		}
 
+		// 7. 处理line_text
+
+		for (const auto& i : line_texts)
+		{
+			const auto& cur_line_text = i.second;
+			auto from_tile_iter = tiles.find(cur_line_text.from_tile_id);
+			if (from_tile_iter == tiles.end())
+			{
+				continue;
+			}
+			const auto& from_tile = from_tile_iter->second;
+			const auto& from_circle = circles[from_tile.circle_id];
+			auto from_angle = from_tile.angle_begin + from_circle.angle_per_unit * cur_line_text.from_pos_idx;
+			auto from_point = Point::radius_point(from_circle.outer_radius, amplify_angle::from_rad(from_angle), config.center);
+			if (cur_line_text.from_tile_id == cur_line_text.to_tile_id && cur_line_text.from_pos_idx == cur_line_text.to_pos_idx)
+			{
+				auto tangent_line = Line::cacl_tangent_clock_wise(config.center, from_point);
+				pre_collection.line_texts.push_back(LineText(tangent_line, cur_line_text.utf8_text, cur_line_text.font_name, cur_line_text.font_size, cur_line_text.fill_color, cur_line_text.opacity));
+				continue;
+			}
+			auto to_tile_iter = tiles.find(cur_line_text.to_tile_id);
+			if (to_tile_iter == tiles.end())
+			{
+				continue;
+			}
+			const auto& to_tile = to_tile_iter->second;
+			const auto& to_circle = circles[to_tile.circle_id];
+			auto to_angle = to_tile.angle_begin + to_circle.angle_per_unit * cur_line_text.to_pos_idx;
+			auto to_point = Point::radius_point(to_circle.outer_radius, amplify_angle::from_rad(to_angle), config.center);
+			auto text_line = Line(from_point, to_point);
+			pre_collection.line_texts.push_back(LineText(text_line, cur_line_text.utf8_text, cur_line_text.font_name, cur_line_text.font_size, cur_line_text.fill_color, cur_line_text.opacity));
+
+		}
 	}
 }

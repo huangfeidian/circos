@@ -419,7 +419,94 @@ namespace
 			all_point_links[cur_point_link.link_id] = cur_point_link;
 		}
 	} 
+	void read_line_text_sheet(const typed_worksheet& current_sheet, std::unordered_map<std::string_view, model::line_text>& all_line_texts)
+	{
+		// line_text headers line_text_id(string) from_tile_id(string) from_pos_idx(int) to_tile_id(string) to_pos_idx(int)  text(string) font_name(string) font_size(uint16) color(RGB) ref_color(ref) opacity(float)
+		std::unordered_map<string_view, const typed_header*> sheet_headers;
+		sheet_headers["line_text_id"] = new typed_header(new typed_node_type_descriptor(basic_value_type::string), "line_text_id", "");
 
+		sheet_headers["from_tile_id"] = new typed_header(new typed_node_type_descriptor(basic_value_type::string), "from_tile_id", "");
+
+		sheet_headers["to_tile_id"] = new typed_header(new typed_node_type_descriptor(basic_value_type::string), "to_tile_id", "");
+
+		sheet_headers["from_pos_idx"] = new typed_header(new typed_node_type_descriptor(basic_value_type::number_32), "from_pos_idx", "");
+		sheet_headers["to_pos_idx"] = new typed_header(new typed_node_type_descriptor(basic_value_type::number_32), "to_pos_idx", "");
+
+		sheet_headers["text"] = new typed_header(new typed_node_type_descriptor(basic_value_type::string), "text", "");
+		sheet_headers["font_name"] = new typed_header(new typed_node_type_descriptor(basic_value_type::string), "font_name", "");
+		sheet_headers["font_size"] = new typed_header(new typed_node_type_descriptor(basic_value_type::number_u32), "font_size", "");
+
+		auto color_type_detail = make_tuple(new typed_node_type_descriptor(basic_value_type::number_32), 3, ',');
+		sheet_headers["color"] = new typed_header(new typed_node_type_descriptor(color_type_detail), "color", "");
+
+		sheet_headers["opacity"] = new typed_header(new typed_node_type_descriptor(basic_value_type::number_float), "opacity", "");
+
+
+
+		auto header_match = current_sheet.check_header_match(sheet_headers, "link_id", std::vector<std::string_view>({}), std::vector<std::string_view>({ "ref_color" }));
+		if (!header_match)
+		{
+			std::cerr << "header for point_link description mismatch for sheet " << current_sheet._name << std::endl;
+			return;
+		}
+		const vector<const typed_header*>& all_headers = current_sheet.get_typed_headers();
+		vector<string_view> header_names = { "link_id", "from_tile_id", "to_tile_id", "from_pos_idx", "to_pos_idx", "text", "font_name", "font_size", "color", "ref_color", "opacity" , "control_radius_percent" };
+		const vector<uint32_t>& header_indexes = current_sheet.get_header_index_vector(header_names);
+		if (header_indexes.empty())
+		{
+			return;
+		}
+		uint32_t ref_color_idx = header_indexes[9];
+		const auto& all_row_info = current_sheet.get_all_typed_row_info();
+		for (int i = 1; i < all_row_info.size(); i++)
+		{
+			model::line_text cur_line_text;
+
+			auto[opt_link_id, opt_from_tile, opt_to_tile, opt_from_pos, opt_to_pos, opt_text, opt_font_name, opt_font_size, opt_color, opt_ref_color, opt_opacity, opt_control] =
+				current_sheet.try_convert_row<string_view, string_view, string_view, int, int, string_view, string_view, int, tuple<int, int, int>, string_view, float, float>(i, header_indexes);
+			if (!(opt_link_id && opt_from_tile && opt_from_pos && opt_to_tile && opt_to_pos && opt_text&& opt_font_name && opt_font_size&& opt_opacity && opt_control))
+			{
+				continue;
+			}
+			cur_line_text.line_text_id = opt_link_id.value();
+			cur_line_text.from_tile_id = opt_from_tile.value();
+			cur_line_text.to_tile_id = opt_to_tile.value();
+			cur_line_text.from_pos_idx = opt_from_pos.value();
+			cur_line_text.to_pos_idx = opt_to_pos.value();
+			cur_line_text.utf8_text = opt_text.value();
+			cur_line_text.font_name = opt_font_name.value();
+			cur_line_text.font_size = static_cast<std::uint16_t>(opt_font_size.value());
+
+			cur_line_text.opacity = opt_opacity.value();
+			if (opt_color)
+			{
+				auto color_value = opt_color.value();
+				cur_line_text.fill_color = Color(get<0>(color_value), get<1>(color_value), get<2>(color_value));
+			}
+			if (opt_ref_color)
+			{
+				auto temp_color = read_ref_color(current_sheet
+					, ref_color_idx, opt_ref_color.value());
+				if (temp_color)
+				{
+					cur_line_text.fill_color = temp_color.value();
+				}
+			}
+			if (cur_line_text.line_text_id.empty())
+			{
+				std::cerr << "cant find line_text for row " << i << std::endl;
+				continue;
+			}
+			if (all_line_texts.find(cur_line_text.line_text_id) != all_line_texts.end())
+			{
+				std::cerr << "duplicated line_text_id " << cur_line_text.line_text_id << std::endl;
+				continue;
+			}
+			
+
+			all_line_texts[cur_line_text.line_text_id] = cur_line_text;
+		}
+	}
 	void read_range_link_sheet(const typed_worksheet& current_sheet, std::unordered_map<std::string_view, model::range_link>& all_range_links)
 	{
 		// point_link headers link_id(string) from_tile_id(string) from_pos_idx_begin(int) from_pos_idx_end(int) to_tile_id(string) to_pos_idx_begin(int)  to_pos_idx_end(int) color(RGB) ref_color(ref) opacity(float)

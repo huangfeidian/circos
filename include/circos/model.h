@@ -12,6 +12,7 @@
 #include "shapes/line.h"
 #include "shapes/arc.h"
 #include "shapes/tile.h"
+#include "shapes/line_text.h"
 
 
 namespace circos::model
@@ -66,6 +67,21 @@ namespace circos::model
 		float opacity;
 		int width;
 
+	};
+	struct line_text
+	{
+		// 一条直线上的文本
+		// 如果初始位置与结束位置相同 则代表此位置的顺时针切线方向
+		std::string_view line_text_id;
+		std::string_view from_tile_id;
+		int from_pos_idx;
+		std::string_view to_tile_id;
+		int to_pos_idx;
+		std::string_view utf8_text;
+		std::string_view font_name;
+		std::uint16_t font_size;
+		Color fill_color;
+		float opacity;
 	};
 	struct range_link
 	{
@@ -152,6 +168,7 @@ namespace circos::model
 		std::unordered_map<std::string_view, point_link> point_links;
 		std::unordered_map<std::string_view, range_link> range_links;
 		std::unordered_map<std::string_view, tick_on_tile> tile_ticks;
+		std::unordered_map<std::string_view, line_text> line_texts;
 		void to_shapes(shape_collection& pre_collection);
 	};
 }

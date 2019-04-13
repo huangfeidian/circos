@@ -1,8 +1,10 @@
 ﻿#include <unordered_map>
 #include <string>
+#include <sstream>
 #include <circos/drawer/png_drawer.h>
 #include <circos/shape_collection.h>
 #include <iostream>
+#include <fstream>
 
 namespace circos
 {
@@ -71,7 +73,7 @@ namespace circos
 			std:cerr << "unknown font " << font_name << std::endl;
 			exit(1);
 		}
-		ifstream font_file(font_iter->second.first,ios::binary);
+		ifstream font_file(font_iter->second.first, ios::binary);
 		copy(std::istreambuf_iterator<char>(font_file), std::istreambuf_iterator<char>(), back_inserter(result));
 		return result;
 
@@ -451,12 +453,16 @@ namespace circos
 			}
 		}
 	}
+#endif
 	PngImage& PngImage::operator<<(const LineText& line_text)
 	{
+#ifdef USE_TEXT
 		draw_text(line_text.on_line, line_text.utf8_text, line_text.font_name, line_text.font_size, line_text.color, line_text.opacity);
+#endif // USE_TEXT
+
 		return *this;
 	}
-#endif
+
 	vector<Point> PngImage::path(const Line& line) const
 	{
 		return line.path();

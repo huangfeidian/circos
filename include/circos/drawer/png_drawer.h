@@ -92,6 +92,7 @@ namespace circos
 		vector<Point> path(const Line& line) const;
 		PngImage& operator<<( const Line& line);
 
+		PngImage& operator<<(const LineText& line_text);
 		vector<Point> path(const Arc& arc) const;
 		PngImage& operator<<(const Arc& arc);
 
