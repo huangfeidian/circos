@@ -16,10 +16,10 @@ void shape_test_1()
 	Rectangle rect_test_1(Point(100, 100), Point(200, 100), Color(128, 105, 180), 100, true);
 	Rectangle rect_test_2(Point(100, 100), Point(200, 200), Color(0, 105, 180), 141, true,0.5);
 	Point center(400, 400);
-	auto c_pi = 180 * amplify_angle::factor;
+	auto c_pi = amplify_angle::from_angle(180);
 	Circle circle_test_1(360, Point(400, 400), Color(0, 255, 180), 0.5, false);
 	Tile tile(center, 300, 350, c_pi * 11 / 6, c_pi / 4, Color(200, 230, 108));
-	Arc arc(300, 11 * c_pi / 6, c_pi / 4, Point(400, 400), Color(0, 255, 100), 0, 1.0, 4);
+	Arc arc(300, c_pi * 11 / 6, c_pi / 4, Point(400, 400), Color(0, 255, 100), 0, 1.0, 4);
 	Arc arc_1(360, c_pi / 6, c_pi / 3, center, Color(128, 128, 128), 0, 1.0, 2);
 	Arc arc_2(360, c_pi * 2 / 3, c_pi * 5 / 6, center, Color(128, 128, 128), 0, 1.0, 8);
 	Arc arc_3(360, c_pi * 5 / 6 + c_pi, c_pi * 2 / 3 + c_pi, center, Color(128, 128, 128));
@@ -79,8 +79,8 @@ void arc_test()
 	string png_filename = "circos_arc_test_1.png";
 	std::unordered_map<string, pair<string, string>> font_info{ {"yahei",make_pair("C:/Windows/Fonts/msyhl.ttc", "microsoft yahei")} };
 	Point center(400, 400);
-	auto c_pi = 180 * amplify_angle::factor;
-	Arc arc(300, 11 * c_pi / 6, c_pi / 4, Point(400, 400), Color(0, 255, 100), 0, 1.0, 4);
+	auto c_pi = amplify_angle::from_angle(180);
+	Arc arc(300, c_pi * 11 / 6, c_pi / 4, Point(400, 400), Color(0, 255, 100), 0, 1.0, 4);
 	Arc arc_1(360, c_pi / 6, c_pi / 3, center, Color(128, 128, 128), 0, 1.0, 2);
 	Arc arc_2(360, c_pi * 2 / 3, c_pi * 5 / 6, center, Color(128, 128, 128), 0, 1.0, 8);
 	Arc arc_3(360, c_pi * 5 / 6 + c_pi, c_pi * 2 / 3 + c_pi, center, Color(128, 128, 128));
@@ -96,8 +96,8 @@ void arc_test()
 }
 void circle_test()
 {
-	auto c_pi = 180 * amplify_angle::factor;
-	auto path_points = Arc::arc_path(0, c_pi / 4, 100);
+	auto c_pi = amplify_angle::from_angle(180);
+	auto path_points = Arc::arc_path(amplify_angle::from_angle(0), c_pi / 4, 100);
 	for (const auto& i : path_points)
 	{
 		cout << i.x << "," << i.y<<endl;
@@ -109,7 +109,7 @@ void flood_test()
 	int radius = 2000;
 	Point center(radius, radius);
 	Color background_color = Color(255, 255, 255);
-	Tile cur_tile(center, 1600, 1700, amplify_angle::rad_to_angle_percent(4.4369), amplify_angle::rad_to_angle_percent(4.9811), Color(0, 0, 0), 1, true, 1);
+	Tile cur_tile(center, 1600, 1700, amplify_angle::from_rad(4.4369), amplify_angle::from_rad(4.9811), Color(0, 0, 0), 1, true, 1);
 	string png_filename = "circos_arc_test_1.png";
 	std::unordered_map<string, pair<string, string>> font_info{ {"yahei",make_pair("C:/Windows/Fonts/msyhl.ttc", "microsoft yahei")} };
 	PngImage png_image(font_info, png_filename, radius, background_color);

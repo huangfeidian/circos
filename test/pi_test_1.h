@@ -10,6 +10,7 @@
 #include <circos/basics/color.h>
 #include <random>
 #include <algorithm>
+#include <memory>
 
 using namespace std;
 using namespace circos;
@@ -37,7 +38,7 @@ void pi_test_1(void)
 		}
 
 	}
-	vector<string> all_temp_string;
+	vector<std::unique_ptr<string>> all_temp_string;
 	i = 0;
 	vector<int> chunk_size(10, 0); // 记录每个块的大小
 	chunk_size[3] = 1;
@@ -79,8 +80,8 @@ void pi_test_1(void)
 
 	model::model pi_model;
 	model::circle cur_circle;
-	all_temp_string.push_back("pi");
-	cur_circle.circle_id = all_temp_string.back();
+	all_temp_string.push_back(std::make_unique<std::string>("pi"));
+	cur_circle.circle_id = std::string_view(all_temp_string.back()->data(), all_temp_string.back()->size());
 	cur_circle.inner_radius = inner_radius;
 	cur_circle.outer_radius = outer_radius;
 	cur_circle.gap = pi_str.size() / 10;
@@ -96,8 +97,8 @@ void pi_test_1(void)
 	for (i = 0; i < 10; i++)
 	{
 		tiles[i].circle_id = cur_circle.circle_id;
-		all_temp_string.push_back(to_string(i));
-		tiles[i].tile_id = all_temp_string.back();
+		all_temp_string.push_back(std::make_unique<std::string>(to_string(i)));
+		tiles[i].tile_id = std::string_view(all_temp_string.back()->data(), all_temp_string.back()->size());
 		tiles[i].width = chunk_size[i];
 		tiles[i].fill_color = strand_color[i];
 		tiles[i].opacity = 1.0;
@@ -115,8 +116,8 @@ void pi_test_1(void)
 			auto to_tile_id = tiles[one_link.second.first].tile_id;
 			auto to_pos_idx = one_link.second.second;
 			model::point_link temp_link;
-			all_temp_string.push_back(to_string(id_count++));
-			temp_link.link_id = all_temp_string.back();
+			all_temp_string.push_back(std::make_unique<std::string>(to_string(id_count++)));
+			temp_link.link_id = std::string_view(all_temp_string.back()->data(), all_temp_string.back()->size());
 			temp_link.from_tile_id = from_tile_id;
 			temp_link.from_pos_idx = from_pos_idx;
 			temp_link.to_tile_id = to_tile_id;
