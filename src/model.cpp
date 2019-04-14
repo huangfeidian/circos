@@ -2,6 +2,9 @@
 #include <algorithm>
 #include <numeric>
 #include <unordered_map>
+#include <unordered_set>
+#include <iostream>
+
 namespace circos::model
 {
 	using namespace std;
@@ -214,5 +217,102 @@ namespace circos::model
 			pre_collection.line_texts.push_back(LineText(text_line, cur_line_text.utf8_text, cur_line_text.font_name, cur_line_text.font_size, cur_line_text.fill_color, cur_line_text.opacity));
 
 		}
+
+		// 8. 整理所有的value_on_tile 删除不在同一个circle上的track 剩余的数据在track内排序
+		for (auto& one_track_data : all_value_on_tile_by_track)
+		{
+			// 清空所有不在同一个circle上的data
+			std::string_view on_circle_id;
+			bool invalid_track = false;
+			for (const auto& one_value_data : one_track_data.second)
+			{
+				auto cur_tile_id = one_value_data.tile_id;
+				auto cur_tile_iter = tiles.find(cur_tile_id);
+				if (cur_tile_iter == tiles.end())
+				{
+					invalid_track == true;
+					std::cout << "invalid tile " << cur_tile_id << " on track " << one_track_data.first << std::endl;
+					break;
+				}
+				auto cur_circle_id = cur_tile_iter->second.circle_id;
+				if (cur_circle_id.empty())
+				{
+					std::cout << " invalid data with empty circle_id for tile  " << cur_tile_id << " cur data id " << one_value_data.data_id << std::endl;
+					invalid_track = true;
+					break;
+				}
+				if (on_circle_id.empty())
+				{
+					on_circle_id = cur_circle_id;
+				}
+				if (cur_circle_id != on_circle_id)
+				{
+					std::cout << "data on track " << one_track_data.first << " has more than one circle " << cur_circle_id << " "<< on_circle_id<< std::endl;
+					invalid_track = true;
+					break;
+				}
+			}
+			if (invalid_track)
+			{
+				one_track_data.second.clear();
+				continue;
+			}
+			auto cur_circle_iter = circles.find(on_circle_id);
+			if (cur_circle_iter == circles.end())
+			{
+				one_track_data.second.clear();
+				continue;
+			}
+			const auto& cur_circle = cur_circle_iter->second;
+			for (auto& one_value_data : one_track_data.second)
+			{
+				const auto& cur_tile = tiles[one_value_data.tile_id];
+				one_value_data.angle = cur_tile.angle_begin + cur_circle.angle_per_unit * 0.5 * (one_value_data.begin_pos + one_value_data.end_pos);
+			}
+			std::sort(one_track_data.second.begin(), one_track_data.second.end(), [](const value_on_tile& a, const value_on_tile& b)
+			{
+				return a.angle < b.angle;
+			});
+		}
+		// 9. 输出所有的point track
+		for (const auto& one_track_config_iter : point_track_configs)
+		{
+			auto track_data_iter = all_value_on_tile_by_track.find(one_track_config_iter.first);
+			if (track_data_iter == all_value_on_tile_by_track.end())
+			{
+				std::cout << "invalid point track " << one_track_config_iter.first << std::endl;
+				continue;
+			}
+			const auto& cur_track_data = track_data_iter->second;
+			if (cur_track_data.size() == 0)
+			{
+				continue;
+			}
+			auto cur_circle_id = tiles[cur_track_data[0].tile_id].circle_id;
+			auto cur_circle_radius = circles[cur_circle_id].outer_radius;
+			const auto& cur_track_config = one_track_config_iter.second;
+			cur_circle_radius += cur_track_config.radius_offset;
+			for (const auto& one_point_data : cur_track_data)
+			{
+				auto cur_point_center = Point::radius_point(cur_circle_radius, amplify_angle::from_rad(one_point_data.angle));
+				float progress = 1.0;
+				if (cur_track_config.clamp_data_value.first == cur_track_config.clamp_data_value.second)
+				{
+					progress = 1.0;
+				}
+				else
+				{
+					progress = (one_point_data.data_value - cur_track_config.clamp_data_value.first) / (cur_track_config.clamp_data_value.second - cur_track_config.clamp_data_value.first);
+				}
+				progress = progress > 1.0 ? 1.0 : progress;
+				progress = progress < 0.0 ? 0.0 : progress;
+				auto cur_point_color = Color(cur_track_config.clamp_color.first, cur_track_config.clamp_color.second, progress);
+				int cur_point_size = cur_track_config.clamp_point_size.first * (1 - progress) + (cur_track_config.clamp_point_size.second) * progress;
+				pre_collection.circles.push_back(Circle(cur_point_size, cur_point_center, cur_point_color, 1.0, true));
+
+			}
+			
+		}
+		
 	}
 }

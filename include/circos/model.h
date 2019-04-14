@@ -116,24 +116,34 @@ namespace circos::model
 		Color fill_color;
 	};
 
-	struct text_ontile:public fill_ontile
+	struct value_on_tile
 	{
-		std::string_view text;
-		int font_size;
-		std::string_view font_name;
-		text_align_type align_type;
+		std::string_view data_id;
+		std::string_view track_id;
+		std::string_view tile_id;
+		int begin_pos;
+		int end_pos;
+		float data_value;
+		float angle = 0;
+	};
+	struct point_track_config
+	{
+		std::string_view track_id;
+		std::pair<Color, Color> clamp_color;
+		std::pair<float, float> clamp_data_value;
+		std::pair<int, int> clamp_point_size;
+		int radius_offset;
 	};
 
-	struct single_value_ontile: public fill_ontile
+	struct point_link_track_config
 	{
-		float value;
+		std::string_view track_id;
+		Color line_color;
+		std::pair<float, float> clamp_data_value;
+		std::pair<int, int> clamp_point_offset;
+		bool with_shadow;//是否绘制阴影
 	};
-	
-	struct two_value_ontile : public fill_ontile
-	{
-		float value_1;
-		float value_2;
-	};
+
 	struct value_ontile_config
 	{
 		circos::value_on_tile_draw_type draw_type;
@@ -169,7 +179,11 @@ namespace circos::model
 		std::unordered_map<std::string_view, range_link> range_links;
 		std::unordered_map<std::string_view, tick_on_tile> tile_ticks;
 		std::unordered_map<std::string_view, line_text> line_texts;
-		void to_shapes(shape_collection& pre_collection);
 		std::unordered_map<std::string_view, std::pair<std::string_view, std::string_view>> font_info;
+
+		std::unordered_map<std::string_view, std::vector<value_on_tile>> all_value_on_tile_by_track;
+		std::unordered_map<std::string_view, point_track_config> point_track_configs;
+		void to_shapes(shape_collection& pre_collection);
+		
 	};
 }
