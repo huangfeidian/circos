@@ -55,14 +55,14 @@ namespace circos
 		const string software = "circos implemented in c++";
 		const string title = "circos.png";
 		std::unordered_map<int, vector<Point>> circle_cache;
-		const std::unordered_map<std::string_view, std::pair<std::string, std::string>>& font_info;//所有字体相关文件的存储路径映射
+		const std::unordered_map<std::string_view, std::pair<std::string_view, std::string_view>>& font_info;//所有字体相关文件的存储路径映射
 		//下面是跟freetype相关的成员
 #ifdef USE_TEXT
 		std::unordered_map<std::string_view, vector<unsigned char>> font_cache;//字体文件读入内存
 		FT_Library ft_library;
 #endif
 
-		PngImage(const std::unordered_map<std::string_view, std::pair<std::string, std::string>>& in_font_info,string in_file_name, int in_radius, Color back_color, int compress=8);
+		PngImage(const std::unordered_map<std::string_view, std::pair<std::string_view, std::string_view>>& in_font_info,string in_file_name, int in_radius, Color back_color, int compress=8);
 #ifdef USE_TEXT
 		const vector<unsigned char>& get_font_mem(std::string_view font_name);
 #endif

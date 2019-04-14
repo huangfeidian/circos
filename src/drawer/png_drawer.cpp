@@ -9,7 +9,7 @@
 namespace circos
 {
 	using namespace std;
-	PngImage::PngImage(const unordered_map<string_view, pair<string, string>>& in_font_info, string in_file_name, int in_radius, Color back_color, int compress)
+	PngImage::PngImage(const unordered_map<string_view, pair<string_view, string_view>>& in_font_info, string in_file_name, int in_radius, Color back_color, int compress)
 	: font_info(in_font_info)
 	,file_name(in_file_name)
 	, radius(in_radius)
@@ -73,7 +73,7 @@ namespace circos
 			std:cerr << "unknown font " << font_name << std::endl;
 			exit(1);
 		}
-		ifstream font_file(font_iter->second.first, ios::binary);
+		ifstream font_file(string(font_iter->second.first), ios::binary);
 		std::copy(std::istreambuf_iterator<char>(font_file), std::istreambuf_iterator<char>(), std::back_inserter(result));
 		return result;
 

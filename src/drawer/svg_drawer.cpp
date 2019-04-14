@@ -3,7 +3,7 @@
 #include <string_view>
 namespace circos
 {
-	SvgGraph::SvgGraph(const std::unordered_map<std::string_view, std::pair<std::string, std::string>>& in_font_info,
+	SvgGraph::SvgGraph(const std::unordered_map<std::string_view, std::pair<std::string_view, std::string_view>>& in_font_info,
 		string in_file_name, int in_background_radius, Color in_background_color)
 		: font_info(in_font_info)
 		, file_name(in_file_name)

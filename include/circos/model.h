@@ -170,5 +170,6 @@ namespace circos::model
 		std::unordered_map<std::string_view, tick_on_tile> tile_ticks;
 		std::unordered_map<std::string_view, line_text> line_texts;
 		void to_shapes(shape_collection& pre_collection);
+		std::unordered_map<std::string_view, std::pair<std::string_view, std::string_view>> font_info;
 	};
 }

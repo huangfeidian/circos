@@ -24,6 +24,7 @@ namespace
 	enum class sheet_type
 	{
 		circle,
+		font_info,
 		tile,
 		fill_ontile,
 		line_text,
@@ -685,6 +686,45 @@ namespace
 		}
 		return config_values;
 	}
+	void read_font_info(const typed_worksheet& current_sheet, std::unordered_map<std::string_view, std::pair<std::string_view, std::string_view>>& fonts_info)
+	{
+		// font info headers font_id(str) font_file_path(str) font_web_name(str)
+		std::unordered_map<string_view, const typed_header*> sheet_headers;
+		sheet_headers["font_id"] = new typed_header(new typed_node_type_descriptor(basic_value_type::string), "font_id", "");
+
+		sheet_headers["font_file_path"] = new typed_header(new typed_node_type_descriptor(basic_value_type::string), "font_file_path", "");
+
+		sheet_headers["font_web_name"] = new typed_header(new typed_node_type_descriptor(basic_value_type::string), "font_web_name", "");
+
+		auto header_match = current_sheet.check_header_match(sheet_headers, "font_id", std::vector<std::string_view>({}), std::vector<std::string_view>());
+		if (!header_match)
+		{
+			std::cerr << "header for fonts_info description mismatch for sheet " << current_sheet._name << std::endl;
+			return;
+		}
+		const vector<const typed_header*>& all_headers = current_sheet.get_typed_headers();
+		vector<string_view> header_names = { "font_id", "font_file_path", "font_web_name"};
+		const vector<uint32_t>& header_indexes = current_sheet.get_header_index_vector(header_names);
+		if (header_indexes.empty())
+		{
+			return;
+		}
+		const auto& all_row_info = current_sheet.get_all_typed_row_info();
+		for (int i = 1; i < all_row_info.size(); i++)
+		{
+			model::range_link cur_range_link;
+			auto[opt_font_id, opt_font_path, opt_font_name] =
+				current_sheet.try_convert_row<string_view, string_view, string_view>(i, header_indexes);
+			if (!opt_font_id || !opt_font_name || !opt_font_path)
+			{
+				continue;
+			}
+			fonts_info[opt_font_id.value()] = std::make_pair(opt_font_path.value(), opt_font_name.value());
+
+		}
+
+
+	}
 	bool convert_config_to_model(unordered_map<string_view, typed_value*> config_values, model::model_config& cur_config)
 	{
 		model::model_config new_model_config;
@@ -738,7 +778,7 @@ namespace
 	}
 	void read_sheet_content_by_role(string_view sheet_role, const typed_worksheet& sheet_content, model::model& in_model)
 	{
-		const static unordered_map<string_view, sheet_type> avail_types = { {string_view("config"), sheet_type::config}, {string_view("circle"), sheet_type::circle}, {string_view("tile"), sheet_type::tile}, {string_view("point_link"), sheet_type::point_link}, {string_view("range_link"), sheet_type::range_link}, {string_view("color"), sheet_type::colors}, {string_view("circle_tick"), sheet_type::circle_tick}, {string_view("line_text"), sheet_type::line_text} };
+		const static unordered_map<string_view, sheet_type> avail_types = { {string_view("config"), sheet_type::config}, {string_view("font_info"), sheet_type::font_info}, {string_view("circle"), sheet_type::circle}, {string_view("tile"), sheet_type::tile}, {string_view("point_link"), sheet_type::point_link}, {string_view("range_link"), sheet_type::range_link}, {string_view("color"), sheet_type::colors}, {string_view("circle_tick"), sheet_type::circle_tick}, {string_view("line_text"), sheet_type::line_text}};
 		auto sheet_type_iter = avail_types.find(sheet_role);
 		if(sheet_type_iter == avail_types.cend())
 		{
@@ -749,6 +789,9 @@ namespace
 		{
 		case sheet_type::config:
 			read_model_config(sheet_content, in_model.config);
+			break;
+		case sheet_type::font_info:
+			read_font_info(sheet_content, in_model.font_info);
 			break;
 		case sheet_type::circle:
 			read_circle_sheet(sheet_content, in_model.circles);
@@ -888,7 +931,7 @@ namespace circos
 		{
 			return;
 		}
-		std::unordered_map<string_view, pair<string, string>> font_info{ { "yahei",make_pair("C:/Windows/Fonts/msyhl.ttc", "microsoft yahei") } };
+		std::unordered_map<string_view, pair<string_view, string_view>> font_info{ { "yahei",make_pair("C:/Windows/Fonts/msyhl.ttc", "microsoft yahei") } };
 		if(png_output_file.empty() && svg_output_file.empty())
 		{
 			return;
@@ -897,12 +940,12 @@ namespace circos
 		the_model.to_shapes(cur_collection);
 		if(!png_output_file.empty())
 		{
-			PngImage png_image(font_info, png_output_file, the_model.config.radius, the_model.config.background_color);
+			PngImage png_image(the_model.font_info, png_output_file, the_model.config.radius, the_model.config.background_color);
 			draw_collections(png_image, cur_collection);
 		}
 		if(!svg_output_file.empty())
 		{
-			SvgGraph svg_graph(font_info, svg_output_file, the_model.config.radius, the_model.config.background_color);
+			SvgGraph svg_graph(the_model.font_info, svg_output_file, the_model.config.radius, the_model.config.background_color);
 			draw_collections(svg_graph, cur_collection);
 		}
 

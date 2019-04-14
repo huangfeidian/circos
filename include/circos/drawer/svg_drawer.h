@@ -28,9 +28,9 @@ namespace circos
 		int path_index = 0;
 		const int background_radius;
 		const Color background_color;
-		const std::unordered_map<std::string_view, std::pair<std::string, std::string>>& font_info;//first is png font filepath second is svn font name
+		const std::unordered_map<std::string_view, std::pair<std::string_view, std::string_view>>& font_info;//first is png font filepath second is svn font name
 	public:
-		SvgGraph(const std::unordered_map<std::string_view, std::pair<std::string, std::string>>& in_font_info,
+		SvgGraph(const std::unordered_map<std::string_view, std::pair<std::string_view, std::string_view>>& in_font_info,
 			string in_file_name, int in_background_radius, Color in_background_color);
 			
 		SvgGraph& operator<<(std::string_view input_str);

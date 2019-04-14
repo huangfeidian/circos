@@ -30,5 +30,5 @@ void tick_label_test()
 }
 int main(int argc, char** argv)
 {
-	tick_test();
+	tick_label_test();
 }
