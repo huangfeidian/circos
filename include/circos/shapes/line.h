@@ -194,11 +194,7 @@ namespace circos
 			int diff_y = tangent_point.y - center.y;
 			int new_diff_x = -1 * diff_y;
 			int new_diff_y = diff_x;
-			if ((diff_x * new_diff_y - new_diff_x * diff_y) < 0)
-			{
-				new_diff_x *= -1;
-				new_diff_y *= -1;
-			}
+
 			return Line(tangent_point, tangent_point + Point(new_diff_x, new_diff_y));
 		}
 	};

@@ -11,6 +11,7 @@
 #include <random>
 #include <algorithm>
 #include <memory>
+#include <string_view>
 
 using namespace std;
 using namespace circos;
@@ -19,7 +20,7 @@ void pi_test_1(void)
 	ifstream pi_file("../data/pi100000.txt");
 	string pi_str((istreambuf_iterator<char>(pi_file)), istreambuf_iterator<char>());
 	vector<uint8_t> pi_digits;
-	std::unordered_map<string, pair<string, string>> font_info{ { "yahei",make_pair("C:/Windows/Fonts/msyhl.ttc", "microsoft yahei") } };
+	std::unordered_map<string_view, pair<string, string>> font_info{ { "yahei",make_pair("C:/Windows/Fonts/msyhl.ttc", "microsoft yahei") } };
 	pi_digits.reserve(pi_str.size());
 	int i = 0;
 	for (; i < pi_str.size() - 1; i++)

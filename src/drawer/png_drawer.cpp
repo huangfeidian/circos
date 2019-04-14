@@ -469,7 +469,25 @@ namespace circos
 	}
 	PngImage& PngImage::operator<<( const Line& line)
 	{
-		draw_path(path(line), line.color, line.width, line.opacity);
+		if (line.width <= 4)
+		{
+			draw_path(path(line), line.color, line.width, line.opacity);
+		}
+		else
+		{
+			// convert to rect
+			int pre_diff_y = line.to.y - line.from.y;
+			int pre_diff_x = line.to.x - line.from.x;
+			int new_diff_x = pre_diff_y * -1;
+			int new_diff_y = pre_diff_x;
+			int width_x = new_diff_x * line.width * 0.5/ sqrtf(new_diff_x * new_diff_x + new_diff_y * new_diff_y);
+			int width_y = new_diff_y * line.width * 0.5/ sqrtf(new_diff_x * new_diff_x + new_diff_y * new_diff_y);
+
+			Point rect_left(line.from.x + width_x, line.from.y + width_y);
+			Point rect_right(line.from.x - width_x, line.from.y - width_y);
+			Rectangle cur_rect(rect_left, rect_right, line.color, line.len(), true, line.opacity);
+			*this << cur_rect;
+		}
 		return *this;
 		
 	}
@@ -521,9 +539,11 @@ namespace circos
 		Point diff = rect.right - rect.left;
 		//由于我们当前的坐标系的设置，diff向量的up方向是(diff.y,diff.x) 而不是(diff.y,-diff.x)
 		Point cur = rect.left;
-		Line up_vec(rect.left + Point(-diff.y, diff.x), rect.left, rect.color);
-		Line up_right(rect.right + Point(-diff.y, diff.x), rect.left + Point(-diff.y, diff.x),rect.color);
-		Line right_up(rect.right, rect.right + Point(-diff.y, diff.x), rect.color);
+		Point p_left_up = rect.left + Point(-diff.y, diff.x);
+		Point p_right_up = rect.right + Point(-diff.y, diff.x);
+		Line up_vec(p_left_up, rect.left, rect.color);
+		Line up_right(p_right_up, p_left_up,rect.color);
+		Line right_up(rect.right, p_right_up, rect.color);
 		*this << right_vec << up_vec << up_right << right_up;
 		if (rect.fill)
 		{
@@ -537,7 +557,7 @@ namespace circos
 			path_points.push_back(std::move(path_right_up));
 			path_points.push_back(std::move(path_up_right));
 			path_points.push_back(std::move(path_up));
-			Point center = (right_vec.from + up_right.to)*0.5;
+			Point center = (rect.left + rect.right)*0.5 + Point(diff.y * -0.5, diff.x * 0.5);
 			flood(path_points, vector<Point>(1, center), rect.color, rect.opacity);
 		}
 		return *this;
