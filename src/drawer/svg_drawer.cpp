@@ -1,9 +1,9 @@
 ﻿#include <iostream>
 #include <circos/drawer/svg_drawer.h>
-
+#include <string_view>
 namespace circos
 {
-	SvgGraph::SvgGraph(const std::unordered_map<std::string, std::pair<std::string, std::string>>& in_font_info,
+	SvgGraph::SvgGraph(const std::unordered_map<std::string_view, std::pair<std::string, std::string>>& in_font_info,
 		string in_file_name, int in_background_radius, Color in_background_color)
 		: font_info(in_font_info)
 		, file_name(in_file_name)
@@ -20,11 +20,12 @@ namespace circos
 		output << std::endl;
 	}
 
-	SvgGraph& SvgGraph::operator<<(const string& input_str)
+	SvgGraph& SvgGraph::operator<<(string_view input_str)
 	{
 		output << input_str;
 		return *this;
 	}
+
 	SvgGraph& SvgGraph::operator<<(int value)
 	{
 		output << value;
@@ -61,7 +62,7 @@ namespace circos
 		graph << "/>\n";
 		return graph;
 	}
-	const std::string& SvgGraph::get_font_name(const std::string& input_name)const
+	std::string_view SvgGraph::get_font_name(std::string_view input_name)const
 	{
 		auto iter = font_info.find(input_name);
 		if (iter == font_info.end())

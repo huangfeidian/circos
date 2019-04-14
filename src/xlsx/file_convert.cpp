@@ -26,7 +26,7 @@ namespace
 		circle,
 		tile,
 		fill_ontile,
-		lable_on_tile,
+		line_text,
 		tick_on_tile,
 		value_on_tile,
 		colors,
@@ -443,14 +443,14 @@ namespace
 
 
 
-		auto header_match = current_sheet.check_header_match(sheet_headers, "link_id", std::vector<std::string_view>({}), std::vector<std::string_view>({ "ref_color" }));
+		auto header_match = current_sheet.check_header_match(sheet_headers, "line_text_id", std::vector<std::string_view>({}), std::vector<std::string_view>({ "ref_color" }));
 		if (!header_match)
 		{
 			std::cerr << "header for point_link description mismatch for sheet " << current_sheet._name << std::endl;
 			return;
 		}
 		const vector<const typed_header*>& all_headers = current_sheet.get_typed_headers();
-		vector<string_view> header_names = { "link_id", "from_tile_id", "to_tile_id", "from_pos_idx", "to_pos_idx", "text", "font_name", "font_size", "color", "ref_color", "opacity" , "control_radius_percent" };
+		vector<string_view> header_names = { "line_text_id", "from_tile_id", "to_tile_id", "from_pos_idx", "to_pos_idx", "text", "font_name", "font_size", "color", "ref_color", "opacity"};
 		const vector<uint32_t>& header_indexes = current_sheet.get_header_index_vector(header_names);
 		if (header_indexes.empty())
 		{
@@ -462,9 +462,9 @@ namespace
 		{
 			model::line_text cur_line_text;
 
-			auto[opt_link_id, opt_from_tile, opt_to_tile, opt_from_pos, opt_to_pos, opt_text, opt_font_name, opt_font_size, opt_color, opt_ref_color, opt_opacity, opt_control] =
-				current_sheet.try_convert_row<string_view, string_view, string_view, int, int, string_view, string_view, int, tuple<int, int, int>, string_view, float, float>(i, header_indexes);
-			if (!(opt_link_id && opt_from_tile && opt_from_pos && opt_to_tile && opt_to_pos && opt_text&& opt_font_name && opt_font_size&& opt_opacity && opt_control))
+			auto[opt_link_id, opt_from_tile, opt_to_tile, opt_from_pos, opt_to_pos, opt_text, opt_font_name, opt_font_size, opt_color, opt_ref_color, opt_opacity] =
+				current_sheet.try_convert_row<string_view, string_view, string_view, int, int, string_view, string_view, int, tuple<int, int, int>, string_view, float>(i, header_indexes);
+			if (!(opt_link_id && opt_from_tile && opt_from_pos && opt_to_tile && opt_to_pos && opt_text&& opt_font_name && opt_font_size&& opt_opacity))
 			{
 				continue;
 			}
@@ -738,7 +738,7 @@ namespace
 	}
 	void read_sheet_content_by_role(string_view sheet_role, const typed_worksheet& sheet_content, model::model& in_model)
 	{
-		const static unordered_map<string_view, sheet_type> avail_types = { {string_view("config"), sheet_type::config}, {string_view("circle"), sheet_type::circle}, {string_view("tile"), sheet_type::tile}, {string_view("point_link"), sheet_type::point_link}, {string_view("range_link"), sheet_type::range_link}, {string_view("color"), sheet_type::colors}, {string_view("circle_tick"), sheet_type::circle_tick} };
+		const static unordered_map<string_view, sheet_type> avail_types = { {string_view("config"), sheet_type::config}, {string_view("circle"), sheet_type::circle}, {string_view("tile"), sheet_type::tile}, {string_view("point_link"), sheet_type::point_link}, {string_view("range_link"), sheet_type::range_link}, {string_view("color"), sheet_type::colors}, {string_view("circle_tick"), sheet_type::circle_tick}, {string_view("line_text"), sheet_type::line_text} };
 		auto sheet_type_iter = avail_types.find(sheet_role);
 		if(sheet_type_iter == avail_types.cend())
 		{
@@ -765,6 +765,8 @@ namespace
 		case sheet_type::circle_tick:
 			read_circle_tick_sheet(sheet_content, in_model.circle_ticks);
 			break;
+		case sheet_type::line_text:
+			read_line_text_sheet(sheet_content, in_model.line_texts);
 		default:
 			break;
 		}
@@ -886,7 +888,7 @@ namespace circos
 		{
 			return;
 		}
-		std::unordered_map<string, pair<string, string>> font_info{ { "yahei",make_pair("C:/Windows/Fonts/msyhl.ttc", "microsoft yahei") } };
+		std::unordered_map<string_view, pair<string, string>> font_info{ { "yahei",make_pair("C:/Windows/Fonts/msyhl.ttc", "microsoft yahei") } };
 		if(png_output_file.empty() && svg_output_file.empty())
 		{
 			return;

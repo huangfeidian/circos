@@ -4,6 +4,8 @@
 #include <vector>
 #include <cmath>
 #include <fstream>
+#include <string_view>
+
 #include "../shapes/line.h"
 #include "../shapes/circle.h"
 #include "../shapes/arc.h"
@@ -26,19 +28,19 @@ namespace circos
 		int path_index = 0;
 		const int background_radius;
 		const Color background_color;
-		const std::unordered_map<std::string, std::pair<std::string, std::string>>& font_info;//first is png font filepath second is svn font name
+		const std::unordered_map<std::string_view, std::pair<std::string, std::string>>& font_info;//first is png font filepath second is svn font name
 	public:
-		SvgGraph(const std::unordered_map<std::string, std::pair<std::string, std::string>>& in_font_info,
+		SvgGraph(const std::unordered_map<std::string_view, std::pair<std::string, std::string>>& in_font_info,
 			string in_file_name, int in_background_radius, Color in_background_color);
 			
-		SvgGraph& operator<<(const string& input_str);
+		SvgGraph& operator<<(std::string_view input_str);
 		SvgGraph& operator<<(int value);
 		SvgGraph& operator<<(double value);
 		SvgGraph& operator<<(Color color);
 		SvgGraph& operator<<(const Point& point);
 		void add_to_path(const Line& line);
 		SvgGraph& operator<<(const Line& line);
-		const std::string& get_font_name(const std::string& input_name)const;
+		std::string_view get_font_name(std::string_view input_name)const;
 
 		void add_to_path(const Arc& arc);
 		SvgGraph& operator<<( const Arc& arc);

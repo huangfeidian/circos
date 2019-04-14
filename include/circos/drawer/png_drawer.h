@@ -55,16 +55,16 @@ namespace circos
 		const string software = "circos implemented in c++";
 		const string title = "circos.png";
 		std::unordered_map<int, vector<Point>> circle_cache;
-		const std::unordered_map<string, std::pair<std::string, std::string>>& font_info;//所有字体相关文件的存储路径映射
+		const std::unordered_map<std::string_view, std::pair<std::string, std::string>>& font_info;//所有字体相关文件的存储路径映射
 		//下面是跟freetype相关的成员
 #ifdef USE_TEXT
-		unordered_map<string, vector<unsigned char>> font_cache;//字体文件读入内存
+		std::unordered_map<std::string_view, vector<unsigned char>> font_cache;//字体文件读入内存
 		FT_Library ft_library;
 #endif
 
-		PngImage(const std::unordered_map<string, std::pair<std::string, std::string>>& in_font_info,string in_file_name, int in_radius, Color back_color, int compress=8);
+		PngImage(const std::unordered_map<std::string_view, std::pair<std::string, std::string>>& in_font_info,string in_file_name, int in_radius, Color back_color, int compress=8);
 #ifdef USE_TEXT
-		const vector<unsigned char>& get_font_mem(const string& font_name);
+		const vector<unsigned char>& get_font_mem(std::string_view font_name);
 #endif
 		void plot(Colorbasic_point input, float opacity = 1.0);
 		void plot(Point pos, Color color,float opacity = 1.0);
@@ -82,9 +82,9 @@ namespace circos
 		void flood(const vector<vector<Point>>& boundary, vector<Point> interiors, Color fill_color, float opacity =1.0);
 			
 #ifdef USE_TEXT
-		vector<uint32_t> utf8_to_uint(const string& text) const;
+		vector<uint32_t> utf8_to_uint(std::string_view text) const;
 		//这里要处理一下utf8
-		void draw_text(const Line& base_line, const string& text, const string& font_name, int font_size, Color color, float alpha);
+		void draw_text(const Line& base_line, std::string_view text, std::string_view , int font_size, Color color, float alpha);
 			
 		void draw_bitmap(const FT_GlyphSlot& slot,Line on_line, Color color, float alpha);
 		// 获得某一点相对于某条线的对称点

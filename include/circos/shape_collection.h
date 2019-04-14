@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <unordered_map>
 #include <vector>
 #include "./shapes/arc.h"
@@ -62,6 +62,10 @@ namespace circos
 		for(const auto& one_tile: in_shape_collection.tiles)
 		{
 			output_img << one_tile;
+		}
+		for (const auto& one_line_text : in_shape_collection.line_texts)
+		{
+			output_img << one_line_text;
 		}
 	}
 }

@@ -9,7 +9,7 @@
 namespace circos
 {
 	using namespace std;
-	PngImage::PngImage(const unordered_map<string, pair<string, string>>& in_font_info, string in_file_name, int in_radius, Color back_color, int compress)
+	PngImage::PngImage(const unordered_map<string_view, pair<string, string>>& in_font_info, string in_file_name, int in_radius, Color back_color, int compress)
 	: font_info(in_font_info)
 	,file_name(in_file_name)
 	, radius(in_radius)
@@ -47,7 +47,7 @@ namespace circos
 	}
 
 #ifdef USE_TEXT
-	const vector<unsigned char>& PngImage::get_font_mem(const string& font_name)
+	const vector<unsigned char>& PngImage::get_font_mem(std::string_view font_name)
 	{
 		if (font_info.find(font_name) == font_info.end())
 		{
@@ -74,7 +74,7 @@ namespace circos
 			exit(1);
 		}
 		ifstream font_file(font_iter->second.first, ios::binary);
-		copy(std::istreambuf_iterator<char>(font_file), std::istreambuf_iterator<char>(), back_inserter(result));
+		std::copy(std::istreambuf_iterator<char>(font_file), std::istreambuf_iterator<char>(), std::back_inserter(result));
 		return result;
 
 	}
@@ -304,7 +304,7 @@ namespace circos
 		// cout << "flood count " << count << endl;
 	}
 #ifdef USE_TEXT
-	vector<uint32_t> PngImage::utf8_to_uint(const string& text) const
+	vector<uint32_t> PngImage::utf8_to_uint(std::string_view text) const
 	{
 		unsigned char u, v, w, x, y, z;
 		vector<uint32_t> utf8_result;
@@ -366,7 +366,7 @@ namespace circos
 		}
 		return utf8_result;
 	}
-	void PngImage::draw_text(const Line& base_line, const string& text, const string& font_name, int font_size, Color color, float alpha)
+	void PngImage::draw_text(const Line& base_line, std::string_view text, std::string_view font_name, int font_size, Color color, float alpha)
 		//这里要处理一下utf8
 	{
 		FT_Face face;
