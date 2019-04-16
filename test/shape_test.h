@@ -24,7 +24,7 @@ void shape_test_1()
 	Arc arc_1(360, c_pi / 6, c_pi / 3, center, Color(128, 128, 128), 0, 1.0, 2);
 	Arc arc_2(360, c_pi * 2 / 3, c_pi * 5 / 6, center, Color(128, 128, 128), 0, 1.0, 8);
 	Arc arc_3(360, c_pi * 5 / 6 + c_pi, c_pi * 2 / 3 + c_pi, center, Color(128, 128, 128));
-	std::unordered_map<string_view, pair<string, string>> font_info{ {"yahei",make_pair("C:/Windows/Fonts/msyhl.ttc", "microsoft yahei")} };
+	std::unordered_map<string_view, pair<string_view, string_view>> font_info{ {"yahei",make_pair("C:/Windows/Fonts/msyhl.ttc", "microsoft yahei")} };
 	auto sme = font_info.lower_bound("nima");
 	Bezier t_bezier_1(arc_1.to_point, arc_3.from_point, center, arc_1.color);
 	Bezier t_bezier_2(arc_3.to_point, arc_1.from_point, center, arc_1.color);
@@ -78,7 +78,7 @@ void arc_test()
 	Color background_color = Color(255, 105, 180);
 	string svg_filename = "circos_arc_test_1.svg";
 	string png_filename = "circos_arc_test_1.png";
-	std::unordered_map<string_view, pair<string, string>> font_info{ {"yahei",make_pair("C:/Windows/Fonts/msyhl.ttc", "microsoft yahei")} };
+	std::unordered_map<string_view, pair<string_view, string_view>> font_info{ {"yahei",make_pair("C:/Windows/Fonts/msyhl.ttc", "microsoft yahei")} };
 	Point center(400, 400);
 	auto c_pi = amplify_angle::from_angle(180);
 	Arc arc(300, c_pi * 11 / 6, c_pi / 4, Point(400, 400), Color(0, 255, 100), 0, 1.0, 4);
@@ -112,7 +112,7 @@ void flood_test()
 	Color background_color = Color(255, 255, 255);
 	Tile cur_tile(center, 1600, 1700, amplify_angle::from_rad(4.4369), amplify_angle::from_rad(4.9811), Color(0, 0, 0), 1, true, 1);
 	string png_filename = "circos_arc_test_1.png";
-	std::unordered_map<string_view, pair<string, string>> font_info{ {"yahei",make_pair("C:/Windows/Fonts/msyhl.ttc", "microsoft yahei")} };
+	std::unordered_map<string_view, pair<string_view, string_view>> font_info{ {"yahei",make_pair("C:/Windows/Fonts/msyhl.ttc", "microsoft yahei")} };
 	PngImage png_image(font_info, png_filename, radius, background_color);
 	shape_collection shapes;
 	shapes.tiles.push_back(cur_tile);
@@ -124,7 +124,7 @@ void line_test()
 	Color background_color = Color(255, 105, 180);
 	string svg_filename = "circos_line_test_1.svg";
 	string png_filename = "circos_line_test_1.png";
-	std::unordered_map<string_view, pair<string, string>> font_info{ {"yahei",make_pair("C:/Windows/Fonts/msyhl.ttc", "microsoft yahei")} };
+	std::unordered_map<string_view, pair<string_view, string_view>> font_info{ {"yahei",make_pair("C:/Windows/Fonts/msyhl.ttc", "microsoft yahei")} };
 	Point center(400, 400);
 	auto c_pi = amplify_angle::from_angle(180);
 	Line line_1(Point(450, 400), Point(450, 450), Color(0, 255, 100), 10, 1.0);

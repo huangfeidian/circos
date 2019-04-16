@@ -9,7 +9,7 @@
 #include <circos/model.h>
 #include <circos/drawer/png_drawer.h>
 #include <circos/drawer/svg_drawer.h>
-#include <circos/xlsx/file_convert.h>
+#include <circos/xlsx/read_excel.h>
 
 #ifdef WITH_XLSX_SUPPORT
 #include <xlsx_reader/xlsx_typed_worksheet.h>
