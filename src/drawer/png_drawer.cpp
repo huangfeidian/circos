@@ -539,8 +539,9 @@ namespace circos
 		Point diff = rect.right - rect.left;
 		//由于我们当前的坐标系的设置，diff向量的up方向是(diff.y,diff.x) 而不是(diff.y,-diff.x)
 		Point cur = rect.left;
-		Point p_left_up = rect.left + Point(-diff.y, diff.x);
-		Point p_right_up = rect.right + Point(-diff.y, diff.x);
+		float length_scale = (rect.height * 1.0 / sqrtf(diff.x * diff.x + diff.y * diff.y));
+		Point p_left_up = rect.left + Point(-diff.y, diff.x) * length_scale;
+		Point p_right_up = rect.right + Point(-diff.y, diff.x) * length_scale;
 		Line up_vec(p_left_up, rect.left, rect.color);
 		Line up_right(p_right_up, p_left_up,rect.color);
 		Line right_up(rect.right, p_right_up, rect.color);
@@ -557,7 +558,7 @@ namespace circos
 			path_points.push_back(std::move(path_right_up));
 			path_points.push_back(std::move(path_up_right));
 			path_points.push_back(std::move(path_up));
-			Point center = (rect.left + rect.right)*0.5 + Point(diff.y * -0.5, diff.x * 0.5);
+			Point center = (rect.left + rect.right)*0.5 + Point(diff.y * -0.5, diff.x * 0.5) * length_scale;
 			flood(path_points, vector<Point>(1, center), rect.color, rect.opacity);
 		}
 		return *this;
