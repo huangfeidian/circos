@@ -95,16 +95,7 @@ void arc_test()
 	draw_collections(svg_graph, shapes);
 	draw_collections(png_image, shapes);
 }
-void circle_test()
-{
-	auto c_pi = amplify_angle::from_angle(180);
-	auto path_points = Arc::arc_path(amplify_angle::from_angle(0), c_pi / 4, 100);
-	for (const auto& i : path_points)
-	{
-		cout << i.x << "," << i.y<<endl;
-	}
 
-}
 void flood_test()
 {
 	int radius = 2000;
@@ -140,6 +131,27 @@ void line_test()
 	shapes.lines.push_back(line_3);
 	shapes.lines.push_back(line_4);
 
+	draw_collections(svg_graph, shapes);
+	draw_collections(png_image, shapes);
+}
+void circle_test()
+{
+	int radius = 400;
+	Color background_color = Color(255, 105, 180);
+	string svg_filename = "circos_circle_test_1.svg";
+	string png_filename = "circos_circle_test_1.png";
+	std::unordered_map<string_view, pair<string_view, string_view>> font_info{ {"yahei",make_pair("C:/Windows/Fonts/msyhl.ttc", "microsoft yahei")} };
+	Point center(400, 400);
+	auto c_pi = amplify_angle::from_angle(180);
+	Circle circle_1(10, Point(400, 400), Color(0, 255, 100), 1.0, true);
+	Circle circle_2(20, Point(450, 400), Color(0, 255, 100), 1.0, true);
+	Circle circle_3(40, Point(500, 400), Color(0, 255, 100), 1.0, true);
+	SvgGraph svg_graph(font_info, svg_filename, radius, background_color);
+	PngImage png_image(font_info, png_filename, radius, background_color);
+	shape_collection shapes;
+	shapes.circles.push_back(circle_1);
+	shapes.circles.push_back(circle_2);
+	shapes.circles.push_back(circle_3);
 	draw_collections(svg_graph, shapes);
 	draw_collections(png_image, shapes);
 }

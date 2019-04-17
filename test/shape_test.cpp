@@ -8,6 +8,6 @@ int main()
 	//shape_test_1();
 	//circle_test();
 	//flood_test();
-	line_test();
+	circle_test();
 
 }
