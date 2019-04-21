@@ -664,7 +664,7 @@ namespace
 		sheet_headers["min_color"] = new typed_header(new typed_node_type_descriptor(color_type_detail), "min_color", "");
 		sheet_headers["max_color"] = new typed_header(new typed_node_type_descriptor(color_type_detail), "max_color", "");
 
-		auto header_match = current_sheet.check_header_match(sheet_headers, "value_id", std::vector<std::string_view>({}), std::vector<std::string_view>({ "min_color_ref", "max_color_ref" }));
+		auto header_match = current_sheet.check_header_match(sheet_headers, "track_id", std::vector<std::string_view>({}), std::vector<std::string_view>({ "min_color_ref", "max_color_ref" }));
 		if (!header_match)
 		{
 			std::cerr << "header for point_track_config description mismatch for sheet " << current_sheet._name << std::endl;
@@ -926,6 +926,7 @@ namespace
 			{string_view("circle_tick"), sheet_type::circle_tick}, 
 			{string_view("line_text"), sheet_type::line_text},
 			{string_view("value_on_tile"), sheet_type::value_on_tile},
+			{string_view("point_track_config"), sheet_type::point_track_config}
 		};
 		auto sheet_type_iter = avail_types.find(sheet_role);
 		if(sheet_type_iter == avail_types.cend())

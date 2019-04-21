@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 namespace circos
 {
@@ -26,11 +26,11 @@ namespace circos
 			b= other.b;
 			return (*this);
 		}
-		Color(Color a, Color b, double opacity)
+		Color(const Color& c_a, const Color& c_b, double opacity)
 		{
-			r = a.r*(1-opacity)+b.r*opacity;
-			g = a.g*(1-opacity)+b.g*opacity;
-			b = a.b*(1-opacity)+b.b*opacity;
+			r = c_a.r*(1-opacity)+c_b.r*opacity;
+			g = c_a.g*(1-opacity)+c_b.g*opacity;
+			b = c_a.b*(1-opacity)+c_b.b*opacity;
 		}
 
 		void blend(const Color& other, float opacity)

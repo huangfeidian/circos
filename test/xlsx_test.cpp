@@ -1,4 +1,4 @@
-﻿#include <circos/xlsx/file_convert.h>
+﻿#include <circos/xlsx/read_excel.h>
 using namespace circos;
 void pi_test()
 {
@@ -28,7 +28,15 @@ void tick_label_test()
 	string to_svg_file_name = "tick_label_test.svg";
 	read_xlsx_and_draw(from_xlsx_name, to_png_file_name, to_svg_file_name);
 }
+
+void point_track_test()
+{
+	string from_xlsx_name = "../data/point_track_test.xlsx";
+	string to_png_file_name = "point_track_test.png";
+	string to_svg_file_name = "point_track_test.svg";
+	read_xlsx_and_draw(from_xlsx_name, to_png_file_name, to_svg_file_name);
+}
 int main(int argc, char** argv)
 {
-	tick_label_test();
+	point_track_test();
 }

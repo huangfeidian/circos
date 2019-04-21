@@ -294,7 +294,7 @@ namespace circos::model
 			cur_circle_radius += cur_track_config.radius_offset;
 			for (const auto& one_point_data : cur_track_data)
 			{
-				auto cur_point_center = Point::radius_point(cur_circle_radius, amplify_angle::from_rad(one_point_data.angle));
+				auto cur_point_center = Point::radius_point(cur_circle_radius, amplify_angle::from_rad(one_point_data.angle)) + config.center;
 				float progress = 1.0;
 				if (cur_track_config.clamp_data_value.first == cur_track_config.clamp_data_value.second)
 				{
