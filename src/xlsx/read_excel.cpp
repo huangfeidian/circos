@@ -656,22 +656,25 @@ namespace
 		sheet_headers["min_point_size"] = new typed_header(new typed_node_type_descriptor(basic_value_type::number_32), "min_point_size", "");
 		sheet_headers["max_point_size"] = new typed_header(new typed_node_type_descriptor(basic_value_type::number_32), "max_point_size", "");
 
-		sheet_headers["radius_offset"] = new typed_header(new typed_node_type_descriptor(basic_value_type::number_32), "radius_offset", "");
-
+		sheet_headers["radius_offset_min"] = new typed_header(new typed_node_type_descriptor(basic_value_type::number_32), "radius_offset_min", "");
+		sheet_headers["radius_offset_max"] = new typed_header(new typed_node_type_descriptor(basic_value_type::number_32), "radius_offset_max", "");
+		sheet_headers["link_width"] = new typed_header(new typed_node_type_descriptor(basic_value_type::number_32), "link_width", "");
+		sheet_headers["with_shadow"] = new typed_header(new typed_node_type_descriptor(basic_value_type::number_bool), "with_shadow", "");
 
 
 		auto color_type_detail = make_tuple(new typed_node_type_descriptor(basic_value_type::number_32), 3, ',');
 		sheet_headers["min_color"] = new typed_header(new typed_node_type_descriptor(color_type_detail), "min_color", "");
 		sheet_headers["max_color"] = new typed_header(new typed_node_type_descriptor(color_type_detail), "max_color", "");
+		sheet_headers["link_color"] = new typed_header(new typed_node_type_descriptor(color_type_detail), "link_color", "");
 
-		auto header_match = current_sheet.check_header_match(sheet_headers, "track_id", std::vector<std::string_view>({}), std::vector<std::string_view>({ "min_color_ref", "max_color_ref" }));
+		auto header_match = current_sheet.check_header_match(sheet_headers, "track_id", std::vector<std::string_view>({}), std::vector<std::string_view>({ "min_color_ref", "max_color_ref", "link_color_ref"}));
 		if (!header_match)
 		{
 			std::cerr << "header for point_track_config description mismatch for sheet " << current_sheet._name << std::endl;
 			return;
 		}
 		const vector<const typed_header*>& all_headers = current_sheet.get_typed_headers();
-		vector<string_view> header_names = { "track_id", "min_data_value", "max_data_value", "min_point_size", "max_point_size", "radius_offset", "min_color", "max_color", "min_color_ref", "max_color_ref"};
+		vector<string_view> header_names = { "track_id", "min_data_value", "max_data_value", "min_point_size", "max_point_size", "radius_offset_min", "radius_offset_min", "min_color", "max_color", "min_color_ref", "max_color_ref", "link_width", "link_color", "with_shadow"};
 		const vector<uint32_t>& header_indexes = current_sheet.get_header_index_vector(header_names);
 		if (header_indexes.empty())
 		{
@@ -682,9 +685,9 @@ namespace
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
 		for (int i = 1; i < all_row_info.size(); i++)
 		{
-			auto[opt_track_id, opt_min_value, opt_max_value, opt_min_size, opt_max_size, opt_radius_offset, opt_min_color, opt_max_color, opt_min_color_ref, opt_max_color_ref] =
-				current_sheet.try_convert_row<string_view, float, float, int, int, int, tuple<int, int,int>, tuple<int, int, int>, string_view, string_view>(i, header_indexes);
-			if (!(opt_track_id && opt_min_value && opt_max_value && opt_min_size && opt_max_size && opt_radius_offset))
+			auto[opt_track_id, opt_min_value, opt_max_value, opt_min_size, opt_max_size, opt_radius_offset_min, opt_radius_offset_max, opt_min_color, opt_max_color, opt_min_color_ref, opt_max_color_ref, opt_link_width, opt_link_color, opt_link_color_ref, opt_with_shadow] =
+				current_sheet.try_convert_row<string_view, float, float, int, int, int, int, tuple<int, int,int>, tuple<int, int, int>, string_view, string_view, int, tuple<int, int, int>, string_view, bool>(i, header_indexes);
+			if (!(opt_track_id && opt_min_value && opt_max_value && opt_min_size && opt_max_size && opt_radius_offset_min && opt_radius_offset_max))
 			{
 				continue;
 			}
@@ -692,7 +695,7 @@ namespace
 			cur_track_config.track_id = opt_track_id.value();
 			cur_track_config.clamp_data_value = std::make_pair(opt_min_value.value(), opt_max_value.value());
 			cur_track_config.clamp_point_size = std::make_pair(opt_min_size.value(), opt_max_size.value());
-			cur_track_config.radius_offset = opt_radius_offset.value();
+			cur_track_config.radius_offset = std::make_pair(opt_radius_offset_min.value(), opt_radius_offset_max.value());
 			Color min_color, max_color;
 			if (opt_min_color)
 			{
@@ -723,6 +726,33 @@ namespace
 				}
 			}
 			cur_track_config.clamp_color = std::make_pair(min_color, max_color);
+			cur_track_config.link_width = 0;
+			cur_track_config.with_shadow = false;
+			if (opt_link_width && opt_link_width.value())
+			{
+				Color link_color;
+				if (opt_link_color)
+				{
+					auto color_value = opt_min_color.value();
+					link_color = Color(get<0>(color_value), get<1>(color_value), get<2>(color_value));
+				}
+				if (opt_link_color_ref)
+				{
+					auto temp_color = read_ref_color(current_sheet
+						, min_color_ref_idx, opt_min_color_ref.value());
+					if (temp_color)
+					{
+						link_color = temp_color.value();
+					}
+				}
+				cur_track_config.link_color = link_color;
+				if (opt_with_shadow && opt_with_shadow.value())
+				{
+					cur_track_config.with_shadow = true;
+				}
+
+			}
+
 			if (track_config.find(cur_track_config.track_id) != track_config.end())
 			{
 				std::cerr << "duplicate point track config id " << cur_track_config.track_id << std::endl;

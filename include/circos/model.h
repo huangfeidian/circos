@@ -132,17 +132,12 @@ namespace circos::model
 		std::pair<Color, Color> clamp_color;
 		std::pair<float, float> clamp_data_value;
 		std::pair<int, int> clamp_point_size;
-		int radius_offset;
+		std::pair<int, int> radius_offset;
+		bool with_shadow;
+		std::uint8_t link_width;
+		Color link_color;
 	};
 
-	struct point_link_track_config
-	{
-		std::string_view track_id;
-		Color line_color;
-		std::pair<float, float> clamp_data_value;
-		std::pair<int, int> clamp_point_offset;
-		bool with_shadow;//是否绘制阴影
-	};
 
 	struct value_ontile_config
 	{

@@ -289,12 +289,11 @@ namespace circos::model
 				continue;
 			}
 			auto cur_circle_id = tiles[cur_track_data[0].tile_id].circle_id;
-			auto cur_circle_radius = circles[cur_circle_id].outer_radius;
+			auto origin_circle_radius = circles[cur_circle_id].outer_radius;
 			const auto& cur_track_config = one_track_config_iter.second;
-			cur_circle_radius += cur_track_config.radius_offset;
+			std::vector<Circle> temp_circles;
 			for (const auto& one_point_data : cur_track_data)
 			{
-				auto cur_point_center = Point::radius_point(cur_circle_radius, amplify_angle::from_rad(one_point_data.angle)) + config.center;
 				float progress = 1.0;
 				if (cur_track_config.clamp_data_value.first == cur_track_config.clamp_data_value.second)
 				{
@@ -306,10 +305,34 @@ namespace circos::model
 				}
 				progress = progress > 1.0 ? 1.0 : progress;
 				progress = progress < 0.0 ? 0.0 : progress;
+				auto cur_circle_radius = cur_track_config.radius_offset.first * (1 - progress) + cur_track_config.radius_offset.second * progress + origin_circle_radius;
+				auto cur_point_center = Point::radius_point(cur_circle_radius, amplify_angle::from_rad(one_point_data.angle)) + config.center;
+				
 				auto cur_point_color = Color(cur_track_config.clamp_color.first, cur_track_config.clamp_color.second, progress);
 				int cur_point_size = cur_track_config.clamp_point_size.first * (1 - progress) + (cur_track_config.clamp_point_size.second) * progress;
-				pre_collection.circles.push_back(Circle(cur_point_size, cur_point_center, cur_point_color, 1.0, true));
+				auto cur_circle = Circle(cur_point_size, cur_point_center, cur_point_color, 1.0, true);
+				temp_circles.push_back(cur_circle);
+				pre_collection.circles.push_back(cur_circle);
 
+			}
+			if (cur_track_config.link_width)
+			{
+				vector<Line> temp_lines;
+				for (int i = 0; i < cur_track_data.size() - 1; i++)
+				{
+					auto temp_line = Line(temp_circles[i].center, temp_circles[i + 1].center, cur_track_config.link_color, cur_track_config.link_width, 1);
+					
+					pre_collection.lines.push_back(temp_line);
+					if (cur_track_config.with_shadow)
+					{
+						if (!temp_lines.empty())
+						{
+
+						}
+					}
+					temp_lines.push_back(temp_line);
+				}
+				
 			}
 			
 		}
