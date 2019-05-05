@@ -26,6 +26,13 @@ namespace circos
 			new_pos.y = p.y*s;
 			return new_pos;
 		}
+		friend basic_point operator/(const basic_point& p, double s)
+		{
+			basic_point new_pos;
+			new_pos.x = p.x/s;
+			new_pos.y = p.y/s;
+			return new_pos;
+		}
 		friend basic_point operator*(double s,const basic_point& p)
 		{
 			basic_point new_pos;
@@ -33,6 +40,7 @@ namespace circos
 			new_pos.y = p.y*s;
 			return new_pos;
 		}
+		
 		friend basic_point operator+(const basic_point& first, const basic_point& second)
 		{
 			basic_point new_pos;

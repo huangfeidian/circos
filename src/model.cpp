@@ -318,17 +318,23 @@ namespace circos::model
 			if (cur_track_config.link_width)
 			{
 				vector<Line> temp_lines;
+				amplify_angle last_rad;
 				for (int i = 0; i < cur_track_data.size() - 1; i++)
 				{
 					auto temp_line = Line(temp_circles[i].center, temp_circles[i + 1].center, cur_track_config.link_color, cur_track_config.link_width, 1);
-					
+					auto cur_rad = amplify_angle::from_rad(cur_track_data[i].angle);
 					pre_collection.lines.push_back(temp_line);
-					if (cur_track_config.with_shadow)
+					if (cur_track_config.with_shadow && i != 0)
 					{
-						if (!temp_lines.empty())
-						{
+						// 需要绘制阴影 就是arc和几条直线的闭合环路
 
-						}
+						Region temp_region;
+						temp_region.add_boundary(Line(Point::radius_point(origin_circle_radius, last_rad) + config.center, temp_line.from, cur_track_config.link_color));
+						temp_region.add_boundary(temp_line);
+						temp_region.add_boundary(Line(temp_line.to, Point::radius_point(origin_circle_radius, cur_rad) + config.center, cur_track_config.link_color));
+						temp_region.add_boundary(Arc(origin_circle_radius, cur_rad, last_rad, config.center, cur_track_config.link_color));
+						temp_region.set_inner_point((Point::radius_point(origin_circle_radius, last_rad) + config.center + temp_line.to) * 0.5);
+						pre_collection.regions.push_back(temp_region);
 					}
 					temp_lines.push_back(temp_line);
 				}

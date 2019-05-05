@@ -10,6 +10,7 @@
 #include "./shapes/tile.h"
 #include "./shapes/ribbon.h"
 #include "./shapes/annulus.h"
+#include "./shapes/region.h"
 
 namespace circos
 {
@@ -26,6 +27,8 @@ namespace circos
 		std::vector<LineText> line_texts;
 		std::vector<std::vector<Point>> paths;
 		std::vector<Annulus> annuluses;
+		std::vector<Region> regions;
+
 	};
 	template<typename img>
 	void draw_collections(img& output_img, const shape_collection& in_shape_collection)
@@ -66,6 +69,10 @@ namespace circos
 		for (const auto& one_line_text : in_shape_collection.line_texts)
 		{
 			output_img << one_line_text;
+		}
+		for (const auto& one_region: in_shape_collection.regions)
+		{
+			output_img << one_region;
 		}
 	}
 }

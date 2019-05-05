@@ -670,4 +670,16 @@ namespace circos
 		}
 		return *this;
 	}
+	PngImage& PngImage::operator<<(const Region& region)
+	{
+		vector<vector<Point>> flood_points;
+		for(const auto& one_boundary: region.boundaries)
+		{
+			std::visit([&flood_points](auto&& arg){
+				flood_points.push_back(arg.path());
+			}, one_boundary);
+		}
+		flood(flood_points, vector<Point>{one_region.inner_point}, one_region.color, one_region.opacity);
+		return *this;
+	}
 }

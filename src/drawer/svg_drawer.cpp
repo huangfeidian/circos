@@ -229,6 +229,37 @@ namespace circos
 		}
 		return *this;
 	}
+	SvgGraph& SvgGraph::operator<<(const Region& region)
+	{
+		auto& graph = *this;
+		std::visit([&graph](auto&& arg)
+		{
+			using T = std::decay_t<decltype(arg)>;
+			if constexpr (std::is_same_v<T, Line>)
+			{
+				graph<<"<path d=\" M" << arg.from;
+			}
+			else if constexpr(std::is_same_v<T, Arc>)
+			{
+				graph<<"<path d=\" M" << arg.from_point;
+			}
+
+		}, region.boundaries[0]);
+		for(const auto& one_boundary: region.boundaries)
+		{
+			std::visit([&graph](auto&& arg){
+			graph.add_to_path(arg);
+			}, one_boundary);
+		}
+		
+		graph<<"\" ";
+		graph << "stroke=\"" << region.color << "\" stroke-width=\"" << 1 << "\" ";
+		graph<<"fill=\""<<region.color<<"\" ";
+
+		graph << "opacity=\"" << region.opacity << "\"";
+		graph<<"/>\n";
+		return graph;
+	}
 	SvgGraph::~SvgGraph()
 	{
 		output << "</svg>" << endl;

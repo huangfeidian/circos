@@ -15,6 +15,7 @@
 #include "../shapes/rectangle.h"
 #include "../shapes/line_text.h"
 #include "../shapes/annulus.h"
+#include "../shapes/region.h"
 
 using std::vector;
 using std::endl;
@@ -53,6 +54,7 @@ namespace circos
 		SvgGraph& operator<<(const Ribbon& ribbon);
 		SvgGraph& operator<<(const LineText& line_text);
 		SvgGraph& operator<<(const Annulus& annulus);
+		SvgGraph& operator<<(const Region& region);
 		~SvgGraph();
 	};
 }

@@ -23,10 +23,6 @@ namespace circos
 		Color color;
 		float opacity;
 		std::uint16_t stroke;
-		Arc()
-		{
-
-		}
 		Arc(std::uint16_t in_radius, amplify_angle begin_angle, amplify_angle end_angle, Point in_center, Color in_color, bool in_fill_flag=false, float in_opacity = 1.0, std::uint16_t in_stroke = 1)
 			: fill_flag(in_fill_flag)
 			, radius(in_radius)

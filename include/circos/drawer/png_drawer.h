@@ -104,5 +104,6 @@ namespace circos
 		PngImage& operator<<(const Tile& tile);
 		PngImage& operator<<(const Ribbon& ribbon);
 		PngImage& operator<<(const Annulus& annulus);
+		PngImage& operator<<(const Region& region);
 	};
 }
