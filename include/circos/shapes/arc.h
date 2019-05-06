@@ -23,6 +23,10 @@ namespace circos
 		Color color;
 		float opacity;
 		std::uint16_t stroke;
+		Arc()
+		{
+
+		}
 		Arc(std::uint16_t in_radius, amplify_angle begin_angle, amplify_angle end_angle, Point in_center, Color in_color, bool in_fill_flag=false, float in_opacity = 1.0, std::uint16_t in_stroke = 1)
 			: fill_flag(in_fill_flag)
 			, radius(in_radius)
@@ -67,8 +71,8 @@ namespace circos
 			const auto& points = Circle::get_circle(radius);
 			if(begin_angle >end_angle)
 			{
-				auto result_1 = Arc(radius,begin_angle,amplify_angle::from_angle(360),center,color).path();
-				auto result_2 = Arc(radius, amplify_angle::from_angle(360),end_angle,center,color).path();
+				auto result_1 = Arc(radius,begin_angle,amplify_angle::from_angle(359.9),center,color).path();
+				auto result_2 = Arc(radius, amplify_angle::from_angle(0.1),end_angle,center,color).path();
 				std::vector<std::vector<Point>> temp_result;
 				temp_result.emplace_back(std::move(result_1));
 				Line::connect_paths(temp_result, result_2);

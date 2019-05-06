@@ -21,6 +21,7 @@
 #include "../shapes/rectangle.h"
 #include "../shapes/line_text.h"
 #include "../shapes/annulus.h"
+#include "../shapes/region.h"
 
 #ifdef USE_TEXT
 #include <ft2build.h>

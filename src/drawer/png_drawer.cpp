@@ -679,7 +679,11 @@ namespace circos
 				flood_points.push_back(arg.path());
 			}, one_boundary);
 		}
-		flood(flood_points, vector<Point>{one_region.inner_point}, one_region.color, one_region.opacity);
+		for (const auto& one_path : flood_points)
+		{
+			draw_path(one_path, region.color, 1, region.opacity);
+		}
+		flood(flood_points, vector<Point>{region.inner_point}, region.color, region.opacity);
 		return *this;
 	}
 }

@@ -674,14 +674,15 @@ namespace
 			return;
 		}
 		const vector<const typed_header*>& all_headers = current_sheet.get_typed_headers();
-		vector<string_view> header_names = { "track_id", "min_data_value", "max_data_value", "min_point_size", "max_point_size", "radius_offset_min", "radius_offset_min", "min_color", "max_color", "min_color_ref", "max_color_ref", "link_width", "link_color", "with_shadow"};
+		vector<string_view> header_names = { "track_id", "min_data_value", "max_data_value", "min_point_size", "max_point_size", "radius_offset_min", "radius_offset_max", "min_color", "max_color", "min_color_ref", "max_color_ref", "link_width", "link_color", "link_color_ref", "with_shadow"};
 		const vector<uint32_t>& header_indexes = current_sheet.get_header_index_vector(header_names);
 		if (header_indexes.empty())
 		{
 			return;
 		}
-		uint32_t min_color_ref_idx = header_indexes[8];
-		uint32_t max_color_ref_idx = header_indexes[9];
+		uint32_t min_color_ref_idx = header_indexes[9];
+		uint32_t max_color_ref_idx = header_indexes[10];
+		uint32_t link_color_ref_idx = header_indexes[13];
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
 		for (int i = 1; i < all_row_info.size(); i++)
 		{
@@ -730,6 +731,7 @@ namespace
 			cur_track_config.with_shadow = false;
 			if (opt_link_width && opt_link_width.value())
 			{
+				cur_track_config.link_width = opt_link_width.value();
 				Color link_color;
 				if (opt_link_color)
 				{
@@ -739,7 +741,7 @@ namespace
 				if (opt_link_color_ref)
 				{
 					auto temp_color = read_ref_color(current_sheet
-						, min_color_ref_idx, opt_min_color_ref.value());
+						, link_color_ref_idx, opt_min_color_ref.value());
 					if (temp_color)
 					{
 						link_color = temp_color.value();
