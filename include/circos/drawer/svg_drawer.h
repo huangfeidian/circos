@@ -19,7 +19,7 @@
 
 using std::vector;
 using std::endl;
-namespace circos
+namespace spiritsaway::circos
 {
 
 	class SvgGraph

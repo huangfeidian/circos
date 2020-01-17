@@ -2,7 +2,7 @@
 #include <cmath>
 #include <cstdint>
 #include "constants.h"
-namespace circos
+namespace spiritsaway::circos
 {
 	struct amplify_angle
 	{
@@ -76,11 +76,11 @@ namespace circos
 		}
 		float angle()const
 		{
-			return normalise(value) * 1.0 / factor;
+			return static_cast<float>(normalise(value) * 1.0 / factor);
 		}
 		float rad() const
 		{
-			return normalise(value) * pi() / (factor * 180);
+			return static_cast<float>(normalise(value) * pi() / (factor * 180));
 		}
 		float sin() const
 		{

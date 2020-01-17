@@ -4,7 +4,7 @@
 #include "../basics/point.h"
 #include "../basics/color.h"
 #include "line.h"
-namespace circos
+namespace spiritsaway::circos
 {
 	using std::string_view;
 	struct LineText

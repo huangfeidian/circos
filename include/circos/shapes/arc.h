@@ -7,7 +7,7 @@
 #include "circle.h"
 #include "line.h"
 
-namespace circos
+namespace spiritsaway::circos
 {
 	struct Arc
 	{
@@ -71,8 +71,8 @@ namespace circos
 			const auto& points = Circle::get_circle(radius);
 			if(begin_angle >end_angle)
 			{
-				auto result_1 = Arc(radius,begin_angle,amplify_angle::from_angle(359.9),center,color).path();
-				auto result_2 = Arc(radius, amplify_angle::from_angle(0.1),end_angle,center,color).path();
+				auto result_1 = Arc(radius,begin_angle,amplify_angle::from_angle(359.9f),center,color).path();
+				auto result_2 = Arc(radius, amplify_angle::from_angle(0.1f),end_angle,center,color).path();
 				std::vector<std::vector<Point>> temp_result;
 				temp_result.emplace_back(std::move(result_1));
 				Line::connect_paths(temp_result, result_2);
@@ -94,16 +94,16 @@ namespace circos
 			else
 			{
 				std::vector<std::vector<Point>> temp_result;
-				temp_result.push_back(arc_path(begin_angle, amplify_angle::from_angle((begin_idx+1) * 45), radius));
+				temp_result.push_back(arc_path(begin_angle, amplify_angle::from_angle((begin_idx+1) * 45.0f), radius));
 				begin_idx++;
 				while(begin_idx < end_idx)
 				{
-					Line::connect_paths(temp_result, arc_path(amplify_angle::from_angle(begin_idx*45), amplify_angle::from_angle((begin_idx + 1)*45), radius));
+					Line::connect_paths(temp_result, arc_path(amplify_angle::from_angle(begin_idx*45.0f), amplify_angle::from_angle((begin_idx + 1)*45.0f), radius));
 					begin_idx++;
 				}
-				Line::connect_paths(temp_result, arc_path(amplify_angle::from_angle(begin_idx * 45), end_angle, radius));
+				Line::connect_paths(temp_result, arc_path(amplify_angle::from_angle(begin_idx * 45.0f), end_angle, radius));
 				result.swap(temp_result[0]);
-				for (int i = 1; i < temp_result.size(); i++)
+				for (std::uint32_t i = 1; i < temp_result.size(); i++)
 				{
 					std::copy(temp_result[i].begin(), temp_result[i].end(), std::back_inserter(result));
 				}
@@ -131,8 +131,8 @@ namespace circos
 			{
 				//大于半圆的话 直接反转
 				std::swap(angle_begin, angle_end);
-				angle_begin = amplify_angle::from_angle(360) - angle_begin;
-				angle_end = amplify_angle::from_angle(360) - angle_end;
+				angle_begin = amplify_angle::from_angle(360.0f) - angle_begin;
+				angle_end = amplify_angle::from_angle(360.0f) - angle_end;
 				negative_y = true;
 				idx = angle_begin.value / (45 * amplify_angle::factor);
 
@@ -141,16 +141,16 @@ namespace circos
 			{
 				//在左半球的话，直接向右折叠
 				std::swap(angle_begin, angle_end);
-				angle_begin = amplify_angle::from_angle(180) - angle_begin;
-				angle_end = amplify_angle::from_angle(180) - angle_end;
+				angle_begin = amplify_angle::from_angle(180.0f) - angle_begin;
+				angle_end = amplify_angle::from_angle(180.0f) - angle_end;
 				negative_x = true;
 				idx = angle_begin.value / (45 * amplify_angle::factor);
 			}
 			if (idx == 0)
 			{
 				//如果在第一象限右半区的话 对折到第一象限的上半区
-				angle_begin = amplify_angle::from_angle(90) - angle_begin;
-				angle_end = amplify_angle::from_angle(90) - angle_end;
+				angle_begin = amplify_angle::from_angle(90.0f) - angle_begin;
+				angle_end = amplify_angle::from_angle(90.0f) - angle_end;
 				swap_x_y = true;
 				std::swap(angle_begin, angle_end);
 			}

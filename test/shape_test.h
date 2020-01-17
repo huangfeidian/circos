@@ -5,7 +5,7 @@
 #include <map>
 #include <iostream>
 #include <string_view>
-using namespace circos;
+using namespace spiritsaway::circos;
 using namespace std;
 void shape_test_1()
 {

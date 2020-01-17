@@ -2,7 +2,7 @@
 #include <cmath>
 #include "../basics/point.h"
 #include "../basics/color.h"
-namespace circos
+namespace spiritsaway::circos
 {
 	struct Rectangle
 	{

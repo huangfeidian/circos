@@ -7,7 +7,7 @@
 #include "../basics/point.h"
 #include "../basics/color.h"
 
-namespace circos
+namespace spiritsaway::circos
 {
 	struct Line
 	{
@@ -25,9 +25,9 @@ namespace circos
 		{
 			
 		}
-		double len() const
+		float len() const
 		{
-			return std::sqrt(len_square());
+			return std::sqrtf(len_square());
 		}
 		int len_square() const
 		{
@@ -107,7 +107,7 @@ namespace circos
 		{
 			std::pair<int, int> vec_1 = std::make_pair(to.x - from.x, to.y - from.y);
 			std::pair<int, int> vec_2 = std::make_pair(point.x - from.x, point.y - from.y);
-			float length = (vec_1.first*vec_2.first + vec_1.second*vec_2.second)/(1.0*(vec_1.first*vec_1.first+vec_1.second*vec_1.second));
+			float length = (vec_1.first*vec_2.first + vec_1.second*vec_2.second)/(1.0f*(vec_1.first*vec_1.first+vec_1.second*vec_1.second));
 			std::pair<int, int> remain = static_cast<std::pair<int,int>>(std::make_pair(vec_2.first - length*vec_1.first, vec_2.second - length*vec_1.second));
 			std::pair<int, int> vec_3 = std::make_pair(vec_2.first - 2 * remain.first, vec_2.second - 2 * remain.second);
 			return Point(vec_3.first + from.x, vec_3.second + from.y);
@@ -147,7 +147,7 @@ namespace circos
 				dis_vec.push_back(Line(pre_paths.back().front(), new_path.front()).len_square());
 				double min_dis = dis_vec[0];
 				int min_mode = 0;
-				for (int i = 0; i < dis_vec.size(); i++)
+				for (std::uint32_t i = 0; i < dis_vec.size(); i++)
 				{
 					if (dis_vec[i] < min_dis)
 					{

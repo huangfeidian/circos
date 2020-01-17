@@ -6,7 +6,7 @@
 #include "../basics/color.h"
 
 
-namespace circos
+namespace spiritsaway::circos
 {
 	struct Circle
 	{
@@ -16,7 +16,7 @@ namespace circos
 		float opacity;
 		bool filled;
 		std::uint16_t stroke_width;
-		Circle(std::uint16_t in_radius, Point in_center, Color in_color , double in_opacity = 1, bool in_filled = false, std::uint16_t in_stroke_width = 1)
+		Circle(std::uint16_t in_radius, Point in_center, Color in_color , float in_opacity = 1, bool in_filled = false, std::uint16_t in_stroke_width = 1)
 		: center(in_center)
 		, radius(in_radius)
 		, color(in_color)
@@ -67,7 +67,7 @@ namespace circos
 			{
 				one_four.emplace_back(i.y, i.x);
 			}
-			for (int i = 0; i <= point_size / 2; i++)
+			for (std::uint32_t i = 0; i <= point_size / 2; i++)
 			{
 				std::swap(one_four[i + point_size], one_four[2 * point_size - i - 1]);
 			}
@@ -78,7 +78,7 @@ namespace circos
 			{
 				one_half.emplace_back(-i.x, i.y);
 			}
-			for (int i = 0; i <= point_size / 2; i++)
+			for (std::uint32_t i = 0; i <= point_size / 2; i++)
 			{
 				std::swap(one_half[i], one_half[point_size - i - 1]);
 			}
@@ -89,7 +89,7 @@ namespace circos
 			{
 				one_total.push_back(Point(i.x, -i.y));
 			}
-			for (int i = 0; i <= point_size / 2; i++)
+			for (std::uint32_t i = 0; i <= point_size / 2; i++)
 			{
 				std::swap(one_total[i + point_size], one_total[2 * point_size - i - 1]);
 			}

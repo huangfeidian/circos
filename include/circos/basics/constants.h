@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include <cmath>
-namespace circos
+namespace spiritsaway::circos
 {
 	constexpr double pi()
 	{

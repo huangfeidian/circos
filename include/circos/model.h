@@ -15,30 +15,30 @@
 #include "shapes/line_text.h"
 
 
-namespace circos::model
+namespace spiritsaway::circos::model
 {
 
 	struct circle
 	{
 		std::string_view circle_id;
-		int inner_radius;
-		int outer_radius;
-		int gap;
+		std::uint32_t inner_radius;
+		std::uint32_t outer_radius;
+		std::uint32_t gap;
 		Color fill_color;
 		bool filled;
 		float opacity;
-		double angle_per_unit;
+		float angle_per_unit;
 
 	};
 	struct tile
 	{
 		std::string_view circle_id;
 		std::string_view tile_id;
-		int width;
+		std::uint32_t width;
 		Color fill_color;
 		float opacity;
 		bool is_fill;
-		int sequence; // must not be duplicated
+		std::uint32_t sequence; // must not be duplicated
 		//calculated
 		float angle_begin;
 	};
@@ -47,10 +47,10 @@ namespace circos::model
 		// 处理圆环上的刻度
 		std::string_view circle_tick_id;
 		std::string_view circle_id;
-		int gap;
+		std::uint32_t gap;
 		Color fill_color;
-		int width;
-		int height;
+		std::uint32_t width;
+		std::uint32_t height;
 		float opacity;
 	};
 
@@ -59,13 +59,13 @@ namespace circos::model
 		// 两点之间的连线
 		std::string_view link_id;
 		std::string_view from_tile_id;
-		int from_pos_idx;
+		std::uint32_t from_pos_idx;
 		std::string_view to_tile_id;
-		int to_pos_idx;
+		std::uint32_t to_pos_idx;
 		float control_radius_percent; //negative for direct link
 		Color fill_color;
 		float opacity;
-		int width;
+		std::uint32_t width;
 
 	};
 	struct line_text
@@ -87,11 +87,11 @@ namespace circos::model
 	{
 		std::string_view link_id;
 		std::string_view from_tile_id;
-		int from_pos_begin_idx;
-		int from_pos_end_idx;
+		std::uint32_t from_pos_begin_idx;
+		std::uint32_t from_pos_end_idx;
 		std::string_view to_tile_id;
-		int to_pos_begin_idx;
-		int to_pos_end_idx;
+		std::uint32_t to_pos_begin_idx;
+		std::uint32_t to_pos_end_idx;
 		bool is_cross;
 		Color fill_color;
 		float opacity;
@@ -102,17 +102,17 @@ namespace circos::model
 	{
 		std::string_view tick_tile_id;
 		std::string_view tile_id;
-		int gap;
-		int height;
-		int width;
+		std::uint32_t gap;
+		std::uint32_t height;
+		std::uint32_t width;
 		Color fill_color;
 		float opacity;
 	};
 	struct fill_ontile
 	{
 		std::string_view tile_id;
-		int on_tile_begin;
-		int on_tile_end;
+		std::uint32_t on_tile_begin;
+		std::uint32_t on_tile_end;
 		Color fill_color;
 	};
 
@@ -121,8 +121,8 @@ namespace circos::model
 		std::string_view data_id;
 		std::string_view track_id;
 		std::string_view tile_id;
-		int begin_pos;
-		int end_pos;
+		std::uint32_t begin_pos;
+		std::uint32_t end_pos;
 		float data_value;
 		float angle = 0;
 	};
@@ -131,8 +131,8 @@ namespace circos::model
 		std::string_view track_id;
 		std::pair<Color, Color> clamp_color;
 		std::pair<float, float> clamp_data_value;
-		std::pair<int, int> clamp_point_size;
-		std::pair<int, int> radius_offset;
+		std::pair<std::uint32_t, std::uint32_t> clamp_point_size;
+		std::pair<std::uint32_t, std::uint32_t> radius_offset;
 		bool with_shadow;
 		std::uint8_t link_width;
 		Color link_color;
@@ -154,7 +154,7 @@ namespace circos::model
 
 	struct model_config
 	{
-		int radius;
+		std::uint32_t radius;
 		Color background_color;
 		Point center;
 		model_config()

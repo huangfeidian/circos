@@ -1,7 +1,7 @@
 #pragma once
 #include "circle.h"
 
-namespace circos
+namespace spiritsaway::circos
 {
 	struct Annulus
 	{

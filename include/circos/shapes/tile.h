@@ -6,7 +6,7 @@ using std::vector;
 using std::string;
 using std::stringstream;
 #pragma once
-namespace circos
+namespace spiritsaway::circos
 {
 	struct Tile
 	{

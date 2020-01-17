@@ -12,7 +12,7 @@
 #include "./shapes/annulus.h"
 #include "./shapes/region.h"
 
-namespace circos
+namespace spiritsaway::circos
 {
 	class shape_collection
 	{

@@ -1,7 +1,7 @@
 ﻿#include <iostream>
 #include <circos/drawer/svg_drawer.h>
 #include <string_view>
-namespace circos
+namespace spiritsaway::circos
 {
 	SvgGraph::SvgGraph(const std::unordered_map<std::string_view, std::pair<std::string_view, std::string_view>>& in_font_info,
 		string in_file_name, int in_background_radius, Color in_background_color)

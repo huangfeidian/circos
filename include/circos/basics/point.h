@@ -4,7 +4,7 @@
 #include "constants.h"
 #include "amplify_angle.h"
 
-namespace circos
+namespace spiritsaway::circos
 {
 	template<typename T>
 	struct basic_point
@@ -22,8 +22,8 @@ namespace circos
 		friend basic_point operator*(const basic_point& p, double s)
 		{
 			basic_point new_pos;
-			new_pos.x = p.x*s;
-			new_pos.y = p.y*s;
+			new_pos.x = static_cast<T>(p.x*s);
+			new_pos.y = static_cast<T>(p.y*s);
 			return new_pos;
 		}
 		friend basic_point operator/(const basic_point& p, double s)

@@ -1,5 +1,5 @@
 ﻿#include <circos/xlsx/read_excel.h>
-using namespace circos;
+using namespace spiritsaway::circos;
 void pi_test()
 {
 	string from_xlsx_name = "../data/pi10000.xlsx";

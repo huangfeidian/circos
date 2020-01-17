@@ -5,12 +5,11 @@
 #include "line.h"
 #include "arc.h"
 
-namespace circos
+namespace spiritsaway::circos
 {
 	class Region
 	{
 	public:
-		//下面的这些line 和arc 需要首尾相连 
 		std::vector<std::variant<Line, Arc>> boundaries;
 		Point inner_point;
 		float opacity;

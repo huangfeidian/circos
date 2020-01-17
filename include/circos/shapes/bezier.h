@@ -5,7 +5,7 @@
 #include "../basics/color.h"
 #include "line.h"
 
-namespace circos
+namespace spiritsaway::circos
 {
 	struct Bezier
 	{
@@ -78,13 +78,13 @@ namespace circos
 			basic_point<float> c2;
 			basic_point<float> double_px;
 			Point px;
-			int total_len = (Line(begin_point, control_point).len() + Line(control_point, end_point).len()) * 1.5;
+			std::uint32_t total_len = static_cast<std::uint32_t>((Line(begin_point, control_point).len() + Line(control_point, end_point).len()) * 1.5);
 			if (total_len == 0)
 			{
 				return result;
 			}
 			result.reserve(total_len);
-			float step = 1.0 / total_len;
+			float step = 1.0f / total_len;
 			float inc = 0;
 			c1 = p1 + (cp - p1)*inc;
 			c2 = cp + (p2 - cp)*inc;

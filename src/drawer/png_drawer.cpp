@@ -6,7 +6,7 @@
 #include <iostream>
 #include <fstream>
 
-namespace circos
+namespace spiritsaway::circos
 {
 	using namespace std;
 	PngImage::PngImage(const unordered_map<string_view, pair<string_view, string_view>>& in_font_info, string in_file_name, int in_radius, Color back_color, int compress)
@@ -70,7 +70,7 @@ namespace circos
 		auto font_iter = font_info.find(font_name);
 		if (font_iter == font_info.end())
 		{
-			std:cerr << "unknown font " << font_name << std::endl;
+			std::cerr << "unknown font " << font_name << std::endl;
 			exit(1);
 		}
 		ifstream font_file(string(font_iter->second.first), ios::binary);
@@ -228,7 +228,7 @@ namespace circos
 		vector<Point> fill_points;
 		vector<int> fill_index;
 		int count = 0;
-		for(int i = 0; i < boundary.size(); i++)
+		for(std::uint32_t i = 0; i < boundary.size(); i++)
 		{
 			if(boundary[i].size())
 			{
@@ -240,7 +240,7 @@ namespace circos
 		{
 			fill_index.push_back(fill_index[0]);
 		}
-		for(int i = 0; i< fill_index.size() - 1; i++)
+		for(std::uint32_t i = 0; i< fill_index.size() - 1; i++)
 		{
 			auto pre_point = boundary[fill_index[i]].back();
 			auto next_point = boundary[fill_index[i + 1]].front();
@@ -310,7 +310,7 @@ namespace circos
 		vector<uint32_t> utf8_result;
 		int num_chars = 0;
 		uint32_t num_bytes = text.length();
-		long iii = 0;
+		std::uint32_t iii = 0;
 		while (iii < num_bytes)
 		{
 			uint32_t cur_utf8_char = 0;
@@ -447,7 +447,7 @@ namespace circos
 				if (temp)
 				{
 					auto sym_point = on_line.symmetric_point(Point(left + j, top - i));
-					plot(sym_point.x, sym_point.y, color, alpha*temp/255.0);
+					plot(sym_point.x, sym_point.y, color, alpha*temp/255.0f);
 					//plot(left + j, top - i, color, alpha*temp / 255.0);
 				}
 			}
@@ -480,8 +480,8 @@ namespace circos
 			int pre_diff_x = line.to.x - line.from.x;
 			int new_diff_x = pre_diff_y * -1;
 			int new_diff_y = pre_diff_x;
-			int width_x = new_diff_x * line.width * 0.5/ sqrtf(new_diff_x * new_diff_x + new_diff_y * new_diff_y);
-			int width_y = new_diff_y * line.width * 0.5/ sqrtf(new_diff_x * new_diff_x + new_diff_y * new_diff_y);
+			int width_x = static_cast<int>(new_diff_x * line.width * 0.5/ sqrtf(new_diff_x * new_diff_x + new_diff_y * new_diff_y));
+			int width_y = static_cast<int>(new_diff_y * line.width * 0.5/ sqrtf(new_diff_x * new_diff_x + new_diff_y * new_diff_y));
 
 			Point rect_left(line.from.x + width_x, line.from.y + width_y);
 			Point rect_right(line.from.x - width_x, line.from.y - width_y);
@@ -539,7 +539,7 @@ namespace circos
 		Point diff = rect.right - rect.left;
 		//由于我们当前的坐标系的设置，diff向量的up方向是(diff.y,diff.x) 而不是(diff.y,-diff.x)
 		Point cur = rect.left;
-		float length_scale = (rect.height * 1.0 / sqrtf(diff.x * diff.x + diff.y * diff.y));
+		float length_scale = (rect.height * 1.0f / sqrtf(diff.x * diff.x + diff.y * diff.y));
 		Point p_left_up = rect.left + Point(-diff.y, diff.x) * length_scale;
 		Point p_right_up = rect.right + Point(-diff.y, diff.x) * length_scale;
 		Line up_vec(p_left_up, rect.left, rect.color);
@@ -558,7 +558,7 @@ namespace circos
 			path_points.push_back(std::move(path_right_up));
 			path_points.push_back(std::move(path_up_right));
 			path_points.push_back(std::move(path_up));
-			Point center = (rect.left + rect.right)*0.5 + Point(diff.y * -0.5, diff.x * 0.5) * length_scale;
+			Point center = (rect.left + rect.right)*0.5f + Point(diff.y * -0.5f, diff.x * 0.5f) * length_scale;
 			flood(path_points, vector<Point>(1, center), rect.color, rect.opacity);
 		}
 		return *this;

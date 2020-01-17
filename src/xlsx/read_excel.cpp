@@ -18,9 +18,9 @@
 
 namespace 
 {
-	using namespace xlsx_reader;
+	using namespace spiritsaway::xlsx_reader;
 	using namespace std;
-	using namespace circos;
+	using namespace spiritsaway::circos;
 	enum class sheet_type
 	{
 		circle,
@@ -130,7 +130,7 @@ namespace
 		}
 		uint32_t ref_color_idx = header_indexes[4];
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
-		for(int i=1; i< all_row_info.size(); i++)
+		for(std::uint32_t i=1; i< all_row_info.size(); i++)
 		{
 			model::circle cur_circle;
 			auto[opt_cirlce_id, opt_inner_radius, opt_outer_radius, opt_color, opt_ref_color, opt_opacity, opt_gap, opt_filled] = 
@@ -213,7 +213,7 @@ namespace
 		}
 		uint32_t ref_color_idx = header_indexes[5];
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
-		for(int i=1; i< all_row_info.size(); i++)
+		for(std::uint32_t i=1; i< all_row_info.size(); i++)
 		{
 			model::tile cur_tile;
 
@@ -296,7 +296,7 @@ namespace
 		}
 		uint32_t ref_color_idx = header_indexes[5];
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
-		for(int i = 1; i< all_row_info.size(); i++)
+		for(std::uint32_t i = 1; i< all_row_info.size(); i++)
 		{
 			model::circle_tick cur_circle_tick;
 			auto[opt_tick_id, opt_circle_id, opt_width, opt_height, opt_color, opt_ref_color, opt_opacity, opt_gap] =
@@ -376,7 +376,7 @@ namespace
 		}
 		uint32_t ref_color_idx = header_indexes[6];
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
-		for (int i = 1; i < all_row_info.size(); i++)
+		for (std::uint32_t i = 1; i < all_row_info.size(); i++)
 		{
 			model::point_link cur_point_link;
 			cur_point_link.width = 1;
@@ -460,7 +460,7 @@ namespace
 		}
 		uint32_t ref_color_idx = header_indexes[9];
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
-		for (int i = 1; i < all_row_info.size(); i++)
+		for (std::uint32_t i = 1; i < all_row_info.size(); i++)
 		{
 			model::line_text cur_line_text;
 
@@ -549,7 +549,7 @@ namespace
 		}
 		uint32_t ref_color_idx = header_indexes[7];
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
-		for(int i = 1; i< all_row_info.size(); i++)
+		for(std::uint32_t i = 1; i< all_row_info.size(); i++)
 		{
 			model::range_link cur_range_link;
 			auto[opt_link_id, opt_from_tile, opt_to_tile, opt_from_pos_begin, opt_to_pos_begin, opt_from_pos_end, opt_to_pos_end, opt_color, opt_ref_color, opt_opacity, opt_control, opt_cross] =
@@ -623,7 +623,7 @@ namespace
 			return;
 		}
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
-		for (int i = 1; i < all_row_info.size(); i++)
+		for (std::uint32_t i = 1; i < all_row_info.size(); i++)
 		{
 			auto[opt_data_id, opt_track_id, opt_tile_id, opt_begin_pos, opt_end_pos, opt_data_value] =
 				current_sheet.try_convert_row<string_view, string_view, string_view, int, int, float>(i, header_indexes);
@@ -684,7 +684,7 @@ namespace
 		uint32_t max_color_ref_idx = header_indexes[10];
 		uint32_t link_color_ref_idx = header_indexes[13];
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
-		for (int i = 1; i < all_row_info.size(); i++)
+		for (std::uint32_t i = 1; i < all_row_info.size(); i++)
 		{
 			auto[opt_track_id, opt_min_value, opt_max_value, opt_min_size, opt_max_size, opt_radius_offset_min, opt_radius_offset_max, opt_min_color, opt_max_color, opt_min_color_ref, opt_max_color_ref, opt_link_width, opt_link_color, opt_link_color_ref, opt_with_shadow] =
 				current_sheet.try_convert_row<string_view, float, float, int, int, int, int, tuple<int, int,int>, tuple<int, int, int>, string_view, string_view, int, tuple<int, int, int>, string_view, bool>(i, header_indexes);
@@ -782,10 +782,10 @@ namespace
 		
 		const vector<const typed_header*>& all_headers = config_sheet.get_typed_headers();
 		const auto& all_row_info = config_sheet.get_all_typed_row_info();
-		for(int i = 1; i< all_row_info.size(); i++)
+		for(std::uint32_t i = 1; i< all_row_info.size(); i++)
 		{
 			string_view cur_config_key, cur_config_value, cur_config_value_type;
-			for(int j = 1; j< all_row_info[i].size(); j++)
+			for(std::uint32_t j = 1; j< all_row_info[i].size(); j++)
 			{
 				const auto& cur_cell_value = all_row_info[i][j];
 				uint32_t column_idx = j;
@@ -879,7 +879,7 @@ namespace
 			return;
 		}
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
-		for (int i = 1; i < all_row_info.size(); i++)
+		for (std::uint32_t i = 1; i < all_row_info.size(); i++)
 		{
 			model::range_link cur_range_link;
 			auto[opt_font_id, opt_font_path, opt_font_name] =
@@ -1017,10 +1017,10 @@ namespace
 		}
 		const vector<const typed_header*>& all_headers = role_sheet.get_typed_headers();
 		const auto& all_row_info = role_sheet.get_all_typed_row_info();
-		for(int i = 1; i< all_row_info.size(); i++)
+		for(std::uint32_t i = 1; i< all_row_info.size(); i++)
 		{
 			string_view cur_sheet_name, cur_sheet_role;
-			for(int j = 1; j< all_row_info[i].size(); j++)
+			for(std::uint32_t j = 1; j< all_row_info[i].size(); j++)
 			{
 				const auto&  cur_cell_value = all_row_info[i][j];
 				uint32_t column_idx = j;
@@ -1058,7 +1058,7 @@ namespace
 	}
 	
 }
-namespace circos
+namespace spiritsaway::circos
 {
 	using namespace xlsx_reader;
 	using namespace std;

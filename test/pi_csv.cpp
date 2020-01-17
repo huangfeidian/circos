@@ -7,13 +7,13 @@
 #include <string>
 
 using namespace std;
-using namespace circos;
+using namespace spiritsaway::circos;
 int main()
 {
 	ifstream pi_file("../data/pi10000.txt");
 	string pi_str((istreambuf_iterator<char>(pi_file)), istreambuf_iterator<char>());
 	vector<uint8_t> pi_digits;
-    vector<circos::Color> strand_color(10, Color());
+    vector<Color> strand_color(10, Color());
 	strand_color[0] = Color(15, 66, 90);
 	strand_color[1] = Color(50, 163, 231);
 	strand_color[2] = Color(77, 119, 25);
@@ -38,7 +38,7 @@ int main()
     }
 
     pi_digits.reserve(pi_str.size());
-	int i = 0;
+	std::uint32_t i = 0;
 	for (; i < pi_str.size() - 1; i++)
 	{
 		if (pi_str[i] == '3' && pi_str[i + 1] == '.')
@@ -63,8 +63,8 @@ int main()
     int link_count = 0;
     ofstream link_file("../data/pi_links.csv");
     link_file<<"link_id, from_tile_id, from_pos_idx, to_tile_id, to_pos_idx, control_radius_percent, color, ref_color, opacity"<<endl;
-    float control_radius_percent = 0.3;
-	float opacity = 0.1;
+    float control_radius_percent = 0.3f;
+	float opacity = 0.1f;
 	for (i = 0; i < pi_digits.size(); i++)
 	{
 		auto cur_char = pi_digits[i];

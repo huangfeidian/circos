@@ -14,7 +14,7 @@
 #include <string_view>
 
 using namespace std;
-using namespace circos;
+using namespace spiritsaway::circos;
 void pi_test_1(void)
 {
 	ifstream pi_file("../data/pi100000.txt");
@@ -59,7 +59,7 @@ void pi_test_1(void)
 	float gap = pi() / 4;
 	auto total_size = std::accumulate(chunk_size.begin(), chunk_size.end(), 0);
 	float angle_per_size = (2 * pi() - gap) / total_size;
-	vector<circos::Color> strand_color(10, Color());
+	vector<Color> strand_color(10, Color());
 	strand_color[0] = Color(15, 66, 90);
 	strand_color[1] = Color(50, 163, 231);
 	strand_color[2] = Color(77, 119, 25);
@@ -72,9 +72,9 @@ void pi_test_1(void)
 	strand_color[9] = Color(140, 81, 195);
 
 	int radius = 2000;
-	float inner_radius_ratio = 0.8;
-	float outer_radius_ratio = 0.85;
-	float control_radius_ration = 0.3;
+	float inner_radius_ratio = 0.8f;
+	float outer_radius_ratio = 0.85f;
+	float control_radius_ration = 0.3f;
 	int inner_radius = inner_radius_ratio * radius;
 	int outer_radius = outer_radius_ratio * radius;
 	int control_radius = control_radius_ration * radius;
@@ -87,7 +87,7 @@ void pi_test_1(void)
 	cur_circle.outer_radius = outer_radius;
 	cur_circle.gap = pi_str.size() / 10;
 	cur_circle.fill_color = Color(125, 145, 130);
-	cur_circle.opacity = 0.0;
+	cur_circle.opacity = 0.0f;
 	pi_model.circles[cur_circle.circle_id] = cur_circle;
 
 	int id_count = 1;
@@ -125,7 +125,7 @@ void pi_test_1(void)
 			temp_link.to_pos_idx = to_pos_idx;
 			temp_link.control_radius_percent = control_radius_ration;
 			temp_link.fill_color = strand_color[one_link.second.first];
-			temp_link.opacity = 0.1;
+			temp_link.opacity = 0.1f;
 			temp_link.width = 1;
 			pi_model.point_links[temp_link.link_id] = temp_link;
 		}
@@ -141,8 +141,8 @@ void pi_test_1(void)
 	string svg_filename = "circos_pi_test_1.svg";
 	string png_filename = "circos_pi_test_1.png";
 	// std::unordered_map<string, pair<string, string>> font_info;
-	circos::SvgGraph svg_graph(font_info, svg_filename, radius, background_color);
-	circos::PngImage png_image(font_info, png_filename, radius, background_color);
+	SvgGraph svg_graph(font_info, svg_filename, radius, background_color);
+	PngImage png_image(font_info, png_filename, radius, background_color);
 	shape_collection cur_collection;
 	pi_model.to_shapes(cur_collection);
 	draw_collections(svg_graph, cur_collection);

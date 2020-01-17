@@ -5,7 +5,7 @@
 #include <unordered_set>
 #include <iostream>
 
-namespace circos::model
+namespace spiritsaway::circos::model
 {
 	using namespace std;
 	void model::to_shapes(shape_collection& pre_collection)
@@ -46,10 +46,10 @@ namespace circos::model
 			});
 			circle_ranges[i.first] = total_len;
 
-			double temp_angle_begin = 0;
-			double temp_angle_end = 0;
-			double angle_by_unit = pi() * 2 / total_len;
-			cur_circle.angle_per_unit = angle_by_unit;
+			float temp_angle_begin = 0;
+			float temp_angle_end = 0;
+			float angle_by_unit = static_cast<float>(pi() * 2 / total_len);
+			cur_circle.angle_per_unit = static_cast<float>(angle_by_unit);
 			auto temp_gap = cur_circle.gap / sorted_vector.size() * angle_by_unit;
 			for(auto& one_tile: sorted_vector)
 			{	
@@ -87,7 +87,7 @@ namespace circos::model
 				continue;
 			}
 			int total_count = circle_ranges[circle_id] / cur_tick.gap;
-			double angle_by_unit = pi() * 2 / circle_ranges[circle_id];
+			float angle_by_unit = static_cast<float>(pi() * 2 / circle_ranges[circle_id]);
 			for(int i = 0; i < total_count; i++)
 			{
 				Line cur_tick_line = Line(Point::radius_point(cur_circle.outer_radius, amplify_angle::from_rad(i * cur_tick.gap * angle_by_unit), config.center), Point::radius_point(cur_circle.outer_radius + cur_tick.height, amplify_angle::from_rad(i * cur_tick.gap * angle_by_unit), config.center), cur_tick.fill_color, cur_tick.width, cur_tick.opacity);
@@ -176,7 +176,7 @@ namespace circos::model
 			const auto& from_tile = cur_tile_iter->second;
 			const auto& from_circle = circles[from_tile.circle_id];
 			int total_count = from_tile.width / cur_tick.gap;
-			double angle_by_unit = from_circle.angle_per_unit;
+			float angle_by_unit = from_circle.angle_per_unit;
 			for (int i = 0; i < total_count; i++)
 			{
 				Line cur_tick_line = Line(Point::radius_point(from_circle.outer_radius, amplify_angle::from_rad(i * cur_tick.gap * angle_by_unit + from_tile.angle_begin), config.center), Point::radius_point(from_circle.outer_radius + cur_tick.height, amplify_angle::from_rad(i * cur_tick.gap * angle_by_unit + from_tile.angle_begin), config.center), cur_tick.fill_color, cur_tick.width, cur_tick.opacity);
@@ -230,7 +230,7 @@ namespace circos::model
 				auto cur_tile_iter = tiles.find(cur_tile_id);
 				if (cur_tile_iter == tiles.end())
 				{
-					invalid_track == true;
+					invalid_track = true;
 					std::cout << "invalid tile " << cur_tile_id << " on track " << one_track_data.first << std::endl;
 					break;
 				}
@@ -267,7 +267,7 @@ namespace circos::model
 			for (auto& one_value_data : one_track_data.second)
 			{
 				const auto& cur_tile = tiles[one_value_data.tile_id];
-				one_value_data.angle = cur_tile.angle_begin + cur_circle.angle_per_unit * 0.5 * (one_value_data.begin_pos + one_value_data.end_pos);
+				one_value_data.angle = static_cast<float>(cur_tile.angle_begin + cur_circle.angle_per_unit * 0.5f * (one_value_data.begin_pos + one_value_data.end_pos));
 			}
 			std::sort(one_track_data.second.begin(), one_track_data.second.end(), [](const value_on_tile& a, const value_on_tile& b)
 			{
@@ -294,23 +294,23 @@ namespace circos::model
 			std::vector<Circle> temp_circles;
 			for (const auto& one_point_data : cur_track_data)
 			{
-				float progress = 1.0;
+				float progress = 1.0f;
 				if (cur_track_config.clamp_data_value.first == cur_track_config.clamp_data_value.second)
 				{
-					progress = 1.0;
+					progress = 1.0f;
 				}
 				else
 				{
 					progress = (one_point_data.data_value - cur_track_config.clamp_data_value.first) / (cur_track_config.clamp_data_value.second - cur_track_config.clamp_data_value.first);
 				}
-				progress = progress > 1.0 ? 1.0 : progress;
-				progress = progress < 0.0 ? 0.0 : progress;
+				progress = progress > 1.0f ? 1.0f : progress;
+				progress = progress < 0.0f ? 0.0f : progress;
 				auto cur_circle_radius = cur_track_config.radius_offset.first * (1 - progress) + cur_track_config.radius_offset.second * progress + origin_circle_radius;
 				auto cur_point_center = Point::radius_point(cur_circle_radius, amplify_angle::from_rad(one_point_data.angle)) + config.center;
 				
 				auto cur_point_color = Color(cur_track_config.clamp_color.first, cur_track_config.clamp_color.second, progress);
 				int cur_point_size = cur_track_config.clamp_point_size.first * (1 - progress) + (cur_track_config.clamp_point_size.second) * progress;
-				auto cur_circle = Circle(cur_point_size, cur_point_center, cur_point_color, 1.0, true);
+				auto cur_circle = Circle(cur_point_size, cur_point_center, cur_point_color, 1.0f, true);
 				temp_circles.push_back(cur_circle);
 				pre_collection.circles.push_back(cur_circle);
 
@@ -318,7 +318,7 @@ namespace circos::model
 			if (cur_track_config.link_width)
 			{
 				vector<Line> temp_lines;
-				for (int i = 0; i < cur_track_data.size() - 1; i++)
+				for (std::uint32_t i = 0; i < cur_track_data.size() - 1; i++)
 				{
 					auto temp_line = Line(temp_circles[i].center, temp_circles[i + 1].center, cur_track_config.link_color, cur_track_config.link_width, 1);
 					auto last_rad = amplify_angle::from_rad(cur_track_data[i].angle);
@@ -334,9 +334,9 @@ namespace circos::model
 						temp_region.add_boundary(Line(temp_line.to, temp_line.from, temp_line.color, temp_line.width, temp_line.opacity));
 						temp_region.add_boundary(Line(temp_line.from, Point::radius_point(origin_circle_radius, last_rad) + config.center, cur_track_config.link_color));
 						
-						temp_region.opacity = 1.0;
+						temp_region.opacity = 1.0f;
 						temp_region.color = cur_track_config.link_color;
-						temp_region.set_inner_point((Point::radius_point(origin_circle_radius, last_rad) + config.center + temp_line.to) * 0.5);
+						temp_region.set_inner_point((Point::radius_point(origin_circle_radius, last_rad) + config.center + temp_line.to) * 0.5f);
 						pre_collection.regions.push_back(temp_region);
 					}
 					temp_lines.push_back(temp_line);

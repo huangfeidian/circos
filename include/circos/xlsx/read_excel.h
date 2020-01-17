@@ -4,7 +4,7 @@
 #ifdef WITH_XLSX_SUPPORT
 #include <xlsx_reader/xlsx_archive.h>
 
-namespace circos
+namespace spiritsaway::circos
 {
 	
 	void read_xlsx_and_draw(const string& xlsx_path, const string& png_output_file, const string& svg_output_file);

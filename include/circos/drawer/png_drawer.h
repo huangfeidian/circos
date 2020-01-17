@@ -30,7 +30,7 @@
 #endif
 
 
-namespace circos
+namespace spiritsaway::circos
 {
 	using std::vector;
 	using std::string;
