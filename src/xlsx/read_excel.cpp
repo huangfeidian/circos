@@ -771,7 +771,7 @@ namespace
 
 	unordered_map<string_view, arena_typed_value*> get_config_values_from_sheet(spiritsaway::memory::arena& temp_arena, const typed_worksheet& config_sheet)
 	{
-		arena_typed_value_parser temp_parser(temp_arena);
+		arena_typed_string_parser temp_parser(temp_arena);
 		// config_key(str), config_value(str), config_value_type(str)
 		unordered_map<string_view, arena_typed_value*> config_values;
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
