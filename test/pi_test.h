@@ -17,12 +17,12 @@ using namespace std;
 using namespace spiritsaway::circos;
 void pi_test_1(void)
 {
-	ifstream pi_file("../data/pi100000.txt");
+	ifstream pi_file("../data/pi10000.txt");
 	string pi_str((istreambuf_iterator<char>(pi_file)), istreambuf_iterator<char>());
 	vector<uint8_t> pi_digits;
 	std::unordered_map<string_view, pair<string_view, string_view>> font_info{ { "yahei",make_pair("C:/Windows/Fonts/msyhl.ttc", "microsoft yahei") } };
 	pi_digits.reserve(pi_str.size());
-	int i = 0;
+	std::size_t i = 0;
 	for (; i < pi_str.size() - 1; i++)
 	{
 		if (pi_str[i] == '3' && pi_str[i + 1] == '.')
@@ -71,13 +71,13 @@ void pi_test_1(void)
 	strand_color[8] = Color(63, 30, 78);
 	strand_color[9] = Color(140, 81, 195);
 
-	int radius = 2000;
+	std::uint32_t radius = 2000;
 	float inner_radius_ratio = 0.8f;
 	float outer_radius_ratio = 0.85f;
 	float control_radius_ration = 0.3f;
-	int inner_radius = inner_radius_ratio * radius;
-	int outer_radius = outer_radius_ratio * radius;
-	int control_radius = control_radius_ration * radius;
+	std::uint32_t inner_radius = static_cast<std::uint32_t>(inner_radius_ratio * radius);
+	std::uint32_t outer_radius = static_cast<std::uint32_t>(outer_radius_ratio * radius);
+	std::uint32_t control_radius = static_cast<std::uint32_t>(control_radius_ration * radius);
 
 	model::model pi_model;
 	model::circle cur_circle;
@@ -108,7 +108,7 @@ void pi_test_1(void)
 		tiles[i].is_fill = is_fill;
 		pi_model.tiles[to_string(i)] = tiles[i];
 	}
-	for (int i = 0; i < 10; i++)
+	for (std::size_t i = 0; i < 10; i++)
 	{
 		string_view from_tile_id = tiles[i].tile_id;
 		for (const auto& one_link : connections[i])
