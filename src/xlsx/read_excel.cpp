@@ -107,17 +107,17 @@ namespace
 		// circle headers circle_id(string) inner_radius(int) outer_radius(int) gap(int) color(RGB) ref_color(ref) opacity(float) filled(bool)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
 		auto circle_id_header = 
-		sheet_headers["circle_id"] = new typed_header(new typed_value_desc(basic_value_type::string), "circle_id", "");
-		sheet_headers["inner_radius"] = new typed_header(new typed_value_desc(basic_value_type::number_32), "inner_radius", "");
-		sheet_headers["outer_radius"] = new typed_header(new typed_value_desc(basic_value_type::number_32), "outer_radius", "");
+		sheet_headers["circle_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "circle_id", "");
+		sheet_headers["inner_radius"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "inner_radius", "");
+		sheet_headers["outer_radius"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "outer_radius", "");
 		
-		auto color_type_detail = make_tuple(new typed_value_desc(basic_value_type::number_32), 3, ',');
-		sheet_headers["color"] = new typed_header(new typed_value_desc(color_type_detail), "color", "");
+		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_32), 3, ',');
+		sheet_headers["color"] = new typed_header(new typed_string_desc(color_type_detail), "color", "");
 
-		sheet_headers["opacity"] = new typed_header(new typed_value_desc(basic_value_type::number_float), "opacity", "");
+		sheet_headers["opacity"] = new typed_header(new typed_string_desc(basic_value_type::number_float), "opacity", "");
 
-		sheet_headers["gap"] = new typed_header(new typed_value_desc(basic_value_type::number_32), "gap", "");
-		sheet_headers["filled"] = new typed_header(new typed_value_desc(basic_value_type::number_bool), "filled", "");
+		sheet_headers["gap"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "gap", "");
+		sheet_headers["filled"] = new typed_header(new typed_string_desc(basic_value_type::number_bool), "filled", "");
 
 		auto header_match = current_sheet.check_header_match(sheet_headers, "circle_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
 		
@@ -188,20 +188,20 @@ namespace
 	{
 		// tile_desc headers tile_id(string) circle_id(string)  width(int) color(RGB) ref_color(ref) opacity(float) sequence(int) filled(bool)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
-		sheet_headers["circle_id"] = new typed_header(new typed_value_desc(basic_value_type::string), "circle_id", "");
+		sheet_headers["circle_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "circle_id", "");
 
-		sheet_headers["tile_id"] = new typed_header(new typed_value_desc(basic_value_type::string), "tile_id", "");
+		sheet_headers["tile_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "tile_id", "");
 
-		sheet_headers["width"] = new typed_header(new typed_value_desc(basic_value_type::number_32), "width", "");
+		sheet_headers["width"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "width", "");
 
-		sheet_headers["sequence"] = new typed_header(new typed_value_desc(basic_value_type::number_32), "sequence", "");
+		sheet_headers["sequence"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "sequence", "");
 		
-		auto color_type_detail = make_tuple(new typed_value_desc(basic_value_type::number_32), 3, ',');
-		sheet_headers["color"] = new typed_header(new typed_value_desc(color_type_detail), "color", "");
+		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_32), 3, ',');
+		sheet_headers["color"] = new typed_header(new typed_string_desc(color_type_detail), "color", "");
 
-		sheet_headers["opacity"] = new typed_header(new typed_value_desc(basic_value_type::number_float), "opacity", "");
+		sheet_headers["opacity"] = new typed_header(new typed_string_desc(basic_value_type::number_float), "opacity", "");
 
-		sheet_headers["filled"] = new typed_header(new typed_value_desc(basic_value_type::number_bool), "filled", "");
+		sheet_headers["filled"] = new typed_header(new typed_string_desc(basic_value_type::number_bool), "filled", "");
 
 		auto header_match = current_sheet.check_header_match(sheet_headers, "tile_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
 		if(!header_match)
@@ -274,17 +274,17 @@ namespace
 	{
 		// circle_tick headers tick_id(string) circle_id(string)  width(int) height(int) color(RGB) ref_color(ref) opacity(float)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
-		sheet_headers["tick_id"] = new typed_header(new typed_value_desc(basic_value_type::string), "tick_id", "");
+		sheet_headers["tick_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "tick_id", "");
 
-		sheet_headers["circle_id"] = new typed_header(new typed_value_desc(basic_value_type::string), "circle_id", "");
+		sheet_headers["circle_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "circle_id", "");
 
-		sheet_headers["width"] = new typed_header(new typed_value_desc(basic_value_type::number_32), "width", "");
-		sheet_headers["height"] = new typed_header(new typed_value_desc(basic_value_type::number_32), "height", "");
-		sheet_headers["gap"] = new typed_header(new typed_value_desc(basic_value_type::number_32), "gap", "");
-		auto color_type_detail = make_tuple(new typed_value_desc(basic_value_type::number_32), 3, ',');
-		sheet_headers["color"] = new typed_header(new typed_value_desc(color_type_detail), "color", "");
+		sheet_headers["width"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "width", "");
+		sheet_headers["height"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "height", "");
+		sheet_headers["gap"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "gap", "");
+		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_32), 3, ',');
+		sheet_headers["color"] = new typed_header(new typed_string_desc(color_type_detail), "color", "");
 
-		sheet_headers["opacity"] = new typed_header(new typed_value_desc(basic_value_type::number_float), "opacity", "");
+		sheet_headers["opacity"] = new typed_header(new typed_string_desc(basic_value_type::number_float), "opacity", "");
 
 		auto header_match = current_sheet.check_header_match(sheet_headers, "tick_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
 		if(!header_match)
@@ -350,21 +350,21 @@ namespace
 	{
 		// point_link headers link_id(string) from_tile_id(string) from_pos_idx(int) to_tile_id(string) to_pos_idx(int)  color(RGB) ref_color(ref) opacity(float)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
-		sheet_headers["link_id"] = new typed_header(new typed_value_desc(basic_value_type::string), "link_id", "");
+		sheet_headers["link_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "link_id", "");
 
-		sheet_headers["from_tile_id"] = new typed_header(new typed_value_desc(basic_value_type::string), "from_tile_id", "");
+		sheet_headers["from_tile_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "from_tile_id", "");
 
-		sheet_headers["to_tile_id"] = new typed_header(new typed_value_desc(basic_value_type::string), "to_tile_id", "");
+		sheet_headers["to_tile_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "to_tile_id", "");
 
-		sheet_headers["from_pos_idx"] = new typed_header(new typed_value_desc(basic_value_type::number_32), "from_pos_idx", "");
-		sheet_headers["to_pos_idx"] = new typed_header(new typed_value_desc(basic_value_type::number_32), "to_pos_idx", "");
+		sheet_headers["from_pos_idx"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "from_pos_idx", "");
+		sheet_headers["to_pos_idx"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "to_pos_idx", "");
 		
-		auto color_type_detail = make_tuple(new typed_value_desc(basic_value_type::number_32), 3, ',');
-		sheet_headers["color"] = new typed_header(new typed_value_desc(color_type_detail), "color", "");
+		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_32), 3, ',');
+		sheet_headers["color"] = new typed_header(new typed_string_desc(color_type_detail), "color", "");
 
-		sheet_headers["opacity"] = new typed_header(new typed_value_desc(basic_value_type::number_float), "opacity", "");
+		sheet_headers["opacity"] = new typed_header(new typed_string_desc(basic_value_type::number_float), "opacity", "");
 
-		sheet_headers["control_radius_percent"] = new typed_header(new typed_value_desc(basic_value_type::number_float), "control_radius_percent", "");
+		sheet_headers["control_radius_percent"] = new typed_header(new typed_string_desc(basic_value_type::number_float), "control_radius_percent", "");
 
 		auto header_match = current_sheet.check_header_match(sheet_headers, "link_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
 		if(!header_match)
@@ -430,23 +430,23 @@ namespace
 	{
 		// line_text headers line_text_id(string) from_tile_id(string) from_pos_idx(int) to_tile_id(string) to_pos_idx(int)  text(string) font_name(string) font_size(uint16) color(RGB) ref_color(ref) opacity(float)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
-		sheet_headers["line_text_id"] = new typed_header(new typed_value_desc(basic_value_type::string), "line_text_id", "");
+		sheet_headers["line_text_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "line_text_id", "");
 
-		sheet_headers["from_tile_id"] = new typed_header(new typed_value_desc(basic_value_type::string), "from_tile_id", "");
+		sheet_headers["from_tile_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "from_tile_id", "");
 
-		sheet_headers["to_tile_id"] = new typed_header(new typed_value_desc(basic_value_type::string), "to_tile_id", "");
+		sheet_headers["to_tile_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "to_tile_id", "");
 
-		sheet_headers["from_pos_idx"] = new typed_header(new typed_value_desc(basic_value_type::number_32), "from_pos_idx", "");
-		sheet_headers["to_pos_idx"] = new typed_header(new typed_value_desc(basic_value_type::number_32), "to_pos_idx", "");
+		sheet_headers["from_pos_idx"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "from_pos_idx", "");
+		sheet_headers["to_pos_idx"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "to_pos_idx", "");
 
-		sheet_headers["text"] = new typed_header(new typed_value_desc(basic_value_type::string), "text", "");
-		sheet_headers["font_name"] = new typed_header(new typed_value_desc(basic_value_type::string), "font_name", "");
-		sheet_headers["font_size"] = new typed_header(new typed_value_desc(basic_value_type::number_u32), "font_size", "");
+		sheet_headers["text"] = new typed_header(new typed_string_desc(basic_value_type::string), "text", "");
+		sheet_headers["font_name"] = new typed_header(new typed_string_desc(basic_value_type::string), "font_name", "");
+		sheet_headers["font_size"] = new typed_header(new typed_string_desc(basic_value_type::number_u32), "font_size", "");
 
-		auto color_type_detail = make_tuple(new typed_value_desc(basic_value_type::number_32), 3, ',');
-		sheet_headers["color"] = new typed_header(new typed_value_desc(color_type_detail), "color", "");
+		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_32), 3, ',');
+		sheet_headers["color"] = new typed_header(new typed_string_desc(color_type_detail), "color", "");
 
-		sheet_headers["opacity"] = new typed_header(new typed_value_desc(basic_value_type::number_float), "opacity", "");
+		sheet_headers["opacity"] = new typed_header(new typed_string_desc(basic_value_type::number_float), "opacity", "");
 
 
 
@@ -518,26 +518,26 @@ namespace
 	{
 		// point_link headers link_id(string) from_tile_id(string) from_pos_idx_begin(int) from_pos_idx_end(int) to_tile_id(string) to_pos_idx_begin(int)  to_pos_idx_end(int) color(RGB) ref_color(ref) opacity(float)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
-		sheet_headers["link_id"] = new typed_header(new typed_value_desc(basic_value_type::string), "link_id", "");
+		sheet_headers["link_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "link_id", "");
 
-		sheet_headers["from_tile_id"] = new typed_header(new typed_value_desc(basic_value_type::string), "from_tile_id", "");
+		sheet_headers["from_tile_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "from_tile_id", "");
 
-		sheet_headers["to_tile_id"] = new typed_header(new typed_value_desc(basic_value_type::string), "to_tile_id", "");
+		sheet_headers["to_tile_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "to_tile_id", "");
 
-		sheet_headers["from_pos_idx_begin"] = new typed_header(new typed_value_desc(basic_value_type::number_32), "from_pos_idx_begin", "");
-		sheet_headers["to_pos_idx_begin"] = new typed_header(new typed_value_desc(basic_value_type::number_32), "to_pos_idx_begin", "");
+		sheet_headers["from_pos_idx_begin"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "from_pos_idx_begin", "");
+		sheet_headers["to_pos_idx_begin"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "to_pos_idx_begin", "");
 
-		sheet_headers["from_pos_idx_end"] = new typed_header(new typed_value_desc(basic_value_type::number_32), "from_pos_idx_end", "");
-		sheet_headers["to_pos_idx_end"] = new typed_header(new typed_value_desc(basic_value_type::number_32), "to_pos_idx_end", "");
+		sheet_headers["from_pos_idx_end"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "from_pos_idx_end", "");
+		sheet_headers["to_pos_idx_end"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "to_pos_idx_end", "");
 		
-		auto color_type_detail = make_tuple(new typed_value_desc(basic_value_type::number_32), 3, ',');
-		sheet_headers["color"] = new typed_header(new typed_value_desc(color_type_detail), "color", "");
+		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_32), 3, ',');
+		sheet_headers["color"] = new typed_header(new typed_string_desc(color_type_detail), "color", "");
 
-		sheet_headers["opacity"] = new typed_header(new typed_value_desc(basic_value_type::number_float), "opacity", "");
+		sheet_headers["opacity"] = new typed_header(new typed_string_desc(basic_value_type::number_float), "opacity", "");
 
-		sheet_headers["is_cross"] = new typed_header(new typed_value_desc(basic_value_type::number_bool), "is_cross", "");
+		sheet_headers["is_cross"] = new typed_header(new typed_string_desc(basic_value_type::number_bool), "is_cross", "");
 		
-		sheet_headers["control_radius_percent"] = new typed_header(new typed_value_desc(basic_value_type::number_float), "control_radius_percent", "");
+		sheet_headers["control_radius_percent"] = new typed_header(new typed_string_desc(basic_value_type::number_float), "control_radius_percent", "");
 
 		auto header_match = current_sheet.check_header_match(sheet_headers, "link_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
 		if(!header_match)
@@ -605,14 +605,14 @@ namespace
 	{
 		// value_on_tile headers value_id(string) track_id(string)  tile_id(string) begin_pos(int) end_pos(int)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
-		sheet_headers["value_id"] = new typed_header(new typed_value_desc(basic_value_type::string), "value_id", "");
-		sheet_headers["track_id"] = new typed_header(new typed_value_desc(basic_value_type::string), "track_id", "");
-		sheet_headers["tile_id"] = new typed_header(new typed_value_desc(basic_value_type::string), "tile_id", "");
+		sheet_headers["value_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "value_id", "");
+		sheet_headers["track_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "track_id", "");
+		sheet_headers["tile_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "tile_id", "");
 
-		sheet_headers["begin_pos"] = new typed_header(new typed_value_desc(basic_value_type::number_32), "begin_pos", "");
+		sheet_headers["begin_pos"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "begin_pos", "");
 
-		sheet_headers["end_pos"] = new typed_header(new typed_value_desc(basic_value_type::number_32), "end_pos", "");
-		sheet_headers["data_value"] = new typed_header(new typed_value_desc(basic_value_type::number_float), "data_value", "");
+		sheet_headers["end_pos"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "end_pos", "");
+		sheet_headers["data_value"] = new typed_header(new typed_string_desc(basic_value_type::number_float), "data_value", "");
 
 		auto header_match = current_sheet.check_header_match(sheet_headers, "value_id", std::vector<std::string_view>({}), std::vector<std::string_view>());
 		if (!header_match)
@@ -653,24 +653,24 @@ namespace
 	{
 		// point_track_config headers track_id(string) min_data_value(float) max_data_value(float) min_point_size(int) max_point_size(int) radius_offset(int) min_color(RGB) max_color(RGB) min_color_ref(ref) max_color_ref(ref) 
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
-		sheet_headers["track_id"] = new typed_header(new typed_value_desc(basic_value_type::string), "track_id", "");
+		sheet_headers["track_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "track_id", "");
 
-		sheet_headers["min_data_value"] = new typed_header(new typed_value_desc(basic_value_type::number_float), "min_data_value", "");
-		sheet_headers["max_data_value"] = new typed_header(new typed_value_desc(basic_value_type::number_float), "max_data_value", "");
+		sheet_headers["min_data_value"] = new typed_header(new typed_string_desc(basic_value_type::number_float), "min_data_value", "");
+		sheet_headers["max_data_value"] = new typed_header(new typed_string_desc(basic_value_type::number_float), "max_data_value", "");
 
-		sheet_headers["min_point_size"] = new typed_header(new typed_value_desc(basic_value_type::number_32), "min_point_size", "");
-		sheet_headers["max_point_size"] = new typed_header(new typed_value_desc(basic_value_type::number_32), "max_point_size", "");
+		sheet_headers["min_point_size"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "min_point_size", "");
+		sheet_headers["max_point_size"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "max_point_size", "");
 
-		sheet_headers["radius_offset_min"] = new typed_header(new typed_value_desc(basic_value_type::number_32), "radius_offset_min", "");
-		sheet_headers["radius_offset_max"] = new typed_header(new typed_value_desc(basic_value_type::number_32), "radius_offset_max", "");
-		sheet_headers["link_width"] = new typed_header(new typed_value_desc(basic_value_type::number_32), "link_width", "");
-		sheet_headers["with_shadow"] = new typed_header(new typed_value_desc(basic_value_type::number_bool), "with_shadow", "");
+		sheet_headers["radius_offset_min"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "radius_offset_min", "");
+		sheet_headers["radius_offset_max"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "radius_offset_max", "");
+		sheet_headers["link_width"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "link_width", "");
+		sheet_headers["with_shadow"] = new typed_header(new typed_string_desc(basic_value_type::number_bool), "with_shadow", "");
 
 
-		auto color_type_detail = make_tuple(new typed_value_desc(basic_value_type::number_32), 3, ',');
-		sheet_headers["min_color"] = new typed_header(new typed_value_desc(color_type_detail), "min_color", "");
-		sheet_headers["max_color"] = new typed_header(new typed_value_desc(color_type_detail), "max_color", "");
-		sheet_headers["link_color"] = new typed_header(new typed_value_desc(color_type_detail), "link_color", "");
+		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_32), 3, ',');
+		sheet_headers["min_color"] = new typed_header(new typed_string_desc(color_type_detail), "min_color", "");
+		sheet_headers["max_color"] = new typed_header(new typed_string_desc(color_type_detail), "max_color", "");
+		sheet_headers["link_color"] = new typed_header(new typed_string_desc(color_type_detail), "link_color", "");
 
 		auto header_match = current_sheet.check_header_match(sheet_headers, "track_id", std::vector<std::string_view>({}), std::vector<std::string_view>({ "min_color_ref", "max_color_ref", "link_color_ref"}));
 		if (!header_match)
@@ -775,9 +775,9 @@ namespace
 		// config_key(str), config_value(str), config_value_type(str)
 		unordered_map<string_view, arena_typed_value*> config_values;
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
-		sheet_headers["config_key"] = new typed_header(new typed_value_desc(basic_value_type::string), "config_key", "");
-		sheet_headers["config_value"] = new typed_header(new typed_value_desc(basic_value_type::string), "config_value", "");
-		sheet_headers["config_value_type"] = new typed_header(new typed_value_desc(basic_value_type::string), "config_value_type", "");
+		sheet_headers["config_key"] = new typed_header(new typed_string_desc(basic_value_type::string), "config_key", "");
+		sheet_headers["config_value"] = new typed_header(new typed_string_desc(basic_value_type::string), "config_value", "");
+		sheet_headers["config_value_type"] = new typed_header(new typed_string_desc(basic_value_type::string), "config_value_type", "");
 		auto header_match = config_sheet.check_header_match(sheet_headers, "config_key", std::vector<std::string_view>({}), std::vector<std::string_view>({}));
 		if(!header_match)
 		{
@@ -845,14 +845,14 @@ namespace
 				cout<<"value for "<< empty_key <<" is empty"<<endl;
 				continue;
 			}
-			auto current_parsed_type = typed_value_desc::get_type_from_str(cur_config_value_type);
+			auto current_parsed_type = typed_string_desc::get_type_from_str(cur_config_value_type);
 			auto current_parsed_value = temp_parser.parse_value_with_type(current_parsed_type, cur_config_value);
 			if(!current_parsed_value)
 			{
 				cout<<"cant parse "<< cur_config_value << " for type "<< cur_config_value_type<<endl;
 				if(current_parsed_type)
 				{
-					current_parsed_type->~typed_value_desc();
+					current_parsed_type->~typed_string_desc();
 				}
 				continue;
 			}
@@ -864,11 +864,11 @@ namespace
 	{
 		// font info headers font_id(str) font_file_path(str) font_web_name(str)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
-		sheet_headers["font_id"] = new typed_header(new typed_value_desc(basic_value_type::string), "font_id", "");
+		sheet_headers["font_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "font_id", "");
 
-		sheet_headers["font_file_path"] = new typed_header(new typed_value_desc(basic_value_type::string), "font_file_path", "");
+		sheet_headers["font_file_path"] = new typed_header(new typed_string_desc(basic_value_type::string), "font_file_path", "");
 
-		sheet_headers["font_web_name"] = new typed_header(new typed_value_desc(basic_value_type::string), "font_web_name", "");
+		sheet_headers["font_web_name"] = new typed_header(new typed_string_desc(basic_value_type::string), "font_web_name", "");
 
 		auto header_match = current_sheet.check_header_match(sheet_headers, "font_id", std::vector<std::string_view>({}), std::vector<std::string_view>());
 		if (!header_match)
@@ -1007,9 +1007,9 @@ namespace
 	{
 		// headers sheet_name(string) role(string)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
-		sheet_headers["sheet_name"] = new typed_header(new typed_value_desc(basic_value_type::string), "sheet_name", "");
+		sheet_headers["sheet_name"] = new typed_header(new typed_string_desc(basic_value_type::string), "sheet_name", "");
 
-		sheet_headers["role"] = new typed_header(new typed_value_desc(basic_value_type::string), "role", "");
+		sheet_headers["role"] = new typed_header(new typed_string_desc(basic_value_type::string), "role", "");
 		auto header_match = role_sheet.check_header_match(sheet_headers, "sheet_name", std::vector<std::string_view>({}), std::vector<std::string_view>({}));
 		if(!header_match)
 		{
