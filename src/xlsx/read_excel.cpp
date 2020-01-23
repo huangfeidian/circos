@@ -40,49 +40,15 @@ namespace
 		circle_tick,
 		track_config,
 	};
-	std::optional<Color> read_ref_color(spiritsaway::memory::arena& temp_arena, const typed_worksheet& cur_worksheet, uint32_t ref_header_idx, string_view color_name)
+	std::optional<Color> read_ref_color(string_view color_name, const std::unordered_map<string_view, Color>& defined_colors)
 	{
-		auto ref_header = cur_worksheet.get_typed_headers()[ref_header_idx];
-		if (!ref_header)
+		auto cur_iter = defined_colors.find(color_name);
+		if (cur_iter == defined_colors.end())
 		{
-			return nullopt;
+			return {};
 		}
-		if (color_name.empty())
-		{
-			return nullopt;
-		}
-		auto cur_type_detail = ref_header->type_desc->get_ref_detail_t();
-		if (!cur_type_detail)
-		{
-			return std::nullopt;
-		}
-		auto ref_detail = cur_type_detail.value();
-
-		auto[cur_ws_name, cur_ref_type] = ref_detail;
-		arena_typed_value cur_ref_value(&temp_arena, color_name);
-		const auto& row_value = cur_worksheet.get_ref_row(cur_ws_name, &cur_ref_value);
-		if (row_value.size() != 5)
-		{
-			return nullopt;
-		}
-
-		vector<uint32_t> rgb_values;
-		for (int i = 2; i < 5; i++)
-		{
-
-			auto cur_cell_value = row_value[i];
-			if (!cur_cell_value)
-			{
-				return std::nullopt;
-			}
-			auto cur_int_opt = cur_cell_value->expect_value<std::uint32_t>();
-			if (!cur_int_opt)
-			{
-				return std::nullopt;
-			}
-			rgb_values.push_back(cur_int_opt.value());
-		}
-		return Color(rgb_values[0], rgb_values[1], rgb_values[2]);
+		return cur_iter->second;
+		
 	}
 
 	std::optional<Point> read_point_from_cell(spiritsaway::memory::arena& temp_arena, const typed_worksheet& cur_worksheet, const typed_cell& cell_value)
@@ -104,7 +70,7 @@ namespace
 		}
 	}
 
-	void read_circle_sheet(spiritsaway::memory::arena& temp_arena, const typed_worksheet& current_sheet, std::unordered_map<std::string_view, model::circle>& all_circles)
+	void read_circle_sheet(spiritsaway::memory::arena& temp_arena, const typed_worksheet& current_sheet, std::unordered_map<std::string_view, model::circle>& all_circles, const std::unordered_map<string_view, Color>& defined_colors)
 	{
 		// circle headers circle_id(string) inner_radius(int) outer_radius(int) gap(int) color(RGB) ref_color(ref) opacity(float) filled(bool)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
@@ -121,7 +87,7 @@ namespace
 		sheet_headers["gap"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "gap", "");
 		sheet_headers["filled"] = new typed_header(new typed_string_desc(basic_value_type::number_bool), "filled", "");
 
-		auto header_match = current_sheet.check_header_match(sheet_headers, "circle_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
+		auto header_match = current_sheet.check_header_match(sheet_headers, "circle_id");
 		
 		if(!header_match)
 		{
@@ -160,8 +126,7 @@ namespace
 			}
 			if (opt_ref_color)
 			{
-				auto temp_color = read_ref_color(temp_arena, current_sheet
-					, ref_color_idx, opt_ref_color.value());
+				auto temp_color = read_ref_color(opt_ref_color.value(), defined_colors);
 				if (temp_color)
 				{
 					cur_circle.fill_color = temp_color.value();
@@ -186,7 +151,7 @@ namespace
 			}
 		}
 	} 
-	void read_tile_sheet(spiritsaway::memory::arena& temp_arena, const typed_worksheet& current_sheet, std::unordered_map<std::string_view, model::tile>& all_tiles)
+	void read_tile_sheet(spiritsaway::memory::arena& temp_arena, const typed_worksheet& current_sheet, std::unordered_map<std::string_view, model::tile>& all_tiles, const std::unordered_map<string_view, Color>& defined_colors)
 	{
 		// tile_desc headers tile_id(string) circle_id(string)  width(int) color(RGB) ref_color(ref) opacity(float) sequence(int) filled(bool)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
@@ -205,7 +170,7 @@ namespace
 
 		sheet_headers["filled"] = new typed_header(new typed_string_desc(basic_value_type::number_bool), "filled", "");
 
-		auto header_match = current_sheet.check_header_match(sheet_headers, "tile_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
+		auto header_match = current_sheet.check_header_match(sheet_headers, "tile_id");
 		if(!header_match)
 		{
 			std::cerr<<"header for tile description mismatch for sheet "<<current_sheet._name<<std::endl;
@@ -244,8 +209,7 @@ namespace
 			}
 			if (opt_ref_color)
 			{
-				auto temp_color = read_ref_color(temp_arena, current_sheet
-					, ref_color_idx, opt_ref_color.value());
+				auto temp_color = read_ref_color(opt_ref_color.value(), defined_colors);
 				if (temp_color)
 				{
 					cur_tile.fill_color = temp_color.value();
@@ -272,7 +236,7 @@ namespace
 		}
 	} 
 
-	void read_circle_tick_sheet(spiritsaway::memory::arena& temp_arena, const typed_worksheet& current_sheet, std::unordered_map<std::string_view, model::circle_tick>& all_circle_ticks)
+	void read_circle_tick_sheet(spiritsaway::memory::arena& temp_arena, const typed_worksheet& current_sheet, std::unordered_map<std::string_view, model::circle_tick>& all_circle_ticks, const std::unordered_map<string_view, Color>& defined_colors)
 	{
 		// circle_tick headers tick_id(string) circle_id(string)  width(int) height(int) color(RGB) ref_color(ref) opacity(float)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
@@ -288,7 +252,7 @@ namespace
 
 		sheet_headers["opacity"] = new typed_header(new typed_string_desc(basic_value_type::number_float), "opacity", "");
 
-		auto header_match = current_sheet.check_header_match(sheet_headers, "tick_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
+		auto header_match = current_sheet.check_header_match(sheet_headers, "tick_id");
 		if(!header_match)
 		{
 			std::cerr<<"header for circle_tick description mismatch for sheet "<<current_sheet._name<<std::endl;
@@ -326,8 +290,7 @@ namespace
 			}
 			if (opt_ref_color)
 			{
-				auto temp_color = read_ref_color(temp_arena, current_sheet
-					, ref_color_idx, opt_ref_color.value());
+				auto temp_color = read_ref_color(opt_ref_color.value(), defined_colors);
 				if (temp_color)
 				{
 					cur_circle_tick.fill_color = temp_color.value();
@@ -348,7 +311,7 @@ namespace
 		}
 	} 
 
-	void read_point_link_sheet(spiritsaway::memory::arena& temp_arena, const typed_worksheet& current_sheet, std::unordered_map<std::string_view, model::point_link>& all_point_links)
+	void read_point_link_sheet(spiritsaway::memory::arena& temp_arena, const typed_worksheet& current_sheet, std::unordered_map<std::string_view, model::point_link>& all_point_links, const std::unordered_map<string_view, Color>& defined_colors)
 	{
 		// point_link headers link_id(string) from_tile_id(string) from_pos_idx(int) to_tile_id(string) to_pos_idx(int)  color(RGB) ref_color(ref) opacity(float)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
@@ -368,7 +331,7 @@ namespace
 
 		sheet_headers["control_radius_percent"] = new typed_header(new typed_string_desc(basic_value_type::number_float), "control_radius_percent", "");
 
-		auto header_match = current_sheet.check_header_match(sheet_headers, "link_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
+		auto header_match = current_sheet.check_header_match(sheet_headers, "link_id");
 		if(!header_match)
 		{
 			std::cerr<<"header for point_link description mismatch for sheet "<<current_sheet._name<<std::endl;
@@ -407,8 +370,7 @@ namespace
 			}
 			if (opt_ref_color)
 			{
-				auto temp_color = read_ref_color(temp_arena, current_sheet
-					, ref_color_idx, opt_ref_color.value());
+				auto temp_color = read_ref_color(opt_ref_color.value(), defined_colors);
 				if (temp_color)
 				{
 					cur_point_link.fill_color = temp_color.value();
@@ -428,7 +390,7 @@ namespace
 			all_point_links[cur_point_link.link_id] = cur_point_link;
 		}
 	} 
-	void read_line_text_sheet(spiritsaway::memory::arena& temp_arena, const typed_worksheet& current_sheet, std::unordered_map<std::string_view, model::line_text>& all_line_texts)
+	void read_line_text_sheet(spiritsaway::memory::arena& temp_arena, const typed_worksheet& current_sheet, std::unordered_map<std::string_view, model::line_text>& all_line_texts, const std::unordered_map<string_view, Color>& defined_colors)
 	{
 		// line_text headers line_text_id(string) from_tile_id(string) from_pos_idx(int) to_tile_id(string) to_pos_idx(int)  text(string) font_name(string) font_size(uint16) color(RGB) ref_color(ref) opacity(float)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
@@ -452,7 +414,7 @@ namespace
 
 
 
-		auto header_match = current_sheet.check_header_match(sheet_headers, "line_text_id", std::vector<std::string_view>({}), std::vector<std::string_view>({ "ref_color" }));
+		auto header_match = current_sheet.check_header_match(sheet_headers, "line_text_id");
 		if (!header_match)
 		{
 			std::cerr << "header for point_link description mismatch for sheet " << current_sheet._name << std::endl;
@@ -494,8 +456,7 @@ namespace
 			}
 			if (opt_ref_color)
 			{
-				auto temp_color = read_ref_color(temp_arena, current_sheet
-					, ref_color_idx, opt_ref_color.value());
+				auto temp_color = read_ref_color(opt_ref_color.value(), defined_colors);
 				if (temp_color)
 				{
 					cur_line_text.fill_color = temp_color.value();
@@ -516,7 +477,7 @@ namespace
 			all_line_texts[cur_line_text.line_text_id] = cur_line_text;
 		}
 	}
-	void read_range_link_sheet(spiritsaway::memory::arena& temp_arena, const typed_worksheet& current_sheet, std::unordered_map<std::string_view, model::range_link>& all_range_links)
+	void read_range_link_sheet(spiritsaway::memory::arena& temp_arena, const typed_worksheet& current_sheet, std::unordered_map<std::string_view, model::range_link>& all_range_links, const std::unordered_map<string_view, Color>& defined_colors)
 	{
 		// point_link headers link_id(string) from_tile_id(string) from_pos_idx_begin(int) from_pos_idx_end(int) to_tile_id(string) to_pos_idx_begin(int)  to_pos_idx_end(int) color(RGB) ref_color(ref) opacity(float)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
@@ -541,7 +502,7 @@ namespace
 		
 		sheet_headers["control_radius_percent"] = new typed_header(new typed_string_desc(basic_value_type::number_float), "control_radius_percent", "");
 
-		auto header_match = current_sheet.check_header_match(sheet_headers, "link_id", std::vector<std::string_view>({}), std::vector<std::string_view>({"ref_color"}));
+		auto header_match = current_sheet.check_header_match(sheet_headers, "link_id");
 		if(!header_match)
 		{
 			std::cerr<<"header for range_link description mismatch for sheet "<<current_sheet._name<<std::endl;
@@ -581,8 +542,7 @@ namespace
 			}
 			if (opt_ref_color)
 			{
-				auto temp_color = read_ref_color(temp_arena, current_sheet
-					, ref_color_idx, opt_ref_color.value());
+				auto temp_color = read_ref_color(opt_ref_color.value(), defined_colors);
 				if (temp_color)
 				{
 					cur_range_link.fill_color = temp_color.value();
@@ -603,7 +563,7 @@ namespace
 		}
 	} 
 
-	void read_value_on_tile_sheet(spiritsaway::memory::arena& temp_arena, const typed_worksheet& current_sheet, std::unordered_map<std::string_view, std::vector<model::value_on_tile>>& all_value_on_tile_by_track)
+	void read_value_on_tile_sheet(spiritsaway::memory::arena& temp_arena, const typed_worksheet& current_sheet, std::unordered_map<std::string_view, std::vector<model::value_on_tile>>& all_value_on_tile_by_track, const std::unordered_map<string_view, Color>& defined_colors)
 	{
 		// value_on_tile headers value_id(string) track_id(string)  tile_id(string) begin_pos(int) end_pos(int)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
@@ -616,7 +576,7 @@ namespace
 		sheet_headers["end_pos"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "end_pos", "");
 		sheet_headers["data_value"] = new typed_header(new typed_string_desc(basic_value_type::number_float), "data_value", "");
 
-		auto header_match = current_sheet.check_header_match(sheet_headers, "value_id", std::vector<std::string_view>({}), std::vector<std::string_view>());
+		auto header_match = current_sheet.check_header_match(sheet_headers, "value_id");
 		if (!header_match)
 		{
 			std::cerr << "header for value_on_tile description mismatch for sheet " << current_sheet._name << std::endl;
@@ -651,7 +611,7 @@ namespace
 		}
 	}
 
-	void read_track_config_sheet(spiritsaway::memory::arena& temp_arena, const typed_worksheet& current_sheet, std::unordered_map<std::string_view, model::track_config>& track_config)
+	void read_track_config_sheet(spiritsaway::memory::arena& temp_arena, const typed_worksheet& current_sheet, std::unordered_map<std::string_view, model::track_config>& track_config, const std::unordered_map<string_view, Color>& defined_colors)
 	{
 		// point_track_config headers track_id(string) circle_id(string) draw_type(int) min_data_value(float) max_data_value(float)  radius_offset(int) min_color(RGB) max_color(RGB) min_color_ref(ref) max_color_ref(ref)  
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
@@ -672,7 +632,7 @@ namespace
 		sheet_headers["max_color"] = new typed_header(new typed_string_desc(color_type_detail), "max_color", "");
 		sheet_headers["draw_type"] = new typed_header(new typed_string_desc(basic_value_type::string), "draw_type", "");
 
-		auto header_match = current_sheet.check_header_match(sheet_headers, "track_id", std::vector<std::string_view>({}), std::vector<std::string_view>({ "min_color_ref", "max_color_ref"}));
+		auto header_match = current_sheet.check_header_match(sheet_headers, "track_id");
 		if (!header_match)
 		{
 			std::cerr << "header for point_track_config description mismatch for sheet " << current_sheet._name << std::endl;
@@ -715,8 +675,7 @@ namespace
 			}
 			if (opt_min_color_ref)
 			{
-				auto temp_color = read_ref_color(temp_arena, current_sheet
-					, min_color_ref_idx, opt_min_color_ref.value());
+				auto temp_color = read_ref_color(opt_min_color_ref.value(), defined_colors);
 				if (temp_color)
 				{
 					min_color = temp_color.value();
@@ -729,8 +688,7 @@ namespace
 			}
 			if (opt_max_color_ref)
 			{
-				auto temp_color = read_ref_color(temp_arena, current_sheet
-					, max_color_ref_idx, opt_max_color_ref.value());
+				auto temp_color = read_ref_color(opt_max_color_ref.value(), defined_colors);
 				if (temp_color)
 				{
 					max_color = temp_color.value();
@@ -757,7 +715,7 @@ namespace
 		sheet_headers["config_key"] = new typed_header(new typed_string_desc(basic_value_type::string), "config_key", "");
 		sheet_headers["config_value"] = new typed_header(new typed_string_desc(basic_value_type::string), "config_value", "");
 		sheet_headers["config_value_type"] = new typed_header(new typed_string_desc(basic_value_type::string), "config_value_type", "");
-		auto header_match = config_sheet.check_header_match(sheet_headers, "config_key", std::vector<std::string_view>({}), std::vector<std::string_view>({}));
+		auto header_match = config_sheet.check_header_match(sheet_headers, "config_key");
 		if(!header_match)
 		{
 			std::cerr<<"header for model_config description mismatch for sheet "<<config_sheet._name<<std::endl;
@@ -849,7 +807,7 @@ namespace
 
 		sheet_headers["font_web_name"] = new typed_header(new typed_string_desc(basic_value_type::string), "font_web_name", "");
 
-		auto header_match = current_sheet.check_header_match(sheet_headers, "font_id", std::vector<std::string_view>({}), std::vector<std::string_view>());
+		auto header_match = current_sheet.check_header_match(sheet_headers, "font_id");
 		if (!header_match)
 		{
 			std::cerr << "header for fonts_info description mismatch for sheet " << current_sheet._name << std::endl;
@@ -925,58 +883,95 @@ namespace
 		config_map.clear();
 
 	}
-	void read_sheet_content_by_role(spiritsaway::memory::arena& temp_arena, string_view sheet_role, const typed_worksheet& sheet_content, model::model& in_model)
+	void read_color_info(spiritsaway::memory::arena& temp_arena, const typed_worksheet& current_sheet, std::unordered_map<string_view, Color>& defined_colors)
 	{
-		auto current_role_opt = magic_enum::enum_cast<sheet_type>(sheet_role);
-		if (!current_role_opt)
+		// color info headers color_id(str) red(int) green(int) blue(int)
+
+		std::unordered_map<string_view, const typed_header*> sheet_headers;
+		sheet_headers["color_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "color_id", "");
+
+		sheet_headers["red"] = new typed_header(new typed_string_desc(basic_value_type::number_u32), "red", "");
+
+		sheet_headers["green"] = new typed_header(new typed_string_desc(basic_value_type::number_u32), "green", "");
+
+		sheet_headers["blue"] = new typed_header(new typed_string_desc(basic_value_type::number_u32), "blue", "");
+
+		auto header_match = current_sheet.check_header_match(sheet_headers, "color_id");
+		if (!header_match)
+		{
+			std::cerr << "header for color info description mismatch for sheet " << current_sheet._name << std::endl;
+			return;
+		}
+		const vector<const typed_header*>& all_headers = current_sheet.get_typed_headers();
+		vector<string_view> header_names = { "color_id", "red", "green" ,"blue"};
+		const vector<uint32_t>& header_indexes = current_sheet.get_header_index_vector(header_names);
+		if (header_indexes.empty())
 		{
 			return;
 		}
-		auto current_role = current_role_opt.value();
-		switch(current_role)
+		const auto& all_row_info = current_sheet.get_all_typed_row_info();
+		for (std::uint32_t i = 1; i < all_row_info.size(); i++)
+		{
+			const auto& row_value = current_sheet.get_typed_row(i);
+			auto[opt_color_id, opt_red, opt_green, opt_blue] =
+				current_sheet.try_convert_row<string_view, std::uint32_t, std::uint32_t, std::uint32_t>(i, header_indexes);
+			if (!opt_color_id || !opt_red || !opt_green || !opt_blue)
+			{
+				continue;
+			}
+			defined_colors[opt_color_id.value()] = Color(opt_red.value(), opt_green.value(), opt_blue.value());
+		}
+	}
+	void read_sheet_content_by_role(spiritsaway::memory::arena& temp_arena, sheet_type sheet_role, const typed_worksheet& sheet_content, model::model& in_model, std::unordered_map<string_view, Color>& defined_colors)
+	{
+
+		switch(sheet_role)
 		{
 		case sheet_type::config:
 			read_model_config(temp_arena, sheet_content, in_model.config);
+			break;
+		case sheet_type::colors:
+			read_color_info(temp_arena, sheet_content, defined_colors);
 			break;
 		case sheet_type::font_info:
 			read_font_info(temp_arena, sheet_content, in_model.font_info);
 			break;
 		case sheet_type::circle:
-			read_circle_sheet(temp_arena, sheet_content, in_model.circles);
+			read_circle_sheet(temp_arena, sheet_content, in_model.circles, defined_colors);
 			break;
 		case sheet_type::tile:
-			read_tile_sheet(temp_arena, sheet_content, in_model.tiles);
+			read_tile_sheet(temp_arena, sheet_content, in_model.tiles, defined_colors);
 			break;
 		case sheet_type::point_link:
-			read_point_link_sheet(temp_arena, sheet_content, in_model.point_links);
+			read_point_link_sheet(temp_arena, sheet_content, in_model.point_links, defined_colors);
 			break;
 		case sheet_type::range_link:
-			read_range_link_sheet(temp_arena, sheet_content, in_model.range_links);
+			read_range_link_sheet(temp_arena, sheet_content, in_model.range_links, defined_colors);
 			break;
 		case sheet_type::circle_tick:
-			read_circle_tick_sheet(temp_arena, sheet_content, in_model.circle_ticks);
+			read_circle_tick_sheet(temp_arena, sheet_content, in_model.circle_ticks, defined_colors);
 			break;
 		case sheet_type::line_text:
-			read_line_text_sheet(temp_arena, sheet_content, in_model.line_texts);
+			read_line_text_sheet(temp_arena, sheet_content, in_model.line_texts, defined_colors);
 			break;
 		case sheet_type::value_on_tile:
-			read_value_on_tile_sheet(temp_arena, sheet_content, in_model.all_value_on_tile_by_track);
+			read_value_on_tile_sheet(temp_arena, sheet_content, in_model.all_value_on_tile_by_track, defined_colors);
 			break;
 		case sheet_type::track_config:
-			read_track_config_sheet(temp_arena, sheet_content, in_model.track_configs);
+			read_track_config_sheet(temp_arena, sheet_content, in_model.track_configs, defined_colors);
 			break;
 		default:
 			break;
 		}
 	}
-	void read_role_sheet(const typed_worksheet& role_sheet, unordered_map<string_view, string_view>& sheet_role_map)
+	void read_role_sheet(const typed_worksheet& role_sheet, unordered_map<sheet_type, std::vector<string_view>>& sheet_role_map)
 	{
 		// headers sheet_name(string) role(string)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
 		sheet_headers["sheet_name"] = new typed_header(new typed_string_desc(basic_value_type::string), "sheet_name", "");
 
 		sheet_headers["role"] = new typed_header(new typed_string_desc(basic_value_type::string), "role", "");
-		auto header_match = role_sheet.check_header_match(sheet_headers, "sheet_name", std::vector<std::string_view>({}), std::vector<std::string_view>({}));
+		auto header_match = role_sheet.check_header_match(sheet_headers, "sheet_name");
 		if(!header_match)
 		{
 			cout<<"header not match for role_sheet"<<endl;
@@ -1010,18 +1005,20 @@ namespace
 						break;
 					}
 					cur_sheet_role = opt_role.value();
+					
 				}
 			}
 			if(cur_sheet_name.empty() || cur_sheet_role.empty())
 			{
 				continue;
 			}
-			if(sheet_role_map.find(cur_sheet_name) != sheet_role_map.end())
+			auto cur_sheet_type_opt = magic_enum::enum_cast<sheet_type>(cur_sheet_role);
+			if (!cur_sheet_type_opt)
 			{
-				cout<<"duplicate sheet name "<<cur_sheet_name<<endl;
 				continue;
 			}
-			sheet_role_map[cur_sheet_name] = cur_sheet_role;
+			auto& pre = sheet_role_map[cur_sheet_type_opt.value()];
+			pre.push_back(cur_sheet_name);
 		}
 	}
 	
@@ -1040,39 +1037,39 @@ namespace spiritsaway::circos
 			cout<<"cant find role sheet"<<endl;
 			return result;
 		}
+		unordered_map<std::string_view, Color> defined_colors;
 		const auto& role_sheet = in_workbook.get_worksheet(role_sheet_idx.value());
-		unordered_map<string_view, string_view> sheet_roles;
+		unordered_map<sheet_type, std::vector<string_view>> sheet_roles;
 		read_role_sheet(role_sheet, sheet_roles);
 		int config_count = 0;
-		for(const auto& i: sheet_roles)
+		for (auto one_sheet_role : magic_enum::enum_values<sheet_type>())
 		{
-			auto sheet_name = i.first;
-			auto sheet_role = i.second;
-			if(sheet_name == "sheet_role")
+			auto sheets_iter = sheet_roles.find(one_sheet_role);
+			if (sheets_iter == sheet_roles.end())
 			{
-				cout<< "wrong sheet name sheet_role "<< endl;
-				return model::model();
-			}
-			if(sheet_role == "config")
-			{
-				if(config_count != 0)
-				{
-					cout<<"more than one config sheet "<<sheet_name<<endl;
-
-					return model::model();
-				}
-				config_count += 1;
-
-			}
-			auto temp_sheet_idx = in_workbook.get_sheet_index_by_name(sheet_name);
-			if(!temp_sheet_idx)
-			{
-				cout<<"cant find sheet for "<<sheet_name<<endl;
 				continue;
 			}
-			const auto& temp_sheet_content = in_workbook.get_worksheet(temp_sheet_idx.value());
-			read_sheet_content_by_role(temp_arena, sheet_role, temp_sheet_content, result);
+			if (one_sheet_role == sheet_type::config && sheets_iter->second.size() != 1)
+			{
+				return model::model();
+			}
+			for (auto sheet_name : sheets_iter->second)
+			{
+				if (sheet_name == "sheet_role")
+				{
+					continue;
+				}
+				auto temp_sheet_idx = in_workbook.get_sheet_index_by_name(sheet_name);
+				if (!temp_sheet_idx)
+				{
+					cout << "cant find sheet for " << sheet_name << endl;
+					continue;
+				}
+				const auto& temp_sheet_content = in_workbook.get_worksheet(temp_sheet_idx.value());
+				read_sheet_content_by_role(temp_arena, one_sheet_role, temp_sheet_content, result, defined_colors);
+			}
 		}
+
 		return result;
 		
 	}
