@@ -119,10 +119,10 @@ void pi_test_1(void)
 			model::point_link temp_link;
 			all_temp_string.push_back(std::make_unique<std::string>(to_string(id_count++)));
 			temp_link.link_id = std::string_view(all_temp_string.back()->data(), all_temp_string.back()->size());
-			temp_link.from_tile_id = from_tile_id;
-			temp_link.from_pos_idx = from_pos_idx;
-			temp_link.to_tile_id = to_tile_id;
-			temp_link.to_pos_idx = to_pos_idx;
+			temp_link.from.tile_id = from_tile_id;
+			temp_link.from.pos_idx = from_pos_idx;
+			temp_link.to.tile_id = to_tile_id;
+			temp_link.to.pos_idx = to_pos_idx;
 			temp_link.control_radius_percent = control_radius_ration;
 			temp_link.fill_color = strand_color[one_link.second.first];
 			temp_link.opacity = 0.1f;

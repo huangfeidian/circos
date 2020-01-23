@@ -6,6 +6,8 @@
 #include <tuple>
 #include <iostream>
 
+#include <magic_enum.hpp>
+
 #include <circos/model.h>
 #include <circos/drawer/png_drawer.h>
 #include <circos/drawer/svg_drawer.h>
@@ -36,7 +38,7 @@ namespace
 		range_link,
 		config,
 		circle_tick,
-		point_track_config,
+		track_config,
 	};
 	std::optional<Color> read_ref_color(spiritsaway::memory::arena& temp_arena, const typed_worksheet& cur_worksheet, uint32_t ref_header_idx, string_view color_name)
 	{
@@ -392,10 +394,10 @@ namespace
 				continue;
 			}
 			cur_point_link.link_id = opt_link_id.value();
-			cur_point_link.from_tile_id = opt_from_tile.value();
-			cur_point_link.to_tile_id = opt_to_tile.value();
-			cur_point_link.from_pos_idx = opt_from_pos.value();
-			cur_point_link.to_pos_idx = opt_to_pos.value();
+			cur_point_link.from.tile_id = opt_from_tile.value();
+			cur_point_link.to.tile_id = opt_to_tile.value();
+			cur_point_link.from.pos_idx = opt_from_pos.value();
+			cur_point_link.to.pos_idx = opt_to_pos.value();
 			cur_point_link.opacity = opt_opacity.value();
 			cur_point_link.control_radius_percent = opt_control.value();
 			if (opt_color)
@@ -476,10 +478,10 @@ namespace
 				continue;
 			}
 			cur_line_text.line_text_id = opt_link_id.value();
-			cur_line_text.from_tile_id = opt_from_tile.value();
-			cur_line_text.to_tile_id = opt_to_tile.value();
-			cur_line_text.from_pos_idx = opt_from_pos.value();
-			cur_line_text.to_pos_idx = opt_to_pos.value();
+			cur_line_text.from.tile_id = opt_from_tile.value();
+			cur_line_text.to.tile_id = opt_to_tile.value();
+			cur_line_text.from.pos_idx = opt_from_pos.value();
+			cur_line_text.to.pos_idx = opt_to_pos.value();
 			cur_line_text.utf8_text = opt_text.value();
 			cur_line_text.font_name = opt_font_name.value();
 			cur_line_text.font_size = static_cast<std::uint16_t>(opt_font_size.value());
@@ -564,11 +566,11 @@ namespace
 				continue;
 			}
 			cur_range_link.link_id = opt_link_id.value();
-			cur_range_link.from_tile_id = opt_from_tile.value();
-			cur_range_link.from_pos_begin_idx = opt_from_pos_begin.value();
-			cur_range_link.to_pos_begin_idx = opt_to_pos_begin.value();
-			cur_range_link.from_pos_end_idx = opt_from_pos_end.value();
-			cur_range_link.to_pos_end_idx = opt_to_pos_end.value();
+			cur_range_link.from.tile_id = opt_from_tile.value();
+			cur_range_link.from.begin_pos = opt_from_pos_begin.value();
+			cur_range_link.to.begin_pos = opt_to_pos_begin.value();
+			cur_range_link.from.end_pos = opt_from_pos_end.value();
+			cur_range_link.to.end_pos = opt_to_pos_end.value();
 			cur_range_link.opacity = opt_opacity.value();
 			cur_range_link.control_radius_percent = opt_control.value();
 			cur_range_link.is_cross = opt_cross.value();
@@ -649,37 +651,35 @@ namespace
 		}
 	}
 
-	void read_point_track_sheet(spiritsaway::memory::arena& temp_arena, const typed_worksheet& current_sheet, std::unordered_map<std::string_view, model::point_track_config>& track_config)
+	void read_track_config_sheet(spiritsaway::memory::arena& temp_arena, const typed_worksheet& current_sheet, std::unordered_map<std::string_view, model::track_config>& track_config)
 	{
-		// point_track_config headers track_id(string) min_data_value(float) max_data_value(float) min_point_size(int) max_point_size(int) radius_offset(int) min_color(RGB) max_color(RGB) min_color_ref(ref) max_color_ref(ref) 
+		// point_track_config headers track_id(string) circle_id(string) draw_type(int) min_data_value(float) max_data_value(float)  radius_offset(int) min_color(RGB) max_color(RGB) min_color_ref(ref) max_color_ref(ref)  
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
 		sheet_headers["track_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "track_id", "");
 
+		sheet_headers["circle_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "circle_id", "");
+
 		sheet_headers["min_data_value"] = new typed_header(new typed_string_desc(basic_value_type::number_float), "min_data_value", "");
 		sheet_headers["max_data_value"] = new typed_header(new typed_string_desc(basic_value_type::number_float), "max_data_value", "");
-
-		sheet_headers["min_point_size"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "min_point_size", "");
-		sheet_headers["max_point_size"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "max_point_size", "");
+		
 
 		sheet_headers["radius_offset_min"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "radius_offset_min", "");
 		sheet_headers["radius_offset_max"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "radius_offset_max", "");
-		sheet_headers["link_width"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "link_width", "");
-		sheet_headers["with_shadow"] = new typed_header(new typed_string_desc(basic_value_type::number_bool), "with_shadow", "");
 
 
 		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_32), 3, ',');
 		sheet_headers["min_color"] = new typed_header(new typed_string_desc(color_type_detail), "min_color", "");
 		sheet_headers["max_color"] = new typed_header(new typed_string_desc(color_type_detail), "max_color", "");
-		sheet_headers["link_color"] = new typed_header(new typed_string_desc(color_type_detail), "link_color", "");
+		sheet_headers["draw_type"] = new typed_header(new typed_string_desc(basic_value_type::string), "draw_type", "");
 
-		auto header_match = current_sheet.check_header_match(sheet_headers, "track_id", std::vector<std::string_view>({}), std::vector<std::string_view>({ "min_color_ref", "max_color_ref", "link_color_ref"}));
+		auto header_match = current_sheet.check_header_match(sheet_headers, "track_id", std::vector<std::string_view>({}), std::vector<std::string_view>({ "min_color_ref", "max_color_ref"}));
 		if (!header_match)
 		{
 			std::cerr << "header for point_track_config description mismatch for sheet " << current_sheet._name << std::endl;
 			return;
 		}
 		const vector<const typed_header*>& all_headers = current_sheet.get_typed_headers();
-		vector<string_view> header_names = { "track_id", "min_data_value", "max_data_value", "min_point_size", "max_point_size", "radius_offset_min", "radius_offset_max", "min_color", "max_color", "min_color_ref", "max_color_ref", "link_width", "link_color", "link_color_ref", "with_shadow"};
+		vector<string_view> header_names = { "track_id", "circle_id", "draw_type", "min_data_value", "max_data_value", "radius_offset_min", "radius_offset_max", "min_color", "max_color", "min_color_ref", "max_color_ref", "with_shadow"};
 		const vector<uint32_t>& header_indexes = current_sheet.get_header_index_vector(header_names);
 		if (header_indexes.empty())
 		{
@@ -687,20 +687,25 @@ namespace
 		}
 		uint32_t min_color_ref_idx = header_indexes[9];
 		uint32_t max_color_ref_idx = header_indexes[10];
-		uint32_t link_color_ref_idx = header_indexes[13];
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
 		for (std::uint32_t i = 1; i < all_row_info.size(); i++)
 		{
-			auto[opt_track_id, opt_min_value, opt_max_value, opt_min_size, opt_max_size, opt_radius_offset_min, opt_radius_offset_max, opt_min_color, opt_max_color, opt_min_color_ref, opt_max_color_ref, opt_link_width, opt_link_color, opt_link_color_ref, opt_with_shadow] =
-				current_sheet.try_convert_row<string_view, float, float, int, int, int, int, tuple<int, int,int>, tuple<int, int, int>, string_view, string_view, int, tuple<int, int, int>, string_view, bool>(i, header_indexes);
-			if (!(opt_track_id && opt_min_value && opt_max_value && opt_min_size && opt_max_size && opt_radius_offset_min && opt_radius_offset_max))
+			auto [opt_track_id, opt_circle_id, opt_draw_type, opt_min_value, opt_max_value,opt_radius_offset_min, opt_radius_offset_max, opt_min_color, opt_max_color, opt_min_color_ref, opt_max_color_ref,  opt_with_shadow] =
+				current_sheet.try_convert_row<string_view, string_view, string_view, float, float, int, int, tuple<int, int,int>, tuple<int, int, int>, string_view, string_view, bool>(i, header_indexes);
+			if (!(opt_track_id && opt_circle_id && opt_draw_type && opt_min_value && opt_max_value && opt_radius_offset_min && opt_radius_offset_max))
 			{
 				continue;
 			}
-			model::point_track_config cur_track_config;
+			model::track_config cur_track_config;
+			auto opt_draw_type_enum = magic_enum::enum_cast<track_draw_type>(opt_draw_type.value());
+			if (!opt_draw_type_enum)
+			{
+				return;
+			}
+			cur_track_config.draw_type = opt_draw_type_enum.value();
 			cur_track_config.track_id = opt_track_id.value();
+			cur_track_config.circle_id = opt_circle_id.value();
 			cur_track_config.clamp_data_value = std::make_pair(opt_min_value.value(), opt_max_value.value());
-			cur_track_config.clamp_point_size = std::make_pair(opt_min_size.value(), opt_max_size.value());
 			cur_track_config.radius_offset = std::make_pair(opt_radius_offset_min.value(), opt_radius_offset_max.value());
 			Color min_color, max_color;
 			if (opt_min_color)
@@ -732,33 +737,7 @@ namespace
 				}
 			}
 			cur_track_config.clamp_color = std::make_pair(min_color, max_color);
-			cur_track_config.link_width = 0;
-			cur_track_config.with_shadow = false;
-			if (opt_link_width && opt_link_width.value())
-			{
-				cur_track_config.link_width = opt_link_width.value();
-				Color link_color;
-				if (opt_link_color)
-				{
-					auto color_value = opt_min_color.value();
-					link_color = Color(get<0>(color_value), get<1>(color_value), get<2>(color_value));
-				}
-				if (opt_link_color_ref)
-				{
-					auto temp_color = read_ref_color(temp_arena, current_sheet
-						, link_color_ref_idx, opt_min_color_ref.value());
-					if (temp_color)
-					{
-						link_color = temp_color.value();
-					}
-				}
-				cur_track_config.link_color = link_color;
-				if (opt_with_shadow && opt_with_shadow.value())
-				{
-					cur_track_config.with_shadow = true;
-				}
-
-			}
+			
 
 			if (track_config.find(cur_track_config.track_id) != track_config.end())
 			{
@@ -948,25 +927,12 @@ namespace
 	}
 	void read_sheet_content_by_role(spiritsaway::memory::arena& temp_arena, string_view sheet_role, const typed_worksheet& sheet_content, model::model& in_model)
 	{
-		const static unordered_map<string_view, sheet_type> avail_types = { 
-			{string_view("config"), sheet_type::config}, 
-			{string_view("font_info"), sheet_type::font_info}, 
-			{string_view("circle"), sheet_type::circle}, 
-			{string_view("tile"), sheet_type::tile}, 
-			{string_view("point_link"), sheet_type::point_link}, 
-			{string_view("range_link"), sheet_type::range_link}, 
-			{string_view("color"), sheet_type::colors}, 
-			{string_view("circle_tick"), sheet_type::circle_tick}, 
-			{string_view("line_text"), sheet_type::line_text},
-			{string_view("value_on_tile"), sheet_type::value_on_tile},
-			{string_view("point_track_config"), sheet_type::point_track_config}
-		};
-		auto sheet_type_iter = avail_types.find(sheet_role);
-		if(sheet_type_iter == avail_types.cend())
+		auto current_role_opt = magic_enum::enum_cast<sheet_type>(sheet_role);
+		if (!current_role_opt)
 		{
 			return;
 		}
-		auto current_role = sheet_type_iter->second;
+		auto current_role = current_role_opt.value();
 		switch(current_role)
 		{
 		case sheet_type::config:
@@ -996,8 +962,8 @@ namespace
 		case sheet_type::value_on_tile:
 			read_value_on_tile_sheet(temp_arena, sheet_content, in_model.all_value_on_tile_by_track);
 			break;
-		case sheet_type::point_track_config:
-			read_point_track_sheet(temp_arena, sheet_content, in_model.point_track_configs);
+		case sheet_type::track_config:
+			read_track_config_sheet(temp_arena, sheet_content, in_model.track_configs);
 			break;
 		default:
 			break;

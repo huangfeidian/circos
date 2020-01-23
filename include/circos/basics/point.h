@@ -73,11 +73,11 @@ namespace spiritsaway::circos
 			this->y = this->y - second.y;
 			return *this;
 		}
-		static basic_point radius_point(T radius, amplify_angle in_angle, basic_point center = basic_point())
+		static basic_point radius_point(T radius, fixed_angle in_angle, basic_point center = basic_point())
 		{
 			basic_point result;
-			result.x = static_cast<uint16_t>(radius * in_angle.cos());
-			result.y = static_cast<uint16_t>(radius * in_angle.sin());
+			result.x = static_cast<T>(radius * in_angle.cos());
+			result.y = static_cast<T>(radius * in_angle.sin());
 			return result + center;
 		}
 		T operator*(const basic_point& other_point)
@@ -93,11 +93,11 @@ namespace spiritsaway::circos
 	};
 	using Point = basic_point<std::int16_t>;
 	template<typename T1, typename T2>
-	basic_point<T2> cast_point(const basic_point<T1>& in_point)
+	basic_point<T1> cast_point(const basic_point<T2>& in_point)
 	{
-		basic_point<T2> result;
-		result.x = static_cast<T2>(in_point.x);
-		result.y = static_cast<T2>(in_point.y);
+		basic_point<T1> result;
+		result.x = static_cast<T1>(in_point.x);
+		result.y = static_cast<T1>(in_point.y);
 		return result;
 	}
 	

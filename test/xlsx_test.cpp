@@ -14,13 +14,7 @@ void tick_test()
 	string to_svg_file_name = "xlsx_tick_test.svg";
 	read_xlsx_and_draw(from_xlsx_name, to_png_file_name, to_svg_file_name);
 }
-void range_links_test()
-{
-	string from_xlsx_name = "../data/range_link_test.xlsx";
-	string to_png_file_name = "xlsx_range_link_test.png";
-	string to_svg_file_name = "xlsx_range_link_test.svg";
-	read_xlsx_and_draw(from_xlsx_name, to_png_file_name, to_svg_file_name);
-}
+
 void tick_label_test()
 {
 	string from_xlsx_name = "../data/tick_label_test.xlsx";
@@ -38,5 +32,7 @@ void point_track_test()
 }
 int main(int argc, char** argv)
 {
-	point_track_test();
+	//tick_test();
+	//tick_label_test();
+	//point_track_test();
 }

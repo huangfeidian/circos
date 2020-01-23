@@ -54,14 +54,27 @@ namespace spiritsaway::circos::model
 		float opacity;
 	};
 
+	struct tile_pos
+	{
+		// 贴片上的一个位置
+		std::string_view tile_id;
+		std::uint32_t pos_idx;
+	};
+
+	struct tile_region
+	{
+		// 贴片上的一段区域
+		std::string_view tile_id;
+		std::uint32_t begin_pos;
+		std::uint32_t end_pos;
+	};
+
 	struct point_link
 	{
-		// 两点之间的连线
+		// 两点之间的连线 可能是贝塞尔曲线 也可能是直线
 		std::string_view link_id;
-		std::string_view from_tile_id;
-		std::uint32_t from_pos_idx;
-		std::string_view to_tile_id;
-		std::uint32_t to_pos_idx;
+		tile_pos from;
+		tile_pos to;
 		float control_radius_percent; //negative for direct link
 		Color fill_color;
 		float opacity;
@@ -73,25 +86,21 @@ namespace spiritsaway::circos::model
 		// 一条直线上的文本
 		// 如果初始位置与结束位置相同 则代表此位置的顺时针切线方向
 		std::string_view line_text_id;
-		std::string_view from_tile_id;
-		int from_pos_idx;
-		std::string_view to_tile_id;
-		int to_pos_idx;
+		tile_pos from;
+		tile_pos to;
 		std::string_view utf8_text;
 		std::string_view font_name;
 		std::uint16_t font_size;
 		Color fill_color;
 		float opacity;
 	};
+
 	struct range_link
 	{
+		// 交叉或者不交叉的条带 
 		std::string_view link_id;
-		std::string_view from_tile_id;
-		std::uint32_t from_pos_begin_idx;
-		std::uint32_t from_pos_end_idx;
-		std::string_view to_tile_id;
-		std::uint32_t to_pos_begin_idx;
-		std::uint32_t to_pos_end_idx;
+		tile_region from;
+		tile_region to;
 		bool is_cross;
 		Color fill_color;
 		float opacity;
@@ -110,9 +119,7 @@ namespace spiritsaway::circos::model
 	};
 	struct fill_ontile
 	{
-		std::string_view tile_id;
-		std::uint32_t on_tile_begin;
-		std::uint32_t on_tile_end;
+		tile_region range;
 		Color fill_color;
 	};
 
@@ -124,33 +131,21 @@ namespace spiritsaway::circos::model
 		std::uint32_t begin_pos;
 		std::uint32_t end_pos;
 		float data_value;
-		float angle = 0;
+		float angle_begin;
+		float angle_end;
+		float data_percentage;
 	};
-	struct point_track_config
+	struct track_config
 	{
 		std::string_view track_id;
+		std::string_view circle_id;
 		std::pair<Color, Color> clamp_color;
 		std::pair<float, float> clamp_data_value;
-		std::pair<std::uint32_t, std::uint32_t> clamp_point_size;
 		std::pair<std::uint32_t, std::uint32_t> radius_offset;
 		bool with_shadow;
-		std::uint8_t link_width;
-		Color link_color;
+		track_draw_type draw_type;
 	};
 
-
-	struct value_ontile_config
-	{
-		circos::value_on_tile_draw_type draw_type;
-		float base_value;
-		float max_value;
-		float scale;
-		Color base_color;
-		Color max_color;
-		std::uint32_t point_size;
-		std::uint32_t stroke_size;
-
-	};
 
 	struct model_config
 	{
@@ -177,8 +172,21 @@ namespace spiritsaway::circos::model
 		std::unordered_map<std::string_view, std::pair<std::string_view, std::string_view>> font_info;
 
 		std::unordered_map<std::string_view, std::vector<value_on_tile>> all_value_on_tile_by_track;
-		std::unordered_map<std::string_view, point_track_config> point_track_configs;
+		std::unordered_map<std::string_view, track_config> track_configs;
 		void to_shapes(shape_collection& pre_collection);
-		
+		std::unordered_map<std::string_view, std::uint32_t> circle_ranges;
+	private:
+
+		void to_shapes(shape_collection& pre_collection, const track_config& config, std::vector<value_on_tile>& data);
+		void to_shapes(shape_collection& pre_collection, const tick_on_tile& data);
+		void to_shapes(shape_collection& pre_collection, const point_link& data);
+		void to_shapes(shape_collection& pre_collection, const line_text& data);
+		void to_shapes(shape_collection& pre_collection, const range_link& data);
+		void to_shapes(shape_collection& pre_collection, const circle_tick& data);
+		void to_shapes(shape_collection& pre_collection, const tile& data);
+		void to_shapes(shape_collection& pre_collection, const circle& data);
+		void draw_tiles(shape_collection& pre_collection);
+		void draw_tiles_in_circle(shape_collection& pre_collection, circle& cur_circle, std::vector<tile>& tiles_in_circle);
+		void prepare_value_on_track(const track_config& config, std::vector<value_on_tile>& one_track_data);
 	};
 }

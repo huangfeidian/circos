@@ -29,7 +29,7 @@ namespace spiritsaway::circos
 		{
 
 		}
-		Bezier(Point center,std::uint16_t in_on_radius, amplify_angle in_begin_angle, amplify_angle in_end_angle, Color in_color,std::uint16_t in_control_radius=0,
+		Bezier(Point center,std::uint16_t in_on_radius, fixed_angle in_begin_angle, fixed_angle in_end_angle, Color in_color,std::uint16_t in_control_radius=0,
 		 std::uint16_t in_stroke_width = 1, float in_opacity = 1.0)
 			: stroke_width(in_stroke_width)
 			, color(in_color)
@@ -44,25 +44,25 @@ namespace spiritsaway::circos
 			{
 				std::swap(in_begin_angle, in_end_angle);
 			}
-			auto angle_diff = in_end_angle - in_begin_angle;
-			auto middle = (in_begin_angle + in_end_angle) / 2;
+			auto angle_diff = (free_angle(in_end_angle) - in_begin_angle);
+			auto middle = ((free_angle(in_begin_angle) + in_end_angle) / 2);
 				
 			auto final_angle = middle;
-			if(abs(angle_diff.value - 180 * amplify_angle::factor) < 3 * amplify_angle::factor)
+			if(abs(angle_diff.normal().value() - 180 * fixed_angle::factor) < 3 * fixed_angle::factor)
 			{
 				
 				// 这里我们要随机的让他翻转
-				if (angle_diff.value % 2)
+				if (angle_diff.normal().value() % 2)
 				{
-					final_angle = middle + amplify_angle::from_angle(180);
+					final_angle = (free_angle::from_angle(180) + middle);
 				}
 				
 			}
 			else
 			{
-				if(angle_diff >= amplify_angle::from_angle(180))
+				if(angle_diff.normal() >= free_angle::from_angle(180))
 				{
-					final_angle = middle + amplify_angle::from_angle(180);
+					final_angle = (free_angle::from_angle(180) + middle);
 				}
 			}
 			/*std::cout << "begin " << in_begin_angle << " end " << in_end_angle << " middle " << middle <<"diff"<<angle_diff<< " final " << final_angle << std::endl;*/
@@ -71,9 +71,9 @@ namespace spiritsaway::circos
 		std::vector<Point> path() const
 		{
 			std::vector<Point> result;
-			const auto& p1 = cast_point<std::int16_t, float>(begin_point);
-			const auto& p2 = cast_point<std::int16_t, float>(end_point);
-			const auto& cp = cast_point<std::int16_t, float>(control_point);
+			const auto& p1 = cast_point<float>(begin_point);
+			const auto& p2 = cast_point<float>(end_point);
+			const auto& cp = cast_point<float>(control_point);
 			basic_point<float> c1;
 			basic_point<float> c2;
 			basic_point<float> double_px;
@@ -89,7 +89,7 @@ namespace spiritsaway::circos
 			c1 = p1 + (cp - p1)*inc;
 			c2 = cp + (p2 - cp)*inc;
 			double_px = c1 + (c2 - c1)*inc;
-			px = cast_point<float, std::int16_t>(double_px);
+			px = cast_point<std::int16_t>(double_px);
 			result.push_back(px);
 			inc += step;
 			while (inc <= 1)
@@ -97,7 +97,7 @@ namespace spiritsaway::circos
 				c1 = p1 + (cp - p1)*inc;
 				c2 = cp + (p2 - cp)*inc;
 				double_px = c1 + (c2 - c1)*inc;
-				px = cast_point<float, std::int16_t>(double_px);
+				px = cast_point<std::int16_t>(double_px);
 				if (!(px == result.back()))
 				{
 					result.push_back(px);

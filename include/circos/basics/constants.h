@@ -12,12 +12,12 @@ namespace spiritsaway::circos
 		left,
 		right,
 	};
-	enum class value_on_tile_draw_type: std::uint8_t
+	enum class track_draw_type: std::uint8_t
 	{
-		point,
+		point = 1,
 		link,
-		rectangle,
-		link_shadow,
-		
+		histogram,
+		area,
+		fan,
 	};
 }

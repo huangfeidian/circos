@@ -502,23 +502,15 @@ namespace spiritsaway::circos
 		if (arc.fill_flag)
 		{
 			vector<vector<Point>> flood_points;
-			auto line_1 = Line(arc.center, arc.from_point, arc.color);
-			auto line_2 = Line(arc.to_point, arc.center, arc.color);
+			auto line_1 = Line(arc.center, arc.from_point(), arc.color);
+			auto line_2 = Line(arc.to_point(), arc.center, arc.color);
 			*this << line_1 << line_2;
 			auto path_line1 = path(line_1);
 			auto path_line2 = path(line_2);
 			Line::connect_paths(flood_points, path_line1);
 			Line::connect_paths(flood_points, arc_points);
 			Line::connect_paths(flood_points, path_line2);
-			Point middle_point;
-			if (arc.begin_angle < arc.end_angle)
-			{
-				middle_point = Point::radius_point(arc.radius, (arc.begin_angle + arc.end_angle) / 2)*0.5 + arc.center;
-			}
-			else
-			{
-				middle_point = Point::radius_point(arc.radius, amplify_angle::from_angle(360) -(arc.begin_angle + arc.end_angle) / 2)*0.5 + arc.center;
-			}
+			Point middle_point = Point::radius_point(arc.radius, arc.middle_angle()) + arc.center;
 			flood(flood_points, vector<Point>{middle_point}, arc.color, arc.opacity);
 		}
 		return *this;
@@ -586,13 +578,12 @@ namespace spiritsaway::circos
 	PngImage& PngImage::operator<<(const Tile& tile)
 	{
 		vector<Point> path_points;
-		Arc arc_1(tile.inner_radius, tile.begin_angle, tile.end_angle, tile.center, tile.color);
-		Arc arc_2(tile.outer_radius, tile.begin_angle, tile.end_angle, tile.center, tile.color);
-		Line line_1(Point::radius_point(tile.inner_radius, tile.end_angle, tile.center), Point::radius_point(tile.outer_radius, tile.end_angle, tile.center), tile.color);
+		Arc arc_1(tile.inner_radius, tile.begin_angle, tile.width, tile.center, false, tile.color);
+		Arc arc_2(tile.outer_radius, tile.begin_angle, tile.width, tile.center, true, tile.color);
+		Line line_1(Point::radius_point(tile.inner_radius, free_angle(tile.begin_angle) + tile.width, tile.center), Point::radius_point(tile.outer_radius, free_angle(tile.begin_angle) + tile.width, tile.center), tile.color);
 		Line line_2(Point::radius_point(tile.outer_radius, tile.begin_angle, tile.center), Point::radius_point(tile.inner_radius, tile.begin_angle, tile.center), tile.color);
 		auto arc_path1 = path(arc_1);
 		auto arc_path2 = path(arc_2);
-		reverse(arc_path2.begin(), arc_path2.end());
 		auto line_path1 = path(line_1);
 		auto line_path2 = path(line_2);
 		draw_path(arc_path1, tile.color, tile.stroke, tile.opacity);
@@ -602,17 +593,8 @@ namespace spiritsaway::circos
 
 		if (tile.fill)
 		{
-			amplify_angle middle_angle;
-			amplify_angle in_end_angle = tile.end_angle;
-			amplify_angle in_begin_angle = tile.begin_angle;
-			if (tile.end_angle > tile.begin_angle)
-			{
-				middle_angle = (tile.end_angle + tile.begin_angle) / 2;
-			}
-			else
-			{
-				middle_angle = amplify_angle::from_angle(360) - (tile.begin_angle + tile.end_angle) / 2;
-			}
+			free_angle middle_angle = free_angle(tile.begin_angle) + free_angle(tile.width) / 2;
+			
 			auto middle_point = Point::radius_point((tile.inner_radius + tile.outer_radius) / 2, middle_angle, tile.center);
 			vector<vector<Point>> flood_points;
 			Line::connect_paths(flood_points, arc_path1);
@@ -642,8 +624,8 @@ namespace spiritsaway::circos
 			Line::connect_paths(flood_points, arc_2);
 			Line::connect_paths(flood_points, bezier_2);
 			//下面的这两个点一定在ribbon内部
-			Point middle_1 = (ribbon.arc_1.from_point + ribbon.arc_1.to_point)*0.5;
-			Point middle_2 = (ribbon.arc_2.from_point + ribbon.arc_2.to_point)*0.5;
+			Point middle_1 = (ribbon.arc_1.from_point() + ribbon.arc_1.to_point())*0.5;
+			Point middle_2 = (ribbon.arc_2.from_point() + ribbon.arc_2.to_point())*0.5;
 			flood(flood_points, vector<Point>{middle_1, middle_2}, ribbon.color, ribbon.opacity);
 		}
 		return *this;
@@ -654,15 +636,15 @@ namespace spiritsaway::circos
 		{
 			return *this;
 		}
-		Arc arc_1(annulus.inner_radius, amplify_angle::from_angle(0), amplify_angle::from_angle(360), annulus.center, annulus.color);
-		Arc arc_2(annulus.outer_radius, amplify_angle::from_angle(0), amplify_angle::from_angle(360), annulus.center, annulus.color);
+		Arc arc_1(annulus.inner_radius, free_angle::from_angle(0), free_angle::from_angle(360), annulus.center, false, annulus.color);
+		Arc arc_2(annulus.outer_radius, free_angle::from_angle(0), free_angle::from_angle(360), annulus.center, false, annulus.color);
 		auto arc_path1 = path(arc_1);
 		auto arc_path2 = path(arc_2);
 		draw_path(arc_path1, annulus.color, 1, annulus.opacity);
 		draw_path(arc_path2, annulus.color, 1, annulus.opacity);
 		if(annulus.filled)
 		{
-			Point middle_point = Point::radius_point((annulus.inner_radius + annulus.outer_radius) / 2, amplify_angle::from_angle(180), annulus.center);
+			Point middle_point = Point::radius_point((annulus.inner_radius + annulus.outer_radius) / 2, free_angle::from_angle(180), annulus.center);
 			vector<vector<Point>> flood_points;
 			flood_points.emplace_back(move(arc_path1));
 			flood_points.emplace_back(move(arc_path2));

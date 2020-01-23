@@ -4,7 +4,8 @@
 #include "constants.h"
 namespace spiritsaway::circos
 {
-	struct amplify_angle
+	class free_angle;
+	struct fixed_angle
 	{
 		static const int factor = 100; // 每一个角度的精度
 		static double angle_percent_to_rad(int in_angle_with_percent)
@@ -19,68 +20,44 @@ namespace spiritsaway::circos
 		{
 			return angle_1 / 2 + angle_2 / 2;
 		}
-		static int normalise(int in_angle)
-		{
-			return in_angle % (360 * factor);
-		}
-		int value;
 
-		amplify_angle()
+	public:
+		
+		friend class free_angle;
+	private:
+		int _value;
+		fixed_angle(int in_value)
+			:_value(in_value)
 		{
 
 		}
-		static amplify_angle from_rad(float rad)
+	public:
+		fixed_angle(const fixed_angle& other)
+			:_value(other._value)
 		{
-			amplify_angle result;
-			result.value = static_cast<int>(rad / pi() * factor * 180);
-			return result;
+
 		}
-		static amplify_angle from_angle(float angle)
+		fixed_angle()
+			:_value(0)
 		{
-			amplify_angle result;
-			result.value = static_cast<int>(angle * factor);
-			return result;
+
 		}
-		friend amplify_angle operator+(const amplify_angle& data_1, const amplify_angle& data_2)
+		fixed_angle& operator=(const fixed_angle& other)
 		{
-			amplify_angle result;
-			result.value = data_1.value + data_2.value;
-			return result;
-		}
-		friend amplify_angle operator-(const amplify_angle& data_1, const amplify_angle& data_2)
-		{
-			amplify_angle result;
-			result.value = data_1.value - data_2.value;
-			return result;
-		}
-		amplify_angle(const amplify_angle& other)
-		{
-			value = other.value;
-		}
-		amplify_angle& operator=(const amplify_angle& other)
-		{
-			value = other.value;
+			_value = other._value;
 			return *this;
 		}
-		amplify_angle operator/(float arg) const
+		int value() const
 		{
-			amplify_angle result;
-			result.value = static_cast<int>(value / arg);
-			return result;
-		}
-		amplify_angle operator*(float arg) const
-		{
-			amplify_angle result;
-			result.value = static_cast<int>(value * arg);
-			return result;
+			return _value;
 		}
 		float angle()const
 		{
-			return static_cast<float>(normalise(value) * 1.0 / factor);
+			return static_cast<float>(_value * 1.0 / factor);
 		}
 		float rad() const
 		{
-			return static_cast<float>(normalise(value) * pi() / (factor * 180));
+			return static_cast<float>(_value * pi() / (factor * 180));
 		}
 		float sin() const
 		{
@@ -94,30 +71,105 @@ namespace spiritsaway::circos
 		{
 			return std::tan(rad());
 		}
-		bool operator==(const amplify_angle& other) const
+		bool operator==(const fixed_angle& other) const
 		{
-			return (value - other.value) % (360 * factor) == 0;
+			return _value == other._value;
 		}
-		bool operator<(const amplify_angle& other) const
+		bool operator<(const fixed_angle& other) const
 		{
-			return normalise(value) < normalise(other.value);
+			return _value < other._value;
 		}
-		bool operator<=(const amplify_angle& other) const
+		bool operator<=(const fixed_angle& other) const
 		{
-			return normalise(value) <= normalise(other.value);
+			return _value <= other._value;
 		}
-		bool operator>(const amplify_angle& other) const
+		bool operator>(const fixed_angle& other) const
 		{
-			return normalise(value) > normalise(other.value);
+			return _value > other._value;
 		}
-		bool operator>=(const amplify_angle& other) const
+		bool operator>=(const fixed_angle& other) const
 		{
-			return normalise(value) >= normalise(other.value);
+			return _value >= other._value;
 		}
-		amplify_angle normalise() const
+		static fixed_angle middle(const fixed_angle& from, const fixed_angle& to)
 		{
-			amplify_angle result;
-			result.value = normalise(value);
+			if (from < to)
+			{
+				return fixed_angle((from.value() + to.value()) / 2);
+			}
+			else
+			{
+				return fixed_angle((from.value() + to.value()) / 2 + 180 * factor);
+			}
+		}
+	};
+	class free_angle
+	{
+	private:
+		int value;
+	public:
+		free_angle()
+		{
+
+		}
+		free_angle(const fixed_angle& fix_data)
+			:value(fix_data._value)
+		{
+
+		}
+		fixed_angle normal() const
+		{
+			return fixed_angle(value % (360 * fixed_angle::factor));
+		}
+		operator fixed_angle() const
+		{
+			return normal();
+		}
+
+		static free_angle from_rad(float rad)
+		{
+			free_angle result;
+			result.value = static_cast<int>(rad / pi() * fixed_angle::factor * 180);
+			return result;
+		}
+		static free_angle from_angle(float angle)
+		{
+			free_angle result;
+			result.value = static_cast<int>(angle * fixed_angle::factor);
+			return result;
+		}
+		friend free_angle operator+(const free_angle& data_1, const free_angle& data_2)
+		{
+			free_angle result;
+			result.value = data_1.value + data_2.value;
+
+			return result;
+		}
+		friend free_angle operator-(const free_angle& data_1, const free_angle& data_2)
+		{
+			free_angle result;
+			result.value = data_1.value - data_2.value;
+			return result;
+		}
+		free_angle(const free_angle& other)
+		{
+			value = other.value;
+		}
+		free_angle& operator=(const free_angle& other)
+		{
+			value = other.value;
+			return *this;
+		}
+		free_angle operator/(float arg) const
+		{
+			free_angle result;
+			result.value = static_cast<int>(value / arg);
+			return result;
+		}
+		free_angle operator*(float arg) const
+		{
+			free_angle result;
+			result.value = static_cast<int>(value * arg);
 			return result;
 		}
 	};

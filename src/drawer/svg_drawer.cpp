@@ -41,11 +41,7 @@ namespace spiritsaway::circos
 		output << "rgb("<<int(color.r)<<","<<int(color.g)<<","<<int(color.b)<<")";
 		return *this;
 	}
-	SvgGraph& SvgGraph::operator<<(const Point& point)
-	{
-		output << point.x << "," << point.y << " ";
-		return *this;
-	}
+	
 	void SvgGraph::add_to_path(const Line& line)
 	{
 		(*this) << " L" << line.to << " ";
@@ -76,14 +72,14 @@ namespace spiritsaway::circos
 	void SvgGraph::add_to_path(const Arc& arc)
 	{
 		(*this) << " A " << arc.radius << "," << arc.radius << " ";
-		(*this) << 0 << " " << arc.large_flag << "," << arc.sweep_flag << " ";
-		(*this) << arc.to_point;
+		(*this) << 0 << " " << arc.large_flag() << ","<<static_cast<int>(!arc.reverse_end)<<" ";
+		(*this) << arc.to_point<float>();
 	}
 	SvgGraph& SvgGraph::operator<<( const Arc& arc)
 	{
 		auto& graph = *this;
 		graph << "<path id=\"textPath" << path_index << "\" ";
-		graph << "d= \" M " << arc.from_point<<" ";
+		graph << "d= \" M " << arc.from_point<float>()<<" ";
 		graph.add_to_path(arc);
 		if (arc.fill_flag)
 		{
@@ -94,7 +90,7 @@ namespace spiritsaway::circos
 		{
 			graph << "\" fill=\"none\" ";
 		}
-		graph << "stroke=\"" << arc.color << "\" " << "stroke-width=\"" << arc.stroke << "\" />";
+		graph << "stroke=\"" << arc.color << "\" " << "stroke-width=\"" << arc.stroke << "\" />\n";
 		path_index++;
 		return graph;
 	}
@@ -153,11 +149,11 @@ namespace spiritsaway::circos
 	SvgGraph& SvgGraph::operator<<(const Tile& tile)
 	{
 		auto& graph = *this;
-		Arc arc_1(tile.inner_radius, tile.begin_angle, tile.end_angle, tile.center, tile.color);
-		Arc arc_2(tile.outer_radius, tile.end_angle, tile.begin_angle, tile.center, tile.color);
-		Line line_1(Point::radius_point(tile.inner_radius, tile.end_angle,tile.center), Point::radius_point(tile.outer_radius, tile.end_angle,tile.center), tile.color);
+		Arc arc_1(tile.inner_radius, tile.begin_angle, tile.width, tile.center, false, tile.color);
+		Arc arc_2(tile.outer_radius, tile.begin_angle, tile.width, tile.center, true, tile.color);
+		Line line_1(Point::radius_point(tile.inner_radius, free_angle(tile.begin_angle) + tile.width,tile.center), Point::radius_point(tile.outer_radius, free_angle(tile.begin_angle) + tile.width,tile.center), tile.color);
 		Line line_2(Point::radius_point(tile.outer_radius, tile.begin_angle, tile.center), Point::radius_point(tile.inner_radius, tile.begin_angle, tile.center), tile.color);
-		graph << "<path d=\" M" << arc_1.from_point;
+		graph << "<path d=\" M" << arc_1.from_point();
 		graph.add_to_path(arc_1);
 		graph.add_to_path(line_1);
 		graph.add_to_path(arc_2);
@@ -179,7 +175,7 @@ namespace spiritsaway::circos
 	SvgGraph& SvgGraph::operator<<(const Ribbon& ribbon)
 	{
 		auto& graph = *this;
-		graph<<"<path d=\" M" << ribbon.arc_1.from_point;
+		graph<<"<path d=\" M" << ribbon.arc_1.from_point();
 		graph.add_to_path(ribbon.arc_1);
 		graph.add_to_path(ribbon.bezier_1);
 		graph.add_to_path(ribbon.arc_2);
@@ -241,7 +237,7 @@ namespace spiritsaway::circos
 			}
 			else if constexpr(std::is_same_v<T, Arc>)
 			{
-				graph<<"<path d=\" M" << arg.from_point;
+				graph<<"<path d=\" M" << arg.from_point();
 			}
 
 		}, region.boundaries[0]);

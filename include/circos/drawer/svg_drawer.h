@@ -38,7 +38,6 @@ namespace spiritsaway::circos
 		SvgGraph& operator<<(int value);
 		SvgGraph& operator<<(double value);
 		SvgGraph& operator<<(Color color);
-		SvgGraph& operator<<(const Point& point);
 		void add_to_path(const Line& line);
 		SvgGraph& operator<<(const Line& line);
 		std::string_view get_font_name(std::string_view input_name)const;
@@ -55,6 +54,12 @@ namespace spiritsaway::circos
 		SvgGraph& operator<<(const LineText& line_text);
 		SvgGraph& operator<<(const Annulus& annulus);
 		SvgGraph& operator<<(const Region& region);
+		template <typename T>
+		SvgGraph& operator<<(const basic_point<T>& point)
+		{
+			output << point.x << "," << point.y << " ";
+			return *this;
+		}
 		~SvgGraph();
 	};
 }
