@@ -26,17 +26,17 @@ namespace
 	using namespace spiritsaway::container;
 	enum class sheet_type
 	{
-		circle,
+		config,
 		font_info,
+		colors,
+		circle,
 		tile,
 		fill_ontile,
 		line_text,
 		tick_on_tile,
 		value_on_tile,
-		colors,
 		point_link,
 		range_link,
-		config,
 		circle_tick,
 		track_config,
 	};
@@ -81,6 +81,7 @@ namespace
 		
 		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_32), 3, ',');
 		sheet_headers["color"] = new typed_header(new typed_string_desc(color_type_detail), "color", "");
+		sheet_headers["ref_color"] = new typed_header(new typed_string_desc(basic_value_type::string), "ref_color", "");
 
 		sheet_headers["opacity"] = new typed_header(new typed_string_desc(basic_value_type::number_float), "opacity", "");
 
@@ -101,7 +102,6 @@ namespace
 		{
 			return;
 		}
-		uint32_t ref_color_idx = header_indexes[4];
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
 		for(std::uint32_t i=1; i< all_row_info.size(); i++)
 		{
@@ -165,6 +165,7 @@ namespace
 		
 		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_32), 3, ',');
 		sheet_headers["color"] = new typed_header(new typed_string_desc(color_type_detail), "color", "");
+		sheet_headers["ref_color"] = new typed_header(new typed_string_desc(basic_value_type::string), "ref_color", "");
 
 		sheet_headers["opacity"] = new typed_header(new typed_string_desc(basic_value_type::number_float), "opacity", "");
 
@@ -183,7 +184,6 @@ namespace
 		{
 			return;
 		}
-		uint32_t ref_color_idx = header_indexes[5];
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
 		for(std::uint32_t i=1; i< all_row_info.size(); i++)
 		{
@@ -249,7 +249,7 @@ namespace
 		sheet_headers["gap"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "gap", "");
 		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_32), 3, ',');
 		sheet_headers["color"] = new typed_header(new typed_string_desc(color_type_detail), "color", "");
-
+		sheet_headers["ref_color"] = new typed_header(new typed_string_desc(basic_value_type::string), "ref_color", "");
 		sheet_headers["opacity"] = new typed_header(new typed_string_desc(basic_value_type::number_float), "opacity", "");
 
 		auto header_match = current_sheet.check_header_match(sheet_headers, "tick_id");
@@ -265,7 +265,6 @@ namespace
 		{
 			return;
 		}
-		uint32_t ref_color_idx = header_indexes[5];
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
 		for(std::uint32_t i = 1; i< all_row_info.size(); i++)
 		{
@@ -326,7 +325,7 @@ namespace
 		
 		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_32), 3, ',');
 		sheet_headers["color"] = new typed_header(new typed_string_desc(color_type_detail), "color", "");
-
+		sheet_headers["ref_color"] = new typed_header(new typed_string_desc(basic_value_type::string), "ref_color", "");
 		sheet_headers["opacity"] = new typed_header(new typed_string_desc(basic_value_type::number_float), "opacity", "");
 
 		sheet_headers["control_radius_percent"] = new typed_header(new typed_string_desc(basic_value_type::number_float), "control_radius_percent", "");
@@ -344,7 +343,6 @@ namespace
 		{
 			return;
 		}
-		uint32_t ref_color_idx = header_indexes[6];
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
 		for (std::uint32_t i = 1; i < all_row_info.size(); i++)
 		{
@@ -409,7 +407,7 @@ namespace
 
 		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_32), 3, ',');
 		sheet_headers["color"] = new typed_header(new typed_string_desc(color_type_detail), "color", "");
-
+		sheet_headers["ref_color"] = new typed_header(new typed_string_desc(basic_value_type::string), "ref_color", "");
 		sheet_headers["opacity"] = new typed_header(new typed_string_desc(basic_value_type::number_float), "opacity", "");
 
 
@@ -427,7 +425,6 @@ namespace
 		{
 			return;
 		}
-		uint32_t ref_color_idx = header_indexes[9];
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
 		for (std::uint32_t i = 1; i < all_row_info.size(); i++)
 		{
@@ -495,6 +492,7 @@ namespace
 		
 		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_32), 3, ',');
 		sheet_headers["color"] = new typed_header(new typed_string_desc(color_type_detail), "color", "");
+		sheet_headers["ref_color"] = new typed_header(new typed_string_desc(basic_value_type::string), "ref_color", "");
 
 		sheet_headers["opacity"] = new typed_header(new typed_string_desc(basic_value_type::number_float), "opacity", "");
 
@@ -515,7 +513,6 @@ namespace
 		{
 			return;
 		}
-		uint32_t ref_color_idx = header_indexes[7];
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
 		for(std::uint32_t i = 1; i< all_row_info.size(); i++)
 		{
@@ -629,7 +626,10 @@ namespace
 
 		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_32), 3, ',');
 		sheet_headers["min_color"] = new typed_header(new typed_string_desc(color_type_detail), "min_color", "");
+		sheet_headers["min_color_ref"] = new typed_header(new typed_string_desc(basic_value_type::string), "min_color_ref", "");
+
 		sheet_headers["max_color"] = new typed_header(new typed_string_desc(color_type_detail), "max_color", "");
+		sheet_headers["max_color_ref"] = new typed_header(new typed_string_desc(basic_value_type::string), "max_color_ref", "");
 		sheet_headers["draw_type"] = new typed_header(new typed_string_desc(basic_value_type::string), "draw_type", "");
 
 		auto header_match = current_sheet.check_header_match(sheet_headers, "track_id");
