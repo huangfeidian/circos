@@ -434,19 +434,11 @@ namespace spiritsaway::circos::model
 				auto end_rad = free_angle::from_angle(cur_point_data.angle_end);
 
 				auto  cur_point_color = Color(cur_track_config.clamp_color.first, cur_track_config.clamp_color.second, cur_point_data.data_percentage);
-				auto temp_arc1 = Arc(bottom_radius, begin_rad, (free_angle(end_rad) - begin_rad), config.center, false, cur_point_color, false, 1.0f);
-				auto temp_arc2 = Arc(cur_circle_radius, begin_rad, (free_angle(end_rad) - begin_rad), config.center, true, cur_point_color, false, 1.0f);
-				auto line_1 = Line(Point::radius_point(bottom_radius, end_rad, config.center), Point::radius_point(cur_circle_radius, end_rad, config.center), cur_point_color);
-				auto line_2 = Line(Point::radius_point(cur_circle_radius, begin_rad, config.center), Point::radius_point(bottom_radius, begin_rad, config.center), cur_point_color);
-				auto temp_region = Region();
-				temp_region.add_boundary(temp_arc1);
-				temp_region.add_boundary(line_1);
-				temp_region.add_boundary(temp_arc2);
-				temp_region.add_boundary(line_2);
+				auto temp_region = Region::make_fan(bottom_radius, cur_circle_radius, begin_rad, end_rad, config.center, cur_point_color);
 				
 				temp_region.color = cur_point_color;
 				temp_region.opacity = 1.0;
-				temp_region.set_inner_point(Point::radius_point((bottom_radius + cur_circle_radius) / 2, fixed_angle::middle(begin_rad, end_rad), config.center));
+
 				pre_collection.regions.push_back(temp_region);
 			}
 			return;
