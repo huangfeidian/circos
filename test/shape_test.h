@@ -98,17 +98,21 @@ void arc_test()
 
 void flood_test()
 {
-	int radius = 2000;
+	int radius = 1000;
 	Point center(radius, radius);
 	Color background_color = Color(255, 255, 255);
-	Tile cur_tile(center, 1600, 1700, free_angle::from_angle(240), free_angle::from_angle(30), Color(0, 0, 0), 1, true, 1);
+	Tile cur_tile(center, 600, 700, free_angle::from_angle(240), free_angle::from_angle(30), Color(0, 0, 0), 1, true, 1);
+	Point line_begin = Point(1000, 1000);
+	Point line_end = Point(1006, 1000);
+	Line cur_line(line_begin, line_end, Color(0, 0, 0), 5);
 	string png_filename = "circos_flood_test_1.png";
 	string svg_filename = "circos_flood_test_1.svg";
 	std::unordered_map<string_view, pair<string_view, string_view>> font_info{ {"yahei",make_pair("C:/Windows/Fonts/msyhl.ttc", "microsoft yahei")} };
 	PngImage png_image(font_info, png_filename, radius, background_color);
 	SvgGraph svg_graph(font_info, svg_filename, radius, background_color);
 	shape_collection shapes;
-	shapes.tiles.push_back(cur_tile);
+	//shapes.tiles.push_back(cur_tile);
+	shapes.lines.push_back(cur_line);
 	draw_collections(png_image, shapes);
 	draw_collections(svg_graph, shapes);
 }

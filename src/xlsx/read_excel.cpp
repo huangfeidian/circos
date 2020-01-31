@@ -639,7 +639,7 @@ namespace
 			return;
 		}
 		const vector<const typed_header*>& all_headers = current_sheet.get_typed_headers();
-		vector<string_view> header_names = { "track_id", "circle_id", "draw_type", "min_data_value", "max_data_value", "radius_offset_min", "radius_offset_max", "min_color", "max_color", "min_color_ref", "max_color_ref", "with_shadow"};
+		vector<string_view> header_names = { "track_id", "circle_id", "draw_type", "min_data_value", "max_data_value", "radius_offset_min", "radius_offset_max", "min_color", "max_color", "min_color_ref", "max_color_ref"};
 		const vector<uint32_t>& header_indexes = current_sheet.get_header_index_vector(header_names);
 		if (header_indexes.empty())
 		{
@@ -650,8 +650,8 @@ namespace
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
 		for (std::uint32_t i = 1; i < all_row_info.size(); i++)
 		{
-			auto [opt_track_id, opt_circle_id, opt_draw_type, opt_min_value, opt_max_value,opt_radius_offset_min, opt_radius_offset_max, opt_min_color, opt_max_color, opt_min_color_ref, opt_max_color_ref,  opt_with_shadow] =
-				current_sheet.try_convert_row<string_view, string_view, string_view, float, float, int, int, tuple<int, int,int>, tuple<int, int, int>, string_view, string_view, bool>(i, header_indexes);
+			auto [opt_track_id, opt_circle_id, opt_draw_type, opt_min_value, opt_max_value,opt_radius_offset_min, opt_radius_offset_max, opt_min_color, opt_max_color, opt_min_color_ref, opt_max_color_ref] =
+				current_sheet.try_convert_row<string_view, string_view, string_view, float, float, int, int, tuple<int, int,int>, tuple<int, int, int>, string_view, string_view>(i, header_indexes);
 			if (!(opt_track_id && opt_circle_id && opt_draw_type && opt_min_value && opt_max_value && opt_radius_offset_min && opt_radius_offset_max))
 			{
 				continue;

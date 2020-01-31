@@ -284,16 +284,17 @@ namespace spiritsaway::circos
 			plot(current, fill_color, opacity);
 			count += 1;
 			flood_map[current.y][current.x] = 1;
-			if (can_flood(current))
+			auto flood_flag = can_flood(current);
+			if (flood_flag)
 			{
-				Point up(current.x, current.y + 1);
-				Point down(current.x, current.y - 1);
-				Point left(current.x - 1, current.y);
-				Point right(current.x + 1, current.y);
-				all_points.push(up);
-				all_points.push(down);
-				all_points.push(left);
-				all_points.push(right);
+				all_points.push(Point(current.x, current.y + 1));
+				all_points.push(Point(current.x, current.y - 1));
+				all_points.push(Point(current.x + 1, current.y + 1));
+				all_points.push(Point(current.x + 1, current.y - 1));
+				all_points.push(Point(current.x - 1, current.y - 1));
+				all_points.push(Point(current.x - 1, current.y + 1));
+				all_points.push(Point(current.x + 1, current.y));
+				all_points.push(Point(current.x - 1, current.y));
 			}
 			
 		}

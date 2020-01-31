@@ -398,7 +398,7 @@ namespace spiritsaway::circos::model
 				temp_region.add_boundary(Line(temp_line.from, Point::radius_point(origin_circle_radius, last_rad) + config.center, cur_track_config.clamp_color.second));
 
 				temp_region.opacity = 1.0f;
-				temp_region.color = cur_track_config.clamp_color.second;
+				temp_region.color = cur_point_color;
 				temp_region.set_inner_point((Point::radius_point(origin_circle_radius, last_rad) + config.center + temp_line.to) * 0.5f);
 				pre_collection.regions.push_back(temp_region);
 
@@ -412,10 +412,11 @@ namespace spiritsaway::circos::model
 
 				auto cur_circle_radius = cur_track_config.radius_offset.first * (1 - cur_point_data.data_percentage) + cur_track_config.radius_offset.second * cur_point_data.data_percentage + origin_circle_radius;
 				auto cur_rad = free_angle::from_angle((cur_point_data.angle_begin + cur_point_data.angle_end) / 2);
+				auto cur_rad_range = free_angle::from_angle((cur_point_data.angle_end - cur_point_data.angle_begin) / 2);
 				auto cur_point_center = Point::radius_point(cur_circle_radius, cur_rad ) + config.center;
 
 				auto cur_point_bottom = Point::radius_point(origin_circle_radius + cur_track_config.radius_offset.first, cur_rad) + config.center;
-				auto line_thickness = (origin_circle_radius + cur_track_config.radius_offset.first) * (free_angle(cur_rad) / 2).normal().sin() * 2;
+				auto line_thickness = (origin_circle_radius + cur_track_config.radius_offset.first) * (cur_rad_range.normal().sin()) * 2;
 				auto  cur_point_color = Color(cur_track_config.clamp_color.first, cur_track_config.clamp_color.second, cur_point_data.data_percentage);
 				auto temp_line = Line(cur_point_bottom, cur_point_center, cur_point_color, line_thickness, 1);
 				pre_collection.lines.push_back(temp_line);
@@ -427,15 +428,26 @@ namespace spiritsaway::circos::model
 			for (const auto& cur_point_data : cur_track_data)
 			{
 
-				auto cur_circle_radius = cur_track_config.radius_offset.first * (1 - cur_point_data.data_percentage / 2) + cur_track_config.radius_offset.second * cur_point_data.data_percentage / 2 + origin_circle_radius;
+				auto cur_circle_radius = cur_track_config.radius_offset.first * (1 - cur_point_data.data_percentage) + cur_track_config.radius_offset.second * cur_point_data.data_percentage + origin_circle_radius;
+				auto bottom_radius = cur_track_config.radius_offset.first + origin_circle_radius;
 				auto begin_rad = free_angle::from_angle(cur_point_data.angle_begin);
 				auto end_rad = free_angle::from_angle(cur_point_data.angle_end);
 
 				auto  cur_point_color = Color(cur_track_config.clamp_color.first, cur_track_config.clamp_color.second, cur_point_data.data_percentage);
-
-				auto temp_arc1 = Arc(cur_circle_radius, begin_rad, (free_angle(end_rad) - begin_rad), config.center, false, cur_point_color, true, 1.0f, cur_circle_radius - cur_track_config.radius_offset.first - origin_circle_radius);
+				auto temp_arc1 = Arc(bottom_radius, begin_rad, (free_angle(end_rad) - begin_rad), config.center, false, cur_point_color, false, 1.0f);
+				auto temp_arc2 = Arc(cur_circle_radius, begin_rad, (free_angle(end_rad) - begin_rad), config.center, true, cur_point_color, false, 1.0f);
+				auto line_1 = Line(Point::radius_point(bottom_radius, end_rad, config.center), Point::radius_point(cur_circle_radius, end_rad, config.center), cur_point_color);
+				auto line_2 = Line(Point::radius_point(cur_circle_radius, begin_rad, config.center), Point::radius_point(bottom_radius, begin_rad, config.center), cur_point_color);
+				auto temp_region = Region();
+				temp_region.add_boundary(temp_arc1);
+				temp_region.add_boundary(line_1);
+				temp_region.add_boundary(temp_arc2);
+				temp_region.add_boundary(line_2);
 				
-				pre_collection.arcs.push_back(temp_arc1);
+				temp_region.color = cur_point_color;
+				temp_region.opacity = 1.0;
+				temp_region.set_inner_point(Point::radius_point((bottom_radius + cur_circle_radius) / 2, fixed_angle::middle(begin_rad, end_rad), config.center));
+				pre_collection.regions.push_back(temp_region);
 			}
 			return;
 		}
