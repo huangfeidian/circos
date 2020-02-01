@@ -272,8 +272,10 @@ namespace spiritsaway::circos
 		{
 			all_points.push(one_point);
 		}
+		std::uint32_t total_points = 0;
 		while (!all_points.empty())
 		{
+			total_points++;
 			auto current = all_points.top();
 			all_points.pop();
 			if (current.y <= 0 || current.y >= height-1 || current.x<=0 || current.x>=width-1 || flood_map[current.y][current.x] != 0)
@@ -289,10 +291,10 @@ namespace spiritsaway::circos
 			{
 				all_points.push(Point(current.x, current.y + 1));
 				all_points.push(Point(current.x, current.y - 1));
-				all_points.push(Point(current.x + 1, current.y + 1));
-				all_points.push(Point(current.x + 1, current.y - 1));
-				all_points.push(Point(current.x - 1, current.y - 1));
-				all_points.push(Point(current.x - 1, current.y + 1));
+				//all_points.push(Point(current.x + 1, current.y + 1));
+				//all_points.push(Point(current.x + 1, current.y - 1));
+				//all_points.push(Point(current.x - 1, current.y - 1));
+				//all_points.push(Point(current.x - 1, current.y + 1));
 				all_points.push(Point(current.x + 1, current.y));
 				all_points.push(Point(current.x - 1, current.y));
 			}

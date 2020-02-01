@@ -610,7 +610,7 @@ namespace
 
 	void read_track_config_sheet(spiritsaway::memory::arena& temp_arena, const typed_worksheet& current_sheet, std::unordered_map<std::string_view, model::track_config>& track_config, const std::unordered_map<string_view, Color>& defined_colors)
 	{
-		// point_track_config headers track_id(string) circle_id(string) draw_type(int) min_data_value(float) max_data_value(float)  radius_offset(int) min_color(RGB) max_color(RGB) min_color_ref(ref) max_color_ref(ref)  
+		// point_track_config headers track_id(string) circle_id(string) draw_type(int) min_data_value(float) max_data_value(float)  radius_offset(int) min_color(RGB) max_color(RGB) min_color_ref(ref) max_color_ref(ref)  fixed_size(uint32_t)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
 		sheet_headers["track_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "track_id", "");
 
@@ -623,6 +623,7 @@ namespace
 		sheet_headers["radius_offset_min"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "radius_offset_min", "");
 		sheet_headers["radius_offset_max"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "radius_offset_max", "");
 
+		sheet_headers["fixed_size"] = new typed_header(new typed_string_desc(basic_value_type::number_u32), "fixed_size", "");
 
 		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_32), 3, ',');
 		sheet_headers["min_color"] = new typed_header(new typed_string_desc(color_type_detail), "min_color", "");
@@ -639,7 +640,7 @@ namespace
 			return;
 		}
 		const vector<const typed_header*>& all_headers = current_sheet.get_typed_headers();
-		vector<string_view> header_names = { "track_id", "circle_id", "draw_type", "min_data_value", "max_data_value", "radius_offset_min", "radius_offset_max", "min_color", "max_color", "min_color_ref", "max_color_ref"};
+		vector<string_view> header_names = { "track_id", "circle_id", "draw_type", "min_data_value", "max_data_value", "radius_offset_min", "radius_offset_max", "min_color", "max_color", "min_color_ref", "max_color_ref", "fixed_size"};
 		const vector<uint32_t>& header_indexes = current_sheet.get_header_index_vector(header_names);
 		if (header_indexes.empty())
 		{
@@ -650,8 +651,8 @@ namespace
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
 		for (std::uint32_t i = 1; i < all_row_info.size(); i++)
 		{
-			auto [opt_track_id, opt_circle_id, opt_draw_type, opt_min_value, opt_max_value,opt_radius_offset_min, opt_radius_offset_max, opt_min_color, opt_max_color, opt_min_color_ref, opt_max_color_ref] =
-				current_sheet.try_convert_row<string_view, string_view, string_view, float, float, int, int, tuple<int, int,int>, tuple<int, int, int>, string_view, string_view>(i, header_indexes);
+			auto [opt_track_id, opt_circle_id, opt_draw_type, opt_min_value, opt_max_value,opt_radius_offset_min, opt_radius_offset_max, opt_min_color, opt_max_color, opt_min_color_ref, opt_max_color_ref, opt_fixed_size] =
+				current_sheet.try_convert_row<string_view, string_view, string_view, float, float, int, int, tuple<int, int,int>, tuple<int, int, int>, string_view, string_view, std::uint32_t>(i, header_indexes);
 			if (!(opt_track_id && opt_circle_id && opt_draw_type && opt_min_value && opt_max_value && opt_radius_offset_min && opt_radius_offset_max))
 			{
 				continue;
@@ -665,6 +666,7 @@ namespace
 			cur_track_config.draw_type = opt_draw_type_enum.value();
 			cur_track_config.track_id = opt_track_id.value();
 			cur_track_config.circle_id = opt_circle_id.value();
+			cur_track_config.fixed_size = opt_fixed_size.value_or(0);
 			cur_track_config.clamp_data_value = std::make_pair(opt_min_value.value(), opt_max_value.value());
 			cur_track_config.radius_offset = std::make_pair(opt_radius_offset_min.value(), opt_radius_offset_max.value());
 			Color min_color, max_color;

@@ -19,5 +19,6 @@ namespace spiritsaway::circos
 		histogram,
 		area,
 		fan,
+		radius_point,
 	};
 }

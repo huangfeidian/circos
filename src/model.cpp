@@ -340,9 +340,35 @@ namespace spiritsaway::circos::model
 				
 				auto cur_circle_radius = cur_track_config.radius_offset.first * (1 - cur_point_data.data_percentage) + cur_track_config.radius_offset.second * cur_point_data.data_percentage + origin_circle_radius;
 				auto cur_point_center = Point::radius_point(cur_circle_radius, (free_angle::from_angle((cur_point_data.angle_begin + cur_point_data.angle_end))/ 2)) + config.center;
+				auto cur_rad_range = free_angle::from_angle((cur_point_data.angle_end - cur_point_data.angle_begin) / 2);
+				auto cur_point_color = Color(cur_track_config.clamp_color.first, cur_track_config.clamp_color.second, cur_point_data.data_percentage);
+				std::uint32_t cur_point_size = (cur_track_config.radius_offset.second - cur_track_config.radius_offset.first) * cur_point_data.data_percentage;
+				if (cur_track_config.fixed_size)
+				{
+					cur_point_size = cur_track_config.fixed_size;
+				}
+				cur_point_size = std::min(cur_point_size, static_cast<std::uint32_t>(cur_circle_radius * cur_rad_range.normal().sin()));
+
+				auto cur_circle = Circle(cur_point_size, cur_point_center, cur_point_color, 1.0f, true);
+				pre_collection.circles.push_back(cur_circle);
+			}
+			return;
+		}
+		case track_draw_type::radius_point:
+		{
+			for (const auto& cur_point_data : cur_track_data)
+			{
+				auto cur_circle_radius = (cur_track_config.radius_offset.first  + cur_track_config.radius_offset.second) * 0.5  + origin_circle_radius;
+				auto cur_rad_range = free_angle::from_angle((cur_point_data.angle_end - cur_point_data.angle_begin) / 2);
+				auto cur_point_center = Point::radius_point(cur_circle_radius, (free_angle::from_angle((cur_point_data.angle_begin + cur_point_data.angle_end)) / 2)) + config.center;
 
 				auto cur_point_color = Color(cur_track_config.clamp_color.first, cur_track_config.clamp_color.second, cur_point_data.data_percentage);
-				int cur_point_size = (cur_track_config.radius_offset.second - cur_track_config.radius_offset.first) * cur_point_data.data_percentage;
+				std::uint32_t cur_point_size = (cur_track_config.radius_offset.second - cur_track_config.radius_offset.first) * cur_point_data.data_percentage;
+				if (cur_track_config.fixed_size)
+				{
+					cur_point_size = cur_track_config.fixed_size;
+				}
+				cur_point_size = std::min(cur_point_size, static_cast<std::uint32_t>(cur_circle_radius * cur_rad_range.normal().sin()));
 				auto cur_circle = Circle(cur_point_size, cur_point_center, cur_point_color, 1.0f, true);
 				pre_collection.circles.push_back(cur_circle);
 			}
@@ -351,6 +377,7 @@ namespace spiritsaway::circos::model
 		case track_draw_type::link:
 		{
 			Point pre_point;
+			std::uint32_t stroke = cur_track_config.fixed_size ? cur_track_config.fixed_size : 1;
 			for (std::size_t i = 0; i < cur_track_data.size(); i++)
 			{
 				const auto& cur_point_data = cur_track_data[i];
@@ -360,7 +387,8 @@ namespace spiritsaway::circos::model
 				if(i != 0)
 				{
 					auto cur_point_color = Color(cur_track_config.clamp_color.first, cur_track_config.clamp_color.second, cur_point_data.data_percentage);
-					auto temp_line = Line(pre_point, cur_point_center, cur_point_color, 1, 1);
+					
+					auto temp_line = Line(pre_point, cur_point_center, cur_point_color, stroke, 1);
 					pre_collection.lines.push_back(temp_line);
 				}
 				pre_point = cur_point_center;
@@ -417,6 +445,10 @@ namespace spiritsaway::circos::model
 
 				auto cur_point_bottom = Point::radius_point(origin_circle_radius + cur_track_config.radius_offset.first, cur_rad) + config.center;
 				auto line_thickness = (origin_circle_radius + cur_track_config.radius_offset.first) * (cur_rad_range.normal().sin()) * 2;
+				if (cur_track_config.fixed_size)
+				{
+					line_thickness = cur_track_config.fixed_size;
+				}
 				auto  cur_point_color = Color(cur_track_config.clamp_color.first, cur_track_config.clamp_color.second, cur_point_data.data_percentage);
 				auto temp_line = Line(cur_point_bottom, cur_point_center, cur_point_color, line_thickness, 1);
 				pre_collection.lines.push_back(temp_line);

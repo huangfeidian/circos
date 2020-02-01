@@ -142,8 +142,8 @@ namespace spiritsaway::circos::model
 		std::pair<Color, Color> clamp_color;
 		std::pair<float, float> clamp_data_value;
 		std::pair<std::uint32_t, std::uint32_t> radius_offset;
-		bool with_shadow;
 		track_draw_type draw_type;
+		std::uint32_t fixed_size;// 在不同的type下有不同的意思
 	};
 
 
