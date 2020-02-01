@@ -74,11 +74,11 @@ namespace spiritsaway::circos
 		void draw_path(const vector<Point>& path, Color color, int stroke = 1, float opacity = 1.0);
 		~PngImage();
 
+		bool on_boundary(Point current) const; // 判断一个点是否在边界上
 		//判断一个点是否可以将他的相邻点加入洪范列表
 		//这里为了保险起见才加了这个判断函数
 		//只要有一个处于边界就停止，避免可能的边界没有完全闭合的情况
 		bool can_flood(Point current);
-
 		//要求interior一定在boundary里面
 		void flood(const vector<vector<Point>>& boundary, vector<Point> interiors, Color fill_color, float opacity =1.0);
 			

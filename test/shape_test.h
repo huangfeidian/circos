@@ -118,8 +118,8 @@ void flood_test()
 	SvgGraph svg_graph(font_info, svg_filename, radius, background_color);
 	shape_collection shapes;
 	//shapes.tiles.push_back(cur_tile);
-	//shapes.lines.push_back(cur_line);
-	shapes.regions.push_back(temp_region);
+	shapes.lines.push_back(cur_line);
+	//shapes.regions.push_back(temp_region);
 	draw_collections(png_image, shapes);
 	draw_collections(svg_graph, shapes);
 }

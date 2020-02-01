@@ -188,12 +188,20 @@ namespace spiritsaway::circos
 		png_destroy_write_struct(&png_ptr, &info_ptr);
 		fclose(fp);
 	}
+	bool PngImage::on_boundary(Point current) const
+	{
+		if (current.x == 0 || current.x == width - 1 || current.y == 0 || current.y == height - 1)
+		{
+			return true;
+		}
+		return false;
+	}
 	bool PngImage::can_flood(Point current)
 		//判断一个点是否可以将他的相邻点加入洪范列表
 		//这里为了保险起见才加了这个判断函数
 		//只要有一个处于边界就停止，避免可能的边界没有完全闭合的情况
 	{
-		if (current.x == 0 || current.x == width - 1 || current.y == 0 || current.y == height - 1)
+		if (on_boundary(current))
 		{
 			return false;
 		}
@@ -267,18 +275,18 @@ namespace spiritsaway::circos
 			}
 		}
 		//下面的这两个点一定在ribbon内部
-		stack<Point> all_points;
+		deque<Point> all_points;
 		for (auto one_point : interiors)
 		{
-			all_points.push(one_point);
+			all_points.push_back(one_point);
 		}
-		std::uint32_t total_points = 0;
+		std::uint32_t access_count = 0;
 		while (!all_points.empty())
 		{
-			total_points++;
-			auto current = all_points.top();
-			all_points.pop();
-			if (current.y <= 0 || current.y >= height-1 || current.x<=0 || current.x>=width-1 || flood_map[current.y][current.x] != 0)
+			auto current = all_points.front();
+			all_points.pop_front();
+			access_count++; 
+			if (flood_map[current.y][current.x] != 0 || on_boundary(current))
 			{
 				continue;
 			}
@@ -289,22 +297,57 @@ namespace spiritsaway::circos
 			auto flood_flag = can_flood(current);
 			if (flood_flag)
 			{
-				all_points.push(Point(current.x, current.y + 1));
-				all_points.push(Point(current.x, current.y - 1));
-				//all_points.push(Point(current.x + 1, current.y + 1));
-				//all_points.push(Point(current.x + 1, current.y - 1));
-				//all_points.push(Point(current.x - 1, current.y - 1));
-				//all_points.push(Point(current.x - 1, current.y + 1));
-				all_points.push(Point(current.x + 1, current.y));
-				all_points.push(Point(current.x - 1, current.y));
+				all_points.push_back(Point(current.x, current.y + 1));
+				all_points.push_back(Point(current.x, current.y - 1));
+				
+				all_points.push_back(Point(current.x + 1, current.y));
+				all_points.push_back(Point(current.x - 1, current.y));
 			}
 			
+		}
+		// 这里可能有一些边界附近的节点漏了没有填充 补充填充一下
+		for (const auto& one_boundary : boundary)
+		{
+			for (const auto& current : one_boundary)
+			{
+
+				Point temp_points[4];
+				temp_points[0] = Point(current.x, current.y + 1);
+				temp_points[1] = Point(current.x, current.y - 1);
+				temp_points[2] = Point(current.x - 1, current.y);
+				temp_points[3] = Point(current.x + 1, current.y);
+				//temp_points[4] = Point(current.x + 1, current.y + 1);
+				//temp_points[5] = Point(current.x + 1, current.y - 1);
+				//temp_points[6] = Point(current.x - 1, current.y + 1);
+				//temp_points[7] = Point(current.x + 1, current.y + 1);
+				for (auto one_point : temp_points)
+				{
+					if (on_boundary(one_point))
+					{
+						continue;
+					}
+					if (flood_map[one_point.y][one_point.x])
+					{
+						continue;
+					}
+					if (flood_map[one_point.y + 1][one_point.x] == 1 ||
+						flood_map[one_point.y - 1][one_point.x] == 1 ||
+						flood_map[one_point.y][one_point.x - 1] == 1 ||
+						flood_map[one_point.y][one_point.x + 1] == 1)
+					{
+						plot(one_point, fill_color, opacity);
+						flood_map[one_point.y][one_point.x] = 1;
+						fill_points.push_back(one_point);
+					}
+
+				}
+			}
 		}
 		for (const auto& i : fill_points)
 		{
 			flood_map[i.y][i.x] = 0;
 		}
-		// cout << "flood count " << count << endl;
+		//cout << "flood count " << count <<" access count "<<access_count<< endl;
 	}
 #ifdef USE_TEXT
 	vector<uint32_t> PngImage::utf8_to_uint(std::string_view text) const
