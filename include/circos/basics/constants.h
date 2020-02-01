@@ -20,5 +20,6 @@ namespace spiritsaway::circos
 		area,
 		fan,
 		radius_point,
+		color_fan,
 	};
 }

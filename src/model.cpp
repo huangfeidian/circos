@@ -475,6 +475,26 @@ namespace spiritsaway::circos::model
 			}
 			return;
 		}
+		case track_draw_type::color_fan:
+		{
+			for (const auto& cur_point_data : cur_track_data)
+			{
+
+				auto cur_circle_radius = cur_track_config.radius_offset.second + origin_circle_radius;
+				auto bottom_radius = cur_track_config.radius_offset.first + origin_circle_radius;
+				auto begin_rad = free_angle::from_angle(cur_point_data.angle_begin);
+				auto end_rad = free_angle::from_angle(cur_point_data.angle_end);
+
+				auto  cur_point_color = Color(cur_track_config.clamp_color.first, cur_track_config.clamp_color.second, cur_point_data.data_percentage);
+				auto temp_region = Region::make_fan(bottom_radius, cur_circle_radius, begin_rad, end_rad, config.center, cur_point_color);
+
+				temp_region.color = cur_point_color;
+				temp_region.opacity = 1.0;
+
+				pre_collection.regions.push_back(temp_region);
+			}
+			return;
+		}
 		default:
 			break;
 		}
