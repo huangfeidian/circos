@@ -115,10 +115,11 @@ namespace spiritsaway::circos
 			{
 				for (int k = offset_left;k < offset_right;k++)
 				{
-					if (flood_map[i.y + k][i.x + j] != 1)
+					auto cur_point = Point(i.x + j, i.y + k);
+					if (get_flood_flag(cur_point) != 1)
 					{
-						flood_map[i.y + k][i.x + j] = 1;
-						final_path.push_back(Point(i.x + j, i.y + k));
+						set_flood_flag(cur_point, 1);
+						final_path.push_back(cur_point);
 					}
 				}
 			}
@@ -126,7 +127,7 @@ namespace spiritsaway::circos
 		for (const auto& i : final_path)
 		{
 			plot(i, color, opacity);
-			flood_map[i.y][i.x] = 0;
+			set_flood_flag(i, 0);
 		}
 	}
 	PngImage::~PngImage()
@@ -196,6 +197,14 @@ namespace spiritsaway::circos
 		}
 		return false;
 	}
+	std::uint8_t PngImage::get_flood_flag(Point current) const
+	{
+		return flood_map[current.y][current.x];
+	}
+	void PngImage::set_flood_flag(Point current, std::uint8_t flag)
+	{
+		flood_map[current.y][current.x] = flag;
+	}
 	bool PngImage::can_flood(Point current)
 		//判断一个点是否可以将他的相邻点加入洪范列表
 		//这里为了保险起见才加了这个判断函数
@@ -209,23 +218,11 @@ namespace spiritsaway::circos
 		Point down(current.x, current.y - 1);
 		Point left(current.x - 1, current.y);
 		Point right(current.x + 1, current.y);
-		if (flood_map[up.y][up.x] == 2)
+		if (get_flood_flag(up) == 2 || get_flood_flag(down) == 2 || get_flood_flag(left) == 2 || get_flood_flag(right) == 2)
 		{
 			return false;
 		}
-		if (flood_map[down.y][down.x] == 2)
-		{
-			return false;
-
-		}
-		if (flood_map[left.y][left.x] == 2)
-		{
-			return false;
-		}
-		if (flood_map[right.y][right.x] == 2)
-		{
-			return false;
-		}
+		
 		return true;
 
 	}
@@ -256,7 +253,7 @@ namespace spiritsaway::circos
 
 			for (const auto& one_gap_point : gap_points)
 			{
-				flood_map[one_gap_point.y][one_gap_point.x] = 2;//2代表边界，1代表已经着色，0 代表还未访问
+				set_flood_flag(one_gap_point, 2);
 				plot(one_gap_point, fill_color, opacity);
 				fill_points.push_back(one_gap_point);
 			}
@@ -270,7 +267,7 @@ namespace spiritsaway::circos
 		{
 			for (const auto& i : one_boundary)
 			{
-				flood_map[i.y][i.x] = 2;//2代表边界，1代表已经着色，0 代表还未访问
+				set_flood_flag(i, 2);
 				fill_points.push_back(i);
 			}
 		}
@@ -286,14 +283,14 @@ namespace spiritsaway::circos
 			auto current = all_points.front();
 			all_points.pop_front();
 			access_count++; 
-			if (flood_map[current.y][current.x] != 0 || on_boundary(current))
+			if (get_flood_flag(current) != 0 || on_boundary(current))
 			{
 				continue;
 			}
 			fill_points.push_back(current);
 			plot(current, fill_color, opacity);
 			count += 1;
-			flood_map[current.y][current.x] = 1;
+			set_flood_flag(current,  1);
 			auto flood_flag = can_flood(current);
 			if (flood_flag)
 			{
@@ -326,17 +323,17 @@ namespace spiritsaway::circos
 					{
 						continue;
 					}
-					if (flood_map[one_point.y][one_point.x])
+					if (get_flood_flag(one_point) != 0)
 					{
 						continue;
 					}
-					if (flood_map[one_point.y + 1][one_point.x] == 1 ||
-						flood_map[one_point.y - 1][one_point.x] == 1 ||
-						flood_map[one_point.y][one_point.x - 1] == 1 ||
-						flood_map[one_point.y][one_point.x + 1] == 1)
+					if(get_flood_flag(Point(one_point.x, one_point.y + 1)) ==1 || \
+						get_flood_flag(Point(one_point.x, one_point.y - 1)) == 1|| \
+						get_flood_flag(Point(one_point.x + 1, one_point.y)) == 1 || \
+						get_flood_flag(Point(one_point.x - 1, one_point.y)) == 1)
 					{
 						plot(one_point, fill_color, opacity);
-						flood_map[one_point.y][one_point.x] = 1;
+						set_flood_flag(one_point ,1);
 						fill_points.push_back(one_point);
 					}
 
@@ -345,7 +342,7 @@ namespace spiritsaway::circos
 		}
 		for (const auto& i : fill_points)
 		{
-			flood_map[i.y][i.x] = 0;
+			set_flood_flag(i ,0);
 		}
 		//cout << "flood count " << count <<" access count "<<access_count<< endl;
 	}
