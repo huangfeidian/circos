@@ -16,6 +16,7 @@
 #include "../shapes/line_text.h"
 #include "../shapes/annulus.h"
 #include "../shapes/region.h"
+#include "../shapes/arc_text.h"
 
 using std::vector;
 using std::endl;
@@ -54,6 +55,7 @@ namespace spiritsaway::circos
 		SvgGraph& operator<<(const LineText& line_text);
 		SvgGraph& operator<<(const Annulus& annulus);
 		SvgGraph& operator<<(const Region& region);
+		SvgGraph& operator<<(const ArcText& arc_text);
 		template <typename T>
 		SvgGraph& operator<<(const basic_point<T>& point)
 		{

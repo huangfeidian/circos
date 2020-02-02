@@ -1,4 +1,4 @@
-﻿#include <circos/drawer/png_drawer.h>
+#include <circos/drawer/png_drawer.h>
 #include <circos/drawer/svg_drawer.h>
 #include <circos/model.h>
 #include <map>
@@ -148,4 +148,10 @@ void pi_test_1(void)
 	draw_collections(svg_graph, cur_collection);
 	draw_collections(png_image, cur_collection);
 
+}
+
+int main()
+{
+	pi_test_1();
+	return 0;
 }

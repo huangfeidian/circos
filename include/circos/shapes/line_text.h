@@ -3,6 +3,7 @@
 #include <string_view>
 #include "../basics/point.h"
 #include "../basics/color.h"
+#include "../basics/constants.h"
 #include "line.h"
 namespace spiritsaway::circos
 {

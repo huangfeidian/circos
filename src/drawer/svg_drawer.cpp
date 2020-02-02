@@ -94,7 +94,26 @@ namespace spiritsaway::circos
 		path_index++;
 		return graph;
 	}
+	SvgGraph& SvgGraph::operator<<(const ArcText& arc_text)
+	{
+		auto& graph = *this;
+		graph << "<path id=\"textPath" << path_index << "\" ";
+		graph << "d= \" M " << arc_text.on_arc.from_point<float>() << " ";
+		graph.add_to_path(arc_text.on_arc);
+		graph << " />\n";
 
+		graph << "<text ";
+		//graph << "font-family=\"" << line_text.font_name << "\" " << "font-size=\"" << line_text.font_size << "\" ";
+		graph << "font-family=\"" << get_font_name(arc_text.font_name) << "\" " << "font-size=\"" << arc_text.font_size << "\" ";
+		graph << "fill=\"" << arc_text.color << "\" ";
+		graph << "opacity=\"" << arc_text.opacity << "\" >\n";
+		graph << "<textPath xlink:fref=\"#textPath" << path_index << "\">\n";
+		graph << arc_text.utf8_text << "\n";
+		graph << "</textPath>\n";
+		graph << "</text>\n";
+		path_index++;
+		return graph;
+	}
 	SvgGraph& SvgGraph::operator<<(const Bezier& bezier)
 	{
 		auto& graph = *this;
@@ -198,15 +217,16 @@ namespace spiritsaway::circos
 	{
 		const Line& base_line = line_text.on_line;
 		auto& graph = *this;
-		double angle = atan2(base_line.to.y - base_line.from.y, base_line.to.x - base_line.from.x)*180/pi();
+		double angle = atan2(base_line.to.y - base_line.from.y, base_line.to.x - base_line.from.x) * 180 / pi();
 		graph << "<text x=\"" << base_line.from.x << "\" y=\"" << base_line.from.y << "\" ";
 		//graph << "font-family=\"" << line_text.font_name << "\" " << "font-size=\"" << line_text.font_size << "\" ";
 		graph << "font-family=\"" << get_font_name(line_text.font_name) << "\" " << "font-size=\"" << line_text.font_size << "\" ";
 		graph << "fill=\"" << line_text.color << "\" ";
 		graph << "opacity=\"" << line_text.opacity << "\" ";
 		graph << "transform=\"rotate(" << angle << " " << base_line.from.x << " " << base_line.from.y << ")\"";
-		graph <<">\n" << line_text.utf8_text << "\n</text>\n";
+		graph << ">\n" << line_text.utf8_text << "\n</text>\n";
 		return graph;
+		
 	}
 	SvgGraph& SvgGraph::operator<<(const Annulus& annulus)
 	{

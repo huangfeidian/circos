@@ -91,7 +91,7 @@ namespace spiritsaway::circos
 		}
 
 	};
-	using Point = basic_point<std::int16_t>;
+	using Point = basic_point<std::int32_t>;
 	template<typename T1, typename T2>
 	basic_point<T1> cast_point(const basic_point<T2>& in_point)
 	{

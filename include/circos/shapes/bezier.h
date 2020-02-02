@@ -89,7 +89,7 @@ namespace spiritsaway::circos
 			c1 = p1 + (cp - p1)*inc;
 			c2 = cp + (p2 - cp)*inc;
 			double_px = c1 + (c2 - c1)*inc;
-			px = cast_point<std::int16_t>(double_px);
+			px = cast_point<std::int32_t>(double_px);
 			result.push_back(px);
 			inc += step;
 			while (inc <= 1)
@@ -97,7 +97,7 @@ namespace spiritsaway::circos
 				c1 = p1 + (cp - p1)*inc;
 				c2 = cp + (p2 - cp)*inc;
 				double_px = c1 + (c2 - c1)*inc;
-				px = cast_point<std::int16_t>(double_px);
+				px = cast_point<std::int32_t>(double_px);
 				if (!(px == result.back()))
 				{
 					result.push_back(px);

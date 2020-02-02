@@ -5,6 +5,7 @@
 #include <circos/shape_collection.h>
 #include <iostream>
 #include <fstream>
+#include <circos/basics/utf8_util.h>
 
 namespace spiritsaway::circos
 {
@@ -35,7 +36,6 @@ namespace spiritsaway::circos
 		{
 			_buffer[i]=background_color;
 		}
-#ifdef USE_TEXT
 
 		auto error = FT_Init_FreeType(&ft_library);
 		if (error)
@@ -43,10 +43,8 @@ namespace spiritsaway::circos
 			cerr << "cant init ft_library" << endl;
 			exit(1);
 		}
-#endif
 	}
 
-#ifdef USE_TEXT
 	const vector<unsigned char>& PngImage::get_font_mem(std::string_view font_name)
 	{
 		if (font_info.find(font_name) == font_info.end())
@@ -78,7 +76,6 @@ namespace spiritsaway::circos
 		return result;
 
 	}
-#endif
 	void PngImage::plot(Colorbasic_point input, float opacity)
 	{
 		_image[input.pos.y][input.pos.x].blend(input.color, opacity);
@@ -346,70 +343,8 @@ namespace spiritsaway::circos
 		}
 		//cout << "flood count " << count <<" access count "<<access_count<< endl;
 	}
-#ifdef USE_TEXT
-	vector<uint32_t> PngImage::utf8_to_uint(std::string_view text) const
-	{
-		unsigned char u, v, w, x, y, z;
-		vector<uint32_t> utf8_result;
-		int num_chars = 0;
-		uint32_t num_bytes = text.length();
-		std::uint32_t iii = 0;
-		while (iii < num_bytes)
-		{
-			uint32_t cur_utf8_char = 0;
-			z = text[iii];
-			if (z <= 127)
-			{
-				cur_utf8_char = z;
-			}
-			if (z >= 192 && z <= 223)
-			{
-				iii++;
-				y = text[iii];
-				cur_utf8_char = (z - 192) * 64 + (y - 128);
-			}
-			if (z >= 224 && z <= 239)
-			{
-				iii++; y = text[iii];
-				iii++; x = text[iii];
-				cur_utf8_char = (z - 224) * 4096 + (y - 128) * 64 + (x - 128);
-			}
-			if ((240 <= z) && (z <= 247))
-			{
-				iii++; y = text[iii];
-				iii++; x = text[iii];
-				iii++; w = text[iii];
-				cur_utf8_char = (z - 240) * 262144 + (y - 128) * 4096 + (x - 128) * 64 + (w - 128);
-			}
-			if ((248 <= z) && (z <= 251))
-			{
-				iii++; y = text[iii];
-				iii++; x = text[iii];
-				iii++; w = text[iii];
-				iii++; v = text[iii];
-				cur_utf8_char = (z - 248) * 16777216 + (y - 128) * 262144 + (x - 128) * 4096 + (w - 128) * 64 + (v - 128);
-			}
 
-			if ((252 == z) || (z == 253))
-			{
-				iii++; y = text[iii];
-				iii++; x = text[iii];
-				iii++; w = text[iii];
-				iii++; v = text[iii];
-				u = text[iii];
-				cur_utf8_char = (z - 252) * 1073741824 + (y - 128) * 16777216 + (x - 128) * 262144 + (w - 128) * 4096 + (v - 128) * 64 + (u - 128);
-			}
-			if (z >= 254)
-			{
-				std::cerr << "convert string to utf8 char fail with first byte larger than 234" << std::endl;
-				exit(1);
-			}
-			utf8_result.push_back(cur_utf8_char);
-			iii++;
-		}
-		return utf8_result;
-	}
-	void PngImage::draw_text(const Line& base_line, std::string_view text, std::string_view font_name, int font_size, Color color, float alpha)
+	void PngImage::draw_text(const Line& base_line, std::vector<std::uint32_t> text, std::string_view font_name, int font_size, Color color, float alpha)
 		//这里要处理一下utf8
 	{
 		FT_Face face;
@@ -444,8 +379,7 @@ namespace spiritsaway::circos
 		}
 		FT_GlyphSlot slot = face->glyph;
 		use_kerning = FT_HAS_KERNING(face);
-		const auto& u8_text = utf8_to_uint(text);
-		for (uint32_t i : u8_text)
+		for (uint32_t i : text)
 		{
 			glyph_index = FT_Get_Char_Index(face, i);
 			if (use_kerning&& previous&&glyph_index)
@@ -496,13 +430,35 @@ namespace spiritsaway::circos
 			}
 		}
 	}
-#endif
+
 	PngImage& PngImage::operator<<(const LineText& line_text)
 	{
-#ifdef USE_TEXT
-		draw_text(line_text.on_line, line_text.utf8_text, line_text.font_name, line_text.font_size, line_text.color, line_text.opacity);
-#endif // USE_TEXT
 
+		draw_text(line_text.on_line, spiritsaway::string_util::utf8_util::utf8_to_uint(line_text.utf8_text), line_text.font_name, line_text.font_size, line_text.color, line_text.opacity);
+
+		return *this;
+	}
+	PngImage& PngImage::operator<<(const ArcText& arc_text)
+	{
+		// 这里就简单的分割为多个线段组成的文字
+		auto text = spiritsaway::string_util::utf8_util::utf8_to_uint(arc_text.utf8_text);
+		auto begin_rad = arc_text.on_arc.from_angle();
+		auto total_width = arc_text.on_arc.width;
+		if (text.empty())
+		{
+			return *this;
+		}
+		auto rad_per_text = free_angle(total_width) / text.size();
+		for (auto one_text : text)
+		{
+			auto begin_point = Point::radius_point(arc_text.on_arc.radius, begin_rad, arc_text.on_arc.center);
+			begin_rad = begin_rad + rad_per_text;
+			auto end_point = Point::radius_point(arc_text.on_arc.radius, begin_rad, arc_text.on_arc.center);
+			auto temp_line = Line(begin_point, end_point);
+			auto temp_textes = std::vector<std::uint32_t>();
+			temp_textes.push_back(one_text);
+			draw_text(temp_line, temp_textes, arc_text.font_name, arc_text.font_size, arc_text.color, arc_text.opacity);
+		}
 		return *this;
 	}
 

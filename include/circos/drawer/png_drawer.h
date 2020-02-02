@@ -22,12 +22,11 @@
 #include "../shapes/line_text.h"
 #include "../shapes/annulus.h"
 #include "../shapes/region.h"
+#include "../shapes/arc_text.h"
 
-#ifdef USE_TEXT
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-#endif
 
 
 namespace spiritsaway::circos
@@ -58,15 +57,12 @@ namespace spiritsaway::circos
 		std::unordered_map<int, vector<Point>> circle_cache;
 		const std::unordered_map<std::string_view, std::pair<std::string_view, std::string_view>>& font_info;//所有字体相关文件的存储路径映射
 		//下面是跟freetype相关的成员
-#ifdef USE_TEXT
+
 		std::unordered_map<std::string_view, vector<unsigned char>> font_cache;//字体文件读入内存
 		FT_Library ft_library;
-#endif
 
 		PngImage(const std::unordered_map<std::string_view, std::pair<std::string_view, std::string_view>>& in_font_info,string in_file_name, int in_radius, Color back_color, int compress=8);
-#ifdef USE_TEXT
 		const vector<unsigned char>& get_font_mem(std::string_view font_name);
-#endif
 		void plot(Colorbasic_point input, float opacity = 1.0);
 		void plot(Point pos, Color color,float opacity = 1.0);
 		void plot(int x, int y, Color color, float opacity=1.0);
@@ -85,14 +81,12 @@ namespace spiritsaway::circos
 		//要求interior一定在boundary里面
 		void flood(const vector<vector<Point>>& boundary, vector<Point> interiors, Color fill_color, float opacity =1.0);
 			
-#ifdef USE_TEXT
-		vector<uint32_t> utf8_to_uint(std::string_view text) const;
 		//这里要处理一下utf8
-		void draw_text(const Line& base_line, std::string_view text, std::string_view , int font_size, Color color, float alpha);
+		void draw_text(const Line& base_line, std::vector<std::uint32_t> text, std::string_view , int font_size, Color color, float alpha);
 			
 		void draw_bitmap(const FT_GlyphSlot& slot,Line on_line, Color color, float alpha);
 		// 获得某一点相对于某条线的对称点
-#endif
+
 		vector<Point> path(const Line& line) const;
 		PngImage& operator<<( const Line& line);
 
@@ -109,5 +103,6 @@ namespace spiritsaway::circos
 		PngImage& operator<<(const Ribbon& ribbon);
 		PngImage& operator<<(const Annulus& annulus);
 		PngImage& operator<<(const Region& region);
+		PngImage& operator<<(const ArcText& arc_text);
 	};
 }

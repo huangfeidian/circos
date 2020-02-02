@@ -11,6 +11,7 @@
 #include "./shapes/ribbon.h"
 #include "./shapes/annulus.h"
 #include "./shapes/region.h"
+#include "./shapes/arc_text.h"
 
 namespace spiritsaway::circos
 {
@@ -28,6 +29,7 @@ namespace spiritsaway::circos
 		std::vector<std::vector<Point>> paths;
 		std::vector<Annulus> annuluses;
 		std::vector<Region> regions;
+		std::vector<ArcText> arc_texts;
 
 	};
 	template<typename img>
@@ -73,6 +75,10 @@ namespace spiritsaway::circos
 		for (const auto& one_region: in_shape_collection.regions)
 		{
 			output_img << one_region;
+		}
+		for (const auto& one_arc_text : in_shape_collection.arc_texts)
+		{
+			output_img << one_arc_text;
 		}
 	}
 }

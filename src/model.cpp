@@ -5,6 +5,8 @@
 #include <unordered_set>
 #include <iostream>
 
+#include <circos/basics/utf8_util.h>
+
 namespace spiritsaway::circos::model
 {
 	using namespace std;
@@ -43,7 +45,7 @@ namespace spiritsaway::circos::model
 
 		// 7. 处理line_text
 
-		for (const auto& i : line_texts)
+		for (const auto& i : path_texts)
 		{
 			to_shapes(pre_collection, i.second);
 		}
@@ -124,35 +126,99 @@ namespace spiritsaway::circos::model
 			}
 		}
 	}
-	void model::to_shapes(shape_collection& pre_collection, const line_text& cur_line_text)
+	void model::to_shapes(shape_collection& pre_collection, const path_text& cur_path_text)
 	{
 		
-		auto from_tile_iter = tiles.find(cur_line_text.from.tile_id);
+		auto from_tile_iter = tiles.find(cur_path_text._region.tile_id);
 		if (from_tile_iter == tiles.end())
 		{
 			return;
 		}
 		const auto& from_tile = from_tile_iter->second;
 		const auto& from_circle = circles[from_tile.circle_id];
-		auto from_angle = from_tile.angle_begin + from_circle.angle_per_unit * cur_line_text.from.pos_idx;
-		auto from_point = Point::radius_point(from_circle.outer_radius, free_angle::from_angle(from_angle), config.center);
-		if (cur_line_text.from.tile_id == cur_line_text.to.tile_id && cur_line_text.from.pos_idx == cur_line_text.to.pos_idx)
-		{
-			auto tangent_line = Line::cacl_tangent_clock_wise(config.center, from_point);
-			pre_collection.line_texts.push_back(LineText(tangent_line, cur_line_text.utf8_text, cur_line_text.font_name, cur_line_text.font_size, cur_line_text.fill_color, cur_line_text.opacity));
-			return;
-		}
-		auto to_tile_iter = tiles.find(cur_line_text.to.tile_id);
-		if (to_tile_iter == tiles.end())
+		if (cur_path_text._region.begin_pos >= from_tile.width || cur_path_text._region.end_pos >= from_tile.width)
 		{
 			return;
 		}
-		const auto& to_tile = to_tile_iter->second;
-		const auto& to_circle = circles[to_tile.circle_id];
-		auto to_angle = to_tile.angle_begin + to_circle.angle_per_unit * cur_line_text.to.pos_idx;
-		auto to_point = Point::radius_point(to_circle.outer_radius, free_angle::from_angle(to_angle), config.center);
-		auto text_line = Line(from_point, to_point);
-		pre_collection.line_texts.push_back(LineText(text_line, cur_line_text.utf8_text, cur_line_text.font_name, cur_line_text.font_size, cur_line_text.fill_color, cur_line_text.opacity));
+		auto from_angle = from_tile.angle_begin + from_circle.angle_per_unit * cur_path_text._region.begin_pos;
+		auto end_angle = from_tile.angle_begin + from_circle.angle_per_unit * cur_path_text._region.end_pos;
+		auto cur_radius = from_circle.outer_radius + cur_path_text.offset;
+		// 居中这里需要计算文字的总长度
+		// 这里的长度我就简单的算成了字符大小乘以字符个数
+		auto text_size = spiritsaway::string_util::utf8_util::utf8_to_uint(cur_path_text.utf8_text).size();
+		float line_length = text_size * cur_path_text.font_size;
+		switch (cur_path_text._on_path)
+		{
+		case text_type::line:
+		{
+			switch (cur_path_text._align)
+			{
+			case text_align_type::left:
+			{
+				auto from_point = Point::radius_point(cur_radius, free_angle::from_angle(from_angle), config.center);
+
+				auto tangent_line = Line::cacl_tangent_clock_wise(config.center, from_point);
+				pre_collection.line_texts.push_back(LineText(tangent_line, cur_path_text.utf8_text, cur_path_text.font_name, cur_path_text.font_size, cur_path_text.fill_color, cur_path_text.opacity));
+				return;
+			}
+			case text_align_type::center:
+			{
+				auto from_point = Point::radius_point(cur_radius, free_angle::from_angle((from_angle + end_angle) / 2), config.center);
+
+				auto tangent_line = Line::cacl_tangent_clock_wise(config.center, from_point);
+				auto direction_line = tangent_line.to - tangent_line.from;
+				auto direction_line_len = Line(Point(0, 0), direction_line).len();
+				tangent_line.to = tangent_line.from + direction_line * (line_length * 0.5 / direction_line_len);
+				tangent_line.from = tangent_line.from - direction_line * (line_length * 0.5 / direction_line_len);
+				pre_collection.line_texts.push_back(LineText(tangent_line, cur_path_text.utf8_text, cur_path_text.font_name, cur_path_text.font_size, cur_path_text.fill_color, cur_path_text.opacity));
+				return;
+			}
+			case text_align_type::right:
+			{
+				auto from_point = Point::radius_point(cur_radius, free_angle::from_angle(end_angle), config.center);
+
+				auto tangent_line = Line::cacl_tangent_clock_wise(config.center, from_point);
+				// 更改方向
+				tangent_line.to = 2 * tangent_line.from - tangent_line.to;
+				pre_collection.line_texts.push_back(LineText(tangent_line, cur_path_text.utf8_text, cur_path_text.font_name, cur_path_text.font_size, cur_path_text.fill_color, cur_path_text.opacity));
+				return;
+			}
+			default:
+				return;
+			}
+		}
+		case text_type::arc:
+		{
+			if (cur_path_text._align == text_align_type::left || cur_path_text._align == text_align_type::right)
+			{
+				Arc temp_arc = Arc(cur_radius, free_angle::from_angle(from_angle), free_angle::from_angle(end_angle - from_angle), config.center, cur_path_text._align == text_align_type::right, Color());
+				ArcText result = ArcText(temp_arc, cur_path_text.utf8_text,  cur_path_text.font_name, cur_path_text.font_size, cur_path_text.fill_color, cur_path_text.opacity);
+				pre_collection.arc_texts.push_back(result);
+			}
+			else
+			{
+				// 居中 需要计算弧长
+				auto line_rad = line_length / cur_radius;
+				auto new_arc_angle_begin = free_angle::from_angle(from_angle) - free_angle::from_rad(line_rad / 2);
+				Arc temp_arc = Arc(cur_radius, new_arc_angle_begin, free_angle::from_rad(line_rad), config.center, cur_path_text._align == text_align_type::right, Color());
+
+				ArcText result = ArcText(temp_arc, cur_path_text.utf8_text, cur_path_text.font_name, cur_path_text.font_size, cur_path_text.fill_color, cur_path_text.opacity);
+				pre_collection.arc_texts.push_back(result);
+			}
+
+			return;
+		}
+		case text_type::normal:
+		{
+			// 法线方向只有左对齐
+			auto cur_point = Point::radius_point(cur_radius, free_angle::from_angle((from_angle + end_angle) / 2), config.center);
+			auto tangent_line = Line(cur_point, cur_point * 2 - config.center);
+			pre_collection.line_texts.push_back(LineText(tangent_line, cur_path_text.utf8_text, cur_path_text.font_name, cur_path_text.font_size, cur_path_text.fill_color, cur_path_text.opacity));
+			return;
+		}
+		default:
+			return;
+		}
 	}
 	void model::to_shapes(shape_collection& pre_collection, const range_link& cur_range_link)
 	{

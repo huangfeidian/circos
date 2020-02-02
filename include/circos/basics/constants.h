@@ -12,6 +12,12 @@ namespace spiritsaway::circos
 		left,
 		right,
 	};
+	enum class text_type : std::uint8_t
+	{
+		arc,//弧形文字
+		line,//切线文字
+		normal,// 法向文字 与切线文字正交
+	};
 	enum class track_draw_type: std::uint8_t
 	{
 		point = 1,

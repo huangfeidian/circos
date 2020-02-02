@@ -41,19 +41,19 @@ namespace spiritsaway::circos
 		{
 			return width > free_angle::from_angle(180);
 		}
-		template<typename T = std::int16_t>
+		template<typename T = std::int32_t>
 		basic_point<T> from_point() const
 		{
 			return basic_point<T>::radius_point(radius, from_angle()) + cast_point<T>(center);;
 			
 		}
-		template<typename T = std::int16_t>
+		template<typename T = std::int32_t>
 		basic_point<T> to_point() const
 		{
 			return basic_point<T>::radius_point(radius, to_angle()) + cast_point<T>(center);
 		}
 
-		template<typename T = std::int16_t>
+		template<typename T = std::int32_t>
 		basic_point<T> middle_point() const
 		{
 			return basic_point<T>::radius_point(radius, (free_angle(_begin_angle) + free_angle(width) / 2)) + cast_point<T>(center);;

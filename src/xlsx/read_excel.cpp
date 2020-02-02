@@ -13,7 +13,6 @@
 #include <circos/drawer/svg_drawer.h>
 #include <circos/xlsx/read_excel.h>
 
-#ifdef WITH_XLSX_SUPPORT
 #include <xlsx_reader/xlsx_typed_worksheet.h>
 #include <xlsx_reader/xlsx_typed_cell.h>
 #include <xlsx_reader/xlsx_workbook.h>
@@ -32,7 +31,7 @@ namespace
 		circle,
 		tile,
 		fill_ontile,
-		line_text,
+		path_text,
 		tick_on_tile,
 		value_on_tile,
 		point_link,
@@ -388,15 +387,17 @@ namespace
 			all_point_links[cur_point_link.link_id] = cur_point_link;
 		}
 	} 
-	void read_line_text_sheet(spiritsaway::memory::arena& temp_arena, const typed_worksheet& current_sheet, std::unordered_map<std::string_view, model::line_text>& all_line_texts, const std::unordered_map<string_view, Color>& defined_colors)
+	void read_path_text_sheet(spiritsaway::memory::arena& temp_arena, const typed_worksheet& current_sheet, std::unordered_map<std::string_view, model::path_text>& all_path_texts, const std::unordered_map<string_view, Color>& defined_colors)
 	{
-		// line_text headers line_text_id(string) from_tile_id(string) from_pos_idx(int) to_tile_id(string) to_pos_idx(int)  text(string) font_name(string) font_size(uint16) color(RGB) ref_color(ref) opacity(float)
+		// path_text headers path_text_id(string) from_tile_id(string) from_pos_idx(int) to_tile_id(string) to_pos_idx(int)  text(string) font_name(string) font_size(uint16) color(RGB) ref_color(ref) opacity(float)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
-		sheet_headers["line_text_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "line_text_id", "");
+		sheet_headers["path_text_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "path_text_id", "");
 
-		sheet_headers["from_tile_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "from_tile_id", "");
+		sheet_headers["tile_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "tile_id", "");
 
-		sheet_headers["to_tile_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "to_tile_id", "");
+		sheet_headers["text_path_type"] = new typed_header(new typed_string_desc(basic_value_type::string), "text_path_type", "");
+
+		sheet_headers["text_align_type"] = new typed_header(new typed_string_desc(basic_value_type::string), "text_align_type", "");
 
 		sheet_headers["from_pos_idx"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "from_pos_idx", "");
 		sheet_headers["to_pos_idx"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "to_pos_idx", "");
@@ -405,6 +406,8 @@ namespace
 		sheet_headers["font_name"] = new typed_header(new typed_string_desc(basic_value_type::string), "font_name", "");
 		sheet_headers["font_size"] = new typed_header(new typed_string_desc(basic_value_type::number_u32), "font_size", "");
 
+		sheet_headers["offset"] = new typed_header(new typed_string_desc(basic_value_type::number_u32), "offset", "");
+
 		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_32), 3, ',');
 		sheet_headers["color"] = new typed_header(new typed_string_desc(color_type_detail), "color", "");
 		sheet_headers["ref_color"] = new typed_header(new typed_string_desc(basic_value_type::string), "ref_color", "");
@@ -412,14 +415,14 @@ namespace
 
 
 
-		auto header_match = current_sheet.check_header_match(sheet_headers, "line_text_id");
+		auto header_match = current_sheet.check_header_match(sheet_headers, "path_text_id");
 		if (!header_match)
 		{
 			std::cerr << "header for point_link description mismatch for sheet " << current_sheet._name << std::endl;
 			return;
 		}
 		const vector<const typed_header*>& all_headers = current_sheet.get_typed_headers();
-		vector<string_view> header_names = { "line_text_id", "from_tile_id", "to_tile_id", "from_pos_idx", "to_pos_idx", "text", "font_name", "font_size", "color", "ref_color", "opacity"};
+		vector<string_view> header_names = { "path_text_id", "tile_id", "from_pos_idx", "to_pos_idx", "text_path_type", "text_align_type", "text", "font_name", "font_size", "color", "ref_color", "opacity", "offset"};
 		const vector<uint32_t>& header_indexes = current_sheet.get_header_index_vector(header_names);
 		if (header_indexes.empty())
 		{
@@ -428,50 +431,53 @@ namespace
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
 		for (std::uint32_t i = 1; i < all_row_info.size(); i++)
 		{
-			model::line_text cur_line_text;
+			model::path_text cur_path_text;
 
-			auto[opt_link_id, opt_from_tile, opt_to_tile, opt_from_pos, opt_to_pos, opt_text, opt_font_name, opt_font_size, opt_color, opt_ref_color, opt_opacity] =
-				current_sheet.try_convert_row<string_view, string_view, string_view, int, int, string_view, string_view, int, tuple<int, int, int>, string_view, float>(i, header_indexes);
-			if (!(opt_link_id && opt_from_tile && opt_from_pos && opt_to_tile && opt_to_pos && opt_text&& opt_font_name && opt_font_size&& opt_opacity))
+			auto[opt_path_id, opt_tile_id, opt_text_path_type, opt_text_align_type, opt_from_pos, opt_to_pos, opt_text, opt_font_name, opt_font_size, opt_color, opt_ref_color, opt_opacity, opt_offset] =
+				current_sheet.try_convert_row<string_view, string_view, string_view, string_view, int, int, string_view, string_view, int, tuple<int, int, int>, string_view, float, int>(i, header_indexes);
+			if (!(opt_path_id && opt_tile_id && opt_from_pos && opt_to_pos && opt_text&& opt_font_name && opt_font_size&& opt_opacity && opt_text_path_type && opt_text_align_type))
 			{
 				continue;
 			}
-			cur_line_text.line_text_id = opt_link_id.value();
-			cur_line_text.from.tile_id = opt_from_tile.value();
-			cur_line_text.to.tile_id = opt_to_tile.value();
-			cur_line_text.from.pos_idx = opt_from_pos.value();
-			cur_line_text.to.pos_idx = opt_to_pos.value();
-			cur_line_text.utf8_text = opt_text.value();
-			cur_line_text.font_name = opt_font_name.value();
-			cur_line_text.font_size = static_cast<std::uint16_t>(opt_font_size.value());
+			cur_path_text.path_text_id = opt_path_id.value();
+			cur_path_text._on_path = magic_enum::enum_cast<text_type>(opt_text_path_type.value()).value_or(text_type::normal);
 
-			cur_line_text.opacity = opt_opacity.value();
+			cur_path_text._align = magic_enum::enum_cast<text_align_type>(opt_text_align_type.value()).value_or(text_align_type::left);
+
+			cur_path_text._region.tile_id = opt_tile_id.value();
+			cur_path_text._region.begin_pos = opt_from_pos.value();
+			cur_path_text._region.end_pos = opt_to_pos.value();
+			cur_path_text.utf8_text = opt_text.value();
+			cur_path_text.font_name = opt_font_name.value();
+			cur_path_text.font_size = static_cast<std::uint16_t>(opt_font_size.value());
+			cur_path_text.offset = static_cast<std::uint16_t>(opt_offset.value_or(0));
+			cur_path_text.opacity = opt_opacity.value();
 			if (opt_color)
 			{
 				auto color_value = opt_color.value();
-				cur_line_text.fill_color = Color(get<0>(color_value), get<1>(color_value), get<2>(color_value));
+				cur_path_text.fill_color = Color(get<0>(color_value), get<1>(color_value), get<2>(color_value));
 			}
 			if (opt_ref_color)
 			{
 				auto temp_color = read_ref_color(opt_ref_color.value(), defined_colors);
 				if (temp_color)
 				{
-					cur_line_text.fill_color = temp_color.value();
+					cur_path_text.fill_color = temp_color.value();
 				}
 			}
-			if (cur_line_text.line_text_id.empty())
+			if (cur_path_text.path_text_id.empty())
 			{
-				std::cerr << "cant find line_text for row " << i << std::endl;
+				std::cerr << "cant find path_text for row " << i << std::endl;
 				continue;
 			}
-			if (all_line_texts.find(cur_line_text.line_text_id) != all_line_texts.end())
+			if (all_path_texts.find(cur_path_text.path_text_id) != all_path_texts.end())
 			{
-				std::cerr << "duplicated line_text_id " << cur_line_text.line_text_id << std::endl;
+				std::cerr << "duplicated path_text_id " << cur_path_text.path_text_id << std::endl;
 				continue;
 			}
 			
 
-			all_line_texts[cur_line_text.line_text_id] = cur_line_text;
+			all_path_texts[cur_path_text.path_text_id] = cur_path_text;
 		}
 	}
 	void read_range_link_sheet(spiritsaway::memory::arena& temp_arena, const typed_worksheet& current_sheet, std::unordered_map<std::string_view, model::range_link>& all_range_links, const std::unordered_map<string_view, Color>& defined_colors)
@@ -953,8 +959,8 @@ namespace
 		case sheet_type::circle_tick:
 			read_circle_tick_sheet(temp_arena, sheet_content, in_model.circle_ticks, defined_colors);
 			break;
-		case sheet_type::line_text:
-			read_line_text_sheet(temp_arena, sheet_content, in_model.line_texts, defined_colors);
+		case sheet_type::path_text:
+			read_path_text_sheet(temp_arena, sheet_content, in_model.path_texts, defined_colors);
 			break;
 		case sheet_type::value_on_tile:
 			read_value_on_tile_sheet(temp_arena, sheet_content, in_model.all_value_on_tile_by_track, defined_colors);
@@ -1108,5 +1114,5 @@ namespace spiritsaway::circos
 
 	}
 }
-#endif
+
 

@@ -81,18 +81,18 @@ namespace spiritsaway::circos::model
 		std::uint32_t width;
 
 	};
-	struct line_text
+	struct path_text
 	{
-		// 一条直线上的文本
-		// 如果初始位置与结束位置相同 则代表此位置的顺时针切线方向
-		std::string_view line_text_id;
-		tile_pos from;
-		tile_pos to;
+		text_type _on_path;
+		std::string_view path_text_id;
+		tile_region _region;
 		std::string_view utf8_text;
 		std::string_view font_name;
 		std::uint16_t font_size;
 		Color fill_color;
 		float opacity;
+		text_align_type _align;
+		std::uint16_t offset;
 	};
 
 	struct range_link
@@ -168,7 +168,7 @@ namespace spiritsaway::circos::model
 		std::unordered_map<std::string_view, point_link> point_links;
 		std::unordered_map<std::string_view, range_link> range_links;
 		std::unordered_map<std::string_view, tick_on_tile> tile_ticks;
-		std::unordered_map<std::string_view, line_text> line_texts;
+		std::unordered_map<std::string_view, path_text> path_texts;
 		std::unordered_map<std::string_view, std::pair<std::string_view, std::string_view>> font_info;
 
 		std::unordered_map<std::string_view, std::vector<value_on_tile>> all_value_on_tile_by_track;
@@ -180,7 +180,7 @@ namespace spiritsaway::circos::model
 		void to_shapes(shape_collection& pre_collection, const track_config& config, std::vector<value_on_tile>& data);
 		void to_shapes(shape_collection& pre_collection, const tick_on_tile& data);
 		void to_shapes(shape_collection& pre_collection, const point_link& data);
-		void to_shapes(shape_collection& pre_collection, const line_text& data);
+		void to_shapes(shape_collection& pre_collection, const path_text& data);
 		void to_shapes(shape_collection& pre_collection, const range_link& data);
 		void to_shapes(shape_collection& pre_collection, const circle_tick& data);
 		void to_shapes(shape_collection& pre_collection, const tile& data);
