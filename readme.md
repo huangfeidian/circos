@@ -48,10 +48,10 @@
 ![圆周率](https://raw.githubusercontent.com/huangfeidian/circos/master/picture/pi_custom.png)
 
 由data文件夹下的text_test.xlsx生成的图
-![文本绘制](https://raw.githubusercontent.com/huangfeidian/circos/blob/master/picture/text_test.png)
+![文本绘制](https://github.com/huangfeidian/circos/blob/master/picture/text_test.png?raw=true)
 
 由data文件夹下的point_track_test.xlsx生成的图
-![track数据绘制](https://raw.githubusercontent.com/huangfeidian/circos/blob/master/picture/point_track_test.png)
+![track数据绘制](https://github.com/huangfeidian/circos/blob/master/picture/point_track_test.png?raw=true)
 
 由data文件夹下的pi10000.xlsx生成的图
-![track数据绘制](https://raw.githubusercontent.com/huangfeidian/circos/blob/master/picture/pi10000.png)
+![pi数据绘制](https://github.com/huangfeidian/circos/blob/master/picture/pi10000.png?raw=true)
