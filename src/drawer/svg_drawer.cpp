@@ -100,14 +100,14 @@ namespace spiritsaway::circos
 		graph << "<path id=\"textPath" << path_index << "\" ";
 		graph << "d= \" M " << arc_text.on_arc.from_point<float>() << " ";
 		graph.add_to_path(arc_text.on_arc);
-		graph << " />\n";
+		graph << "\" fill=\"none\" />\n";
 
 		graph << "<text ";
 		//graph << "font-family=\"" << line_text.font_name << "\" " << "font-size=\"" << line_text.font_size << "\" ";
 		graph << "font-family=\"" << get_font_name(arc_text.font_name) << "\" " << "font-size=\"" << arc_text.font_size << "\" ";
 		graph << "fill=\"" << arc_text.color << "\" ";
 		graph << "opacity=\"" << arc_text.opacity << "\" >\n";
-		graph << "<textPath xlink:fref=\"#textPath" << path_index << "\">\n";
+		graph << "<textPath xlink:href=\"#textPath" << path_index << "\">\n";
 		graph << arc_text.utf8_text << "\n";
 		graph << "</textPath>\n";
 		graph << "</text>\n";

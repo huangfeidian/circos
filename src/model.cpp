@@ -146,7 +146,7 @@ namespace spiritsaway::circos::model
 		// 居中这里需要计算文字的总长度
 		// 这里的长度我就简单的算成了字符大小乘以字符个数
 		auto text_size = spiritsaway::string_util::utf8_util::utf8_to_uint(cur_path_text.utf8_text).size();
-		float line_length = text_size * cur_path_text.font_size;
+		float line_length = text_size * cur_path_text.font_size * 0.5;
 		switch (cur_path_text._on_path)
 		{
 		case text_type::line:
@@ -189,18 +189,24 @@ namespace spiritsaway::circos::model
 		}
 		case text_type::arc:
 		{
+			auto line_rad = line_length / cur_radius ;
 			if (cur_path_text._align == text_align_type::left || cur_path_text._align == text_align_type::right)
 			{
-				Arc temp_arc = Arc(cur_radius, free_angle::from_angle(from_angle), free_angle::from_angle(end_angle - from_angle), config.center, cur_path_text._align == text_align_type::right, Color());
+				auto cur_arc_begin_angle = free_angle::from_angle(from_angle);
+				if (cur_path_text._align == text_align_type::right)
+				{
+					cur_arc_begin_angle = free_angle::from_angle(end_angle) - free_angle::from_rad(line_rad);
+				}
+				Arc temp_arc = Arc(cur_radius, cur_arc_begin_angle, free_angle::from_rad(line_rad), config.center, cur_path_text._align == text_align_type::right, Color());
 				ArcText result = ArcText(temp_arc, cur_path_text.utf8_text,  cur_path_text.font_name, cur_path_text.font_size, cur_path_text.fill_color, cur_path_text.opacity);
 				pre_collection.arc_texts.push_back(result);
 			}
 			else
 			{
 				// 居中 需要计算弧长
-				auto line_rad = line_length / cur_radius;
-				auto new_arc_angle_begin = free_angle::from_angle(from_angle) - free_angle::from_rad(line_rad / 2);
-				Arc temp_arc = Arc(cur_radius, new_arc_angle_begin, free_angle::from_rad(line_rad), config.center, cur_path_text._align == text_align_type::right, Color());
+	
+				auto new_arc_angle_begin = free_angle::from_angle((from_angle + end_angle) / 2) - free_angle::from_rad(line_rad / 2);
+				Arc temp_arc = Arc(cur_radius, new_arc_angle_begin, free_angle::from_rad(line_rad), config.center, false, Color());
 
 				ArcText result = ArcText(temp_arc, cur_path_text.utf8_text, cur_path_text.font_name, cur_path_text.font_size, cur_path_text.fill_color, cur_path_text.opacity);
 				pre_collection.arc_texts.push_back(result);
@@ -211,10 +217,48 @@ namespace spiritsaway::circos::model
 		case text_type::normal:
 		{
 			// 法线方向只有左对齐
-			auto cur_point = Point::radius_point(cur_radius, free_angle::from_angle((from_angle + end_angle) / 2), config.center);
-			auto tangent_line = Line(cur_point, cur_point * 2 - config.center);
-			pre_collection.line_texts.push_back(LineText(tangent_line, cur_path_text.utf8_text, cur_path_text.font_name, cur_path_text.font_size, cur_path_text.fill_color, cur_path_text.opacity));
+			auto text_begin_radius = cur_radius;
+			if (cur_path_text._align == text_align_type::right)
+			{
+				text_begin_radius -= line_length;
+			}
+			else if (cur_path_text._align == text_align_type::center)
+			{
+				text_begin_radius -= line_length * 0.5;
+			}
+			auto cur_point = Point::radius_point(text_begin_radius, free_angle::from_angle((from_angle + end_angle) / 2), config.center);
+			auto text_line = Line(cur_point, cur_point * 2 - config.center);
+			pre_collection.line_texts.push_back(LineText(text_line, cur_path_text.utf8_text, cur_path_text.font_name, cur_path_text.font_size, cur_path_text.fill_color, cur_path_text.opacity));
 			return;
+		}
+		case text_type::arc_span:
+		{
+			// 这里要计算好单个字符还是多个字符
+			// 这里是左对齐 且分散排列
+			auto u8_split_text = spiritsaway::string_util::utf8_util::u8_split(cur_path_text.utf8_text);
+			auto text_total_angle = free_angle::from_rad(line_length / cur_radius) ;
+			auto blank_angle = free_angle::from_angle(end_angle - from_angle);
+			free_angle text_begin;
+			free_angle text_gap;
+			if (text_size != 1)
+			{
+				text_begin = free_angle::from_angle(from_angle);
+				text_gap = blank_angle / (text_size - 1);
+			}
+			else
+			{
+				text_gap = blank_angle / (text_size + 1);
+				text_begin = free_angle::from_angle(from_angle) + text_gap;
+			}
+			for (auto one_text : u8_split_text)
+			{
+				Arc temp_arc = Arc(cur_radius, text_begin, blank_angle, config.center, false, Color());
+
+				ArcText result = ArcText(temp_arc, one_text, cur_path_text.font_name, cur_path_text.font_size, cur_path_text.fill_color, cur_path_text.opacity);
+				pre_collection.arc_texts.push_back(result);
+				text_begin = text_begin + text_gap;
+			}
+			
 		}
 		default:
 			return;

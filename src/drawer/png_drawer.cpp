@@ -449,10 +449,11 @@ namespace spiritsaway::circos
 			return *this;
 		}
 		auto rad_per_text = free_angle(total_width) / text.size();
+		auto ratio = arc_text.on_arc.reverse_end ? -1: 1;
 		for (auto one_text : text)
 		{
 			auto begin_point = Point::radius_point(arc_text.on_arc.radius, begin_rad, arc_text.on_arc.center);
-			begin_rad = begin_rad + rad_per_text;
+			begin_rad = begin_rad + rad_per_text * ratio;
 			auto end_point = Point::radius_point(arc_text.on_arc.radius, begin_rad, arc_text.on_arc.center);
 			auto temp_line = Line(begin_point, end_point);
 			auto temp_textes = std::vector<std::uint32_t>();

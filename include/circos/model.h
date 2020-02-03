@@ -92,7 +92,7 @@ namespace spiritsaway::circos::model
 		Color fill_color;
 		float opacity;
 		text_align_type _align;
-		std::uint16_t offset;
+		int offset;
 	};
 
 	struct range_link

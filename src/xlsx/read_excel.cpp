@@ -389,7 +389,7 @@ namespace
 	} 
 	void read_path_text_sheet(spiritsaway::memory::arena& temp_arena, const typed_worksheet& current_sheet, std::unordered_map<std::string_view, model::path_text>& all_path_texts, const std::unordered_map<string_view, Color>& defined_colors)
 	{
-		// path_text headers path_text_id(string) from_tile_id(string) from_pos_idx(int) to_tile_id(string) to_pos_idx(int)  text(string) font_name(string) font_size(uint16) color(RGB) ref_color(ref) opacity(float)
+		// path_text headers path_text_id(string) tile_id(string) from_pos_idx(int) to_pos_idx(int)  text(string) font_name(string) font_size(u32) color(RGB) ref_color(str) opacity(float) text_path_typep(choice_str) text_align_type(choice_str) offset(u32)
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
 		sheet_headers["path_text_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "path_text_id", "");
 
@@ -399,14 +399,14 @@ namespace
 
 		sheet_headers["text_align_type"] = new typed_header(new typed_string_desc(basic_value_type::string), "text_align_type", "");
 
-		sheet_headers["from_pos_idx"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "from_pos_idx", "");
-		sheet_headers["to_pos_idx"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "to_pos_idx", "");
+		sheet_headers["begin_pos"] = new typed_header(new typed_string_desc(basic_value_type::number_u32), "begin_pos", "");
+		sheet_headers["end_pos"] = new typed_header(new typed_string_desc(basic_value_type::number_u32), "end_pos", "");
 
 		sheet_headers["text"] = new typed_header(new typed_string_desc(basic_value_type::string), "text", "");
 		sheet_headers["font_name"] = new typed_header(new typed_string_desc(basic_value_type::string), "font_name", "");
 		sheet_headers["font_size"] = new typed_header(new typed_string_desc(basic_value_type::number_u32), "font_size", "");
 
-		sheet_headers["offset"] = new typed_header(new typed_string_desc(basic_value_type::number_u32), "offset", "");
+		sheet_headers["offset"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "offset", "");
 
 		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_32), 3, ',');
 		sheet_headers["color"] = new typed_header(new typed_string_desc(color_type_detail), "color", "");
@@ -422,7 +422,7 @@ namespace
 			return;
 		}
 		const vector<const typed_header*>& all_headers = current_sheet.get_typed_headers();
-		vector<string_view> header_names = { "path_text_id", "tile_id", "from_pos_idx", "to_pos_idx", "text_path_type", "text_align_type", "text", "font_name", "font_size", "color", "ref_color", "opacity", "offset"};
+		vector<string_view> header_names = { "path_text_id", "tile_id", "text_path_type", "text_align_type", "begin_pos", "end_pos",  "text", "font_name", "font_size", "color", "ref_color", "opacity", "offset"};
 		const vector<uint32_t>& header_indexes = current_sheet.get_header_index_vector(header_names);
 		if (header_indexes.empty())
 		{
@@ -434,7 +434,7 @@ namespace
 			model::path_text cur_path_text;
 
 			auto[opt_path_id, opt_tile_id, opt_text_path_type, opt_text_align_type, opt_from_pos, opt_to_pos, opt_text, opt_font_name, opt_font_size, opt_color, opt_ref_color, opt_opacity, opt_offset] =
-				current_sheet.try_convert_row<string_view, string_view, string_view, string_view, int, int, string_view, string_view, int, tuple<int, int, int>, string_view, float, int>(i, header_indexes);
+				current_sheet.try_convert_row<string_view, string_view, string_view, string_view, std::uint32_t, std::uint32_t, string_view, string_view, std::uint32_t, tuple<int, int, int>, string_view, float, int>(i, header_indexes);
 			if (!(opt_path_id && opt_tile_id && opt_from_pos && opt_to_pos && opt_text&& opt_font_name && opt_font_size&& opt_opacity && opt_text_path_type && opt_text_align_type))
 			{
 				continue;
@@ -450,7 +450,7 @@ namespace
 			cur_path_text.utf8_text = opt_text.value();
 			cur_path_text.font_name = opt_font_name.value();
 			cur_path_text.font_size = static_cast<std::uint16_t>(opt_font_size.value());
-			cur_path_text.offset = static_cast<std::uint16_t>(opt_offset.value_or(0));
+			cur_path_text.offset = opt_offset.value_or(0);
 			cur_path_text.opacity = opt_opacity.value();
 			if (opt_color)
 			{
