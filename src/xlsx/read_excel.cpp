@@ -75,16 +75,16 @@ namespace
 		std::unordered_map<string_view, const typed_header*> sheet_headers;
 		auto circle_id_header = 
 		sheet_headers["circle_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "circle_id", "");
-		sheet_headers["inner_radius"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "inner_radius", "");
-		sheet_headers["outer_radius"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "outer_radius", "");
+		sheet_headers["inner_radius"] = new typed_header(new typed_string_desc(basic_value_type::number_u32), "inner_radius", "");
+		sheet_headers["outer_radius"] = new typed_header(new typed_string_desc(basic_value_type::number_u32), "outer_radius", "");
 		
-		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_32), 3, ',');
+		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_u32), 3, ',');
 		sheet_headers["color"] = new typed_header(new typed_string_desc(color_type_detail), "color", "");
 		sheet_headers["ref_color"] = new typed_header(new typed_string_desc(basic_value_type::string), "ref_color", "");
 
 		sheet_headers["opacity"] = new typed_header(new typed_string_desc(basic_value_type::number_float), "opacity", "");
 
-		sheet_headers["gap"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "gap", "");
+		sheet_headers["gap"] = new typed_header(new typed_string_desc(basic_value_type::number_u32), "gap", "");
 		sheet_headers["filled"] = new typed_header(new typed_string_desc(basic_value_type::number_bool), "filled", "");
 
 		auto header_match = current_sheet.check_header_match(sheet_headers, "circle_id");
@@ -106,7 +106,7 @@ namespace
 		{
 			model::circle cur_circle;
 			auto[opt_cirlce_id, opt_inner_radius, opt_outer_radius, opt_color, opt_ref_color, opt_opacity, opt_gap, opt_filled] = 
-				current_sheet.try_convert_row<string_view, int, int, tuple<int, int, int>, string_view, float, int, bool>(i, header_indexes);
+				current_sheet.try_convert_row<string_view, std::uint32_t, std::uint32_t, tuple<std::uint32_t, std::uint32_t, std::uint32_t>, string_view, float, std::uint32_t, bool>(i, header_indexes);
 			if (!(opt_cirlce_id && opt_inner_radius && opt_outer_radius && opt_opacity && opt_gap && opt_filled))
 			{
 				continue;
@@ -158,11 +158,11 @@ namespace
 
 		sheet_headers["tile_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "tile_id", "");
 
-		sheet_headers["width"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "width", "");
+		sheet_headers["width"] = new typed_header(new typed_string_desc(basic_value_type::number_u32), "width", "");
 
-		sheet_headers["sequence"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "sequence", "");
+		sheet_headers["sequence"] = new typed_header(new typed_string_desc(basic_value_type::number_u32), "sequence", "");
 		
-		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_32), 3, ',');
+		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_u32), 3, ',');
 		sheet_headers["color"] = new typed_header(new typed_string_desc(color_type_detail), "color", "");
 		sheet_headers["ref_color"] = new typed_header(new typed_string_desc(basic_value_type::string), "ref_color", "");
 
@@ -189,7 +189,7 @@ namespace
 			model::tile cur_tile;
 
 			auto[opt_tile_id, opt_circle_id, opt_width, opt_seq, opt_color, opt_ref_color, opt_opacity, opt_filled] = 
-				current_sheet.try_convert_row<string_view, string_view, int, int, tuple<int, int, int>, string_view, float, bool>(i, header_indexes);
+				current_sheet.try_convert_row<string_view, string_view, std::uint32_t, std::uint32_t, tuple<std::uint32_t, std::uint32_t, std::uint32_t>, string_view, float, bool>(i, header_indexes);
 			if (!(opt_tile_id && opt_circle_id && opt_width && opt_seq && opt_opacity && opt_filled))
 			{
 				continue;
@@ -243,10 +243,10 @@ namespace
 
 		sheet_headers["circle_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "circle_id", "");
 
-		sheet_headers["width"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "width", "");
-		sheet_headers["height"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "height", "");
-		sheet_headers["gap"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "gap", "");
-		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_32), 3, ',');
+		sheet_headers["width"] = new typed_header(new typed_string_desc(basic_value_type::number_u32), "width", "");
+		sheet_headers["height"] = new typed_header(new typed_string_desc(basic_value_type::number_u32), "height", "");
+		sheet_headers["gap"] = new typed_header(new typed_string_desc(basic_value_type::number_u32), "gap", "");
+		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_u32), 3, ',');
 		sheet_headers["color"] = new typed_header(new typed_string_desc(color_type_detail), "color", "");
 		sheet_headers["ref_color"] = new typed_header(new typed_string_desc(basic_value_type::string), "ref_color", "");
 		sheet_headers["opacity"] = new typed_header(new typed_string_desc(basic_value_type::number_float), "opacity", "");
@@ -269,7 +269,7 @@ namespace
 		{
 			model::circle_tick cur_circle_tick;
 			auto[opt_tick_id, opt_circle_id, opt_width, opt_height, opt_color, opt_ref_color, opt_opacity, opt_gap] =
-				current_sheet.try_convert_row<string_view, string_view, int, int, tuple<int, int, int>, string_view, float, int>(i, header_indexes);
+				current_sheet.try_convert_row<string_view, string_view, std::uint32_t, std::uint32_t, tuple<std::uint32_t, std::uint32_t, std::uint32_t>, string_view, float, std::uint32_t>(i, header_indexes);
 			if (!(opt_tick_id && opt_circle_id && opt_width && opt_height && opt_opacity&& opt_gap))
 			{
 				continue;
@@ -319,10 +319,10 @@ namespace
 
 		sheet_headers["to_tile_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "to_tile_id", "");
 
-		sheet_headers["from_pos_idx"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "from_pos_idx", "");
-		sheet_headers["to_pos_idx"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "to_pos_idx", "");
+		sheet_headers["from_pos_idx"] = new typed_header(new typed_string_desc(basic_value_type::number_u32), "from_pos_idx", "");
+		sheet_headers["to_pos_idx"] = new typed_header(new typed_string_desc(basic_value_type::number_u32), "to_pos_idx", "");
 		
-		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_32), 3, ',');
+		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_u32), 3, ',');
 		sheet_headers["color"] = new typed_header(new typed_string_desc(color_type_detail), "color", "");
 		sheet_headers["ref_color"] = new typed_header(new typed_string_desc(basic_value_type::string), "ref_color", "");
 		sheet_headers["opacity"] = new typed_header(new typed_string_desc(basic_value_type::number_float), "opacity", "");
@@ -348,7 +348,7 @@ namespace
 			model::point_link cur_point_link;
 			cur_point_link.width = 1;
 			auto[opt_link_id, opt_from_tile, opt_to_tile, opt_from_pos, opt_to_pos, opt_color, opt_ref_color, opt_opacity, opt_control] =
-				current_sheet.try_convert_row<string_view, string_view, string_view, int, int, tuple<int, int, int>, string_view, float, float>(i, header_indexes);
+				current_sheet.try_convert_row<string_view, string_view, string_view, std::uint32_t, std::uint32_t, tuple<std::uint32_t, std::uint32_t, std::uint32_t>, string_view, float, float>(i, header_indexes);
 			if (!(opt_link_id && opt_from_tile && opt_from_pos && opt_to_tile && opt_to_pos && opt_opacity && opt_control))
 			{
 				continue;
@@ -408,7 +408,7 @@ namespace
 
 		sheet_headers["offset"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "offset", "");
 
-		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_32), 3, ',');
+		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_u32), 3, ',');
 		sheet_headers["color"] = new typed_header(new typed_string_desc(color_type_detail), "color", "");
 		sheet_headers["ref_color"] = new typed_header(new typed_string_desc(basic_value_type::string), "ref_color", "");
 		sheet_headers["opacity"] = new typed_header(new typed_string_desc(basic_value_type::number_float), "opacity", "");
@@ -434,7 +434,7 @@ namespace
 			model::path_text cur_path_text;
 
 			auto[opt_path_id, opt_tile_id, opt_text_path_type, opt_text_align_type, opt_from_pos, opt_to_pos, opt_text, opt_font_name, opt_font_size, opt_color, opt_ref_color, opt_opacity, opt_offset] =
-				current_sheet.try_convert_row<string_view, string_view, string_view, string_view, std::uint32_t, std::uint32_t, string_view, string_view, std::uint32_t, tuple<int, int, int>, string_view, float, int>(i, header_indexes);
+				current_sheet.try_convert_row<string_view, string_view, string_view, string_view, std::uint32_t, std::uint32_t, string_view, string_view, std::uint32_t, tuple<std::uint32_t, std::uint32_t, std::uint32_t>, string_view, float, int>(i, header_indexes);
 			if (!(opt_path_id && opt_tile_id && opt_from_pos && opt_to_pos && opt_text&& opt_font_name && opt_font_size&& opt_opacity && opt_text_path_type && opt_text_align_type))
 			{
 				continue;
@@ -490,13 +490,13 @@ namespace
 
 		sheet_headers["to_tile_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "to_tile_id", "");
 
-		sheet_headers["from_pos_idx_begin"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "from_pos_idx_begin", "");
-		sheet_headers["to_pos_idx_begin"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "to_pos_idx_begin", "");
+		sheet_headers["from_pos_idx_begin"] = new typed_header(new typed_string_desc(basic_value_type::number_u32), "from_pos_idx_begin", "");
+		sheet_headers["to_pos_idx_begin"] = new typed_header(new typed_string_desc(basic_value_type::number_u32), "to_pos_idx_begin", "");
 
-		sheet_headers["from_pos_idx_end"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "from_pos_idx_end", "");
-		sheet_headers["to_pos_idx_end"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "to_pos_idx_end", "");
+		sheet_headers["from_pos_idx_end"] = new typed_header(new typed_string_desc(basic_value_type::number_u32), "from_pos_idx_end", "");
+		sheet_headers["to_pos_idx_end"] = new typed_header(new typed_string_desc(basic_value_type::number_u32), "to_pos_idx_end", "");
 		
-		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_32), 3, ',');
+		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_u32), 3, ',');
 		sheet_headers["color"] = new typed_header(new typed_string_desc(color_type_detail), "color", "");
 		sheet_headers["ref_color"] = new typed_header(new typed_string_desc(basic_value_type::string), "ref_color", "");
 
@@ -524,7 +524,7 @@ namespace
 		{
 			model::range_link cur_range_link;
 			auto[opt_link_id, opt_from_tile, opt_to_tile, opt_from_pos_begin, opt_to_pos_begin, opt_from_pos_end, opt_to_pos_end, opt_color, opt_ref_color, opt_opacity, opt_control, opt_cross] =
-				current_sheet.try_convert_row<string_view, string_view, string_view, int, int,int, int,  tuple<int, int, int>, string_view, float, float, bool>(i, header_indexes);
+				current_sheet.try_convert_row<string_view, string_view, string_view, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t,  tuple<std::uint32_t, std::uint32_t, std::uint32_t>, string_view, float, float, bool>(i, header_indexes);
 			if (!(opt_link_id && opt_from_tile && opt_to_tile && opt_from_pos_begin && opt_from_pos_end && opt_to_pos_begin && opt_to_pos_end && opt_opacity && opt_opacity && opt_cross))
 			{
 				continue;
@@ -574,9 +574,9 @@ namespace
 		sheet_headers["track_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "track_id", "");
 		sheet_headers["tile_id"] = new typed_header(new typed_string_desc(basic_value_type::string), "tile_id", "");
 
-		sheet_headers["begin_pos"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "begin_pos", "");
+		sheet_headers["begin_pos"] = new typed_header(new typed_string_desc(basic_value_type::number_u32), "begin_pos", "");
 
-		sheet_headers["end_pos"] = new typed_header(new typed_string_desc(basic_value_type::number_32), "end_pos", "");
+		sheet_headers["end_pos"] = new typed_header(new typed_string_desc(basic_value_type::number_u32), "end_pos", "");
 		sheet_headers["data_value"] = new typed_header(new typed_string_desc(basic_value_type::number_float), "data_value", "");
 
 		auto header_match = current_sheet.check_header_match(sheet_headers, "value_id");
@@ -596,7 +596,7 @@ namespace
 		for (std::uint32_t i = 1; i < all_row_info.size(); i++)
 		{
 			auto[opt_data_id, opt_track_id, opt_tile_id, opt_begin_pos, opt_end_pos, opt_data_value] =
-				current_sheet.try_convert_row<string_view, string_view, string_view, int, int, float>(i, header_indexes);
+				current_sheet.try_convert_row<string_view, string_view, string_view, std::uint32_t, std::uint32_t, float>(i, header_indexes);
 			if (!(opt_data_id && opt_track_id && opt_tile_id && opt_begin_pos && opt_end_pos && opt_data_value))
 			{
 				continue;
@@ -631,7 +631,7 @@ namespace
 
 		sheet_headers["fixed_size"] = new typed_header(new typed_string_desc(basic_value_type::number_u32), "fixed_size", "");
 
-		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_32), 3, ',');
+		auto color_type_detail = make_tuple(new typed_string_desc(basic_value_type::number_u32), 3, ',');
 		sheet_headers["min_color"] = new typed_header(new typed_string_desc(color_type_detail), "min_color", "");
 		sheet_headers["min_color_ref"] = new typed_header(new typed_string_desc(basic_value_type::string), "min_color_ref", "");
 
@@ -658,7 +658,7 @@ namespace
 		for (std::uint32_t i = 1; i < all_row_info.size(); i++)
 		{
 			auto [opt_track_id, opt_circle_id, opt_draw_type, opt_min_value, opt_max_value,opt_radius_offset_min, opt_radius_offset_max, opt_min_color, opt_max_color, opt_min_color_ref, opt_max_color_ref, opt_fixed_size] =
-				current_sheet.try_convert_row<string_view, string_view, string_view, float, float, int, int, tuple<int, int,int>, tuple<int, int, int>, string_view, string_view, std::uint32_t>(i, header_indexes);
+				current_sheet.try_convert_row<string_view, string_view, string_view, float, float, int, int, tuple<int, int,int>, tuple<std::uint32_t, std::uint32_t, std::uint32_t>, string_view, string_view, std::uint32_t>(i, header_indexes);
 			if (!(opt_track_id && opt_circle_id && opt_draw_type && opt_min_value && opt_max_value && opt_radius_offset_min && opt_radius_offset_max))
 			{
 				continue;
@@ -865,7 +865,7 @@ namespace
 		auto background_color_ptr = config_values["background_color"];
 		if(background_color_ptr)
 		{
-			auto cur_background_color_opt = background_color_ptr->expect_value<std::tuple<int, int, int>>();
+			auto cur_background_color_opt = background_color_ptr->expect_value<std::tuple<std::uint32_t, std::uint32_t, std::uint32_t>>();
 			if(!cur_background_color_opt)
 			{
 				return false;
