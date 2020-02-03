@@ -28,8 +28,8 @@ int main(int argc, char** argv)
 	time(&rawtime);
 	timeinfo = localtime(&rawtime);
 
-	strftime(buffer, sizeof(buffer), "%d-%m-%Y %H:%M:%S", timeinfo);
-	std::string file_name = cur_file_path.stem().string() +" " + std::string(buffer);
+	strftime(buffer, sizeof(buffer), "%d-%m-%Y-%H-%M-%S", timeinfo);
+	std::string file_name = cur_file_path.stem().string() +"-" + std::string(buffer);
 	std::string png_file_name = file_name + ".png";
 	std::string svg_file_name = file_name + ".svg";
 	if(argc == 3)
@@ -49,6 +49,7 @@ int main(int argc, char** argv)
 			return 0;
 		}
 	}
+	cout << "png file " << png_file_name << " svg file " << svg_file_name << endl;
 	read_xlsx_and_draw(std::string(argv[1]), png_file_name, svg_file_name);
 	return 0;
 }
