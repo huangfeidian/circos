@@ -69,18 +69,47 @@ namespace
 	}
     vector<pair<pair<int32_t, int32_t>, uint8_t>> down_sample(const vector<pair<pair<int32_t, int32_t>, uint8_t>>& data, std::uint8_t ratio)
     {
+		if (ratio == 1)
+		{
+			return data;
+		}
         unordered_map<pair<int, int>, uint16_t, pair_hash> temp_result;
+		std::vector<std::tuple<int, int, int>> offset = {
+			{0, 0, 8},
+		{0,1, 1},
+		{0, -1, 1},
+		{1, 0, 1},
+		{1, -1, 1},
+		{1, 1, 1},
+		{-1, 0, 1},
+		{-1, 1, 1},
+		{-1, -1, 1},
+		};
         for (auto one_data : data)
         {
-            auto new_x = one_data.first.first / ratio;
-            auto new_y = one_data.first.second / ratio;
-            auto cur_pair = make_pair(new_x, new_y);
-            auto& pre = temp_result[cur_pair];
-            pre += one_data.second;
+			auto[cur_x, cur_y] = one_data.first;
+			for (auto[diff_x, diff_y, weight] : offset)
+			{
+				
+				auto new_x = (cur_x + diff_x) / ratio;
+				auto new_y = (cur_y + diff_y) / ratio;
+				if (new_x * ratio == (cur_x + diff_x) && new_y * ratio == (cur_y + diff_y))
+				{
+					auto cur_pair = make_pair(new_x, new_y);
+					temp_result[cur_pair] += one_data.second * weight;
+				}
+			}
+			
         }
+		int total_weight = 0;
+		for (auto[diff_x, diff_y, weight] : offset)
+		{
+			total_weight += weight;
+		}
+
         for (auto& one_data : temp_result)
         {
-            one_data.second /= ratio;
+            one_data.second /= total_weight;
         }
         vector<pair<pair<int32_t, int32_t>, uint8_t>> result;
         result.insert(result.end(), temp_result.begin(), temp_result.end());
