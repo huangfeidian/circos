@@ -102,11 +102,12 @@ namespace
 			return;
 		}
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
-		for(std::uint32_t i=1; i< all_row_info.size(); i++)
+		for(auto one_row_ref: all_row_info)
 		{
+			
 			model::circle cur_circle;
 			auto[opt_cirlce_id, opt_inner_radius, opt_outer_radius, opt_color, opt_ref_color, opt_opacity, opt_gap, opt_filled] = 
-				current_sheet.try_convert_row<string_view, std::uint32_t, std::uint32_t, tuple<std::uint32_t, std::uint32_t, std::uint32_t>, string_view, float, std::uint32_t, bool>(i, header_indexes);
+				current_sheet.try_convert_row<string_view, std::uint32_t, std::uint32_t, tuple<std::uint32_t, std::uint32_t, std::uint32_t>, string_view, float, std::uint32_t, bool>(one_row_ref.get(), header_indexes);
 			if (!(opt_cirlce_id && opt_inner_radius && opt_outer_radius && opt_opacity && opt_gap && opt_filled))
 			{
 				continue;
@@ -133,7 +134,7 @@ namespace
 			}
 			if(cur_circle.circle_id.empty())
 			{
-				std::cerr<<"cant find circle for row "<< i <<std::endl;
+				std::cerr<<"cant find circle for row " <<std::endl;
 				continue;
 			}
 			if(cur_circle.inner_radius >= cur_circle.outer_radius)
@@ -184,12 +185,13 @@ namespace
 			return;
 		}
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
-		for(std::uint32_t i=1; i< all_row_info.size(); i++)
+		for(auto one_row_ref: all_row_info)
 		{
+			
 			model::tile cur_tile;
 
 			auto[opt_tile_id, opt_circle_id, opt_width, opt_seq, opt_color, opt_ref_color, opt_opacity, opt_filled] = 
-				current_sheet.try_convert_row<string_view, string_view, std::uint32_t, std::uint32_t, tuple<std::uint32_t, std::uint32_t, std::uint32_t>, string_view, float, bool>(i, header_indexes);
+				current_sheet.try_convert_row<string_view, string_view, std::uint32_t, std::uint32_t, tuple<std::uint32_t, std::uint32_t, std::uint32_t>, string_view, float, bool>(one_row_ref.get(), header_indexes);
 			if (!(opt_tile_id && opt_circle_id && opt_width && opt_seq && opt_opacity && opt_filled))
 			{
 				continue;
@@ -217,7 +219,7 @@ namespace
 
 			if(cur_tile.tile_id.empty())
 			{
-				std::cerr<<"cant find tile for row "<< i <<std::endl;
+				std::cerr<<"cant find tile for row "<<std::endl;
 				continue;
 			}
 			if(all_tiles.find(cur_tile.tile_id) != all_tiles.end())
@@ -265,11 +267,11 @@ namespace
 			return;
 		}
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
-		for(std::uint32_t i = 1; i< all_row_info.size(); i++)
+		for(auto one_row_ref: all_row_info)
 		{
 			model::circle_tick cur_circle_tick;
 			auto[opt_tick_id, opt_circle_id, opt_width, opt_height, opt_color, opt_ref_color, opt_opacity, opt_gap] =
-				current_sheet.try_convert_row<string_view, string_view, std::uint32_t, std::uint32_t, tuple<std::uint32_t, std::uint32_t, std::uint32_t>, string_view, float, std::uint32_t>(i, header_indexes);
+				current_sheet.try_convert_row<string_view, string_view, std::uint32_t, std::uint32_t, tuple<std::uint32_t, std::uint32_t, std::uint32_t>, string_view, float, std::uint32_t>(one_row_ref.get(), header_indexes);
 			if (!(opt_tick_id && opt_circle_id && opt_width && opt_height && opt_opacity&& opt_gap))
 			{
 				continue;
@@ -296,7 +298,7 @@ namespace
 			}
 			if(cur_circle_tick.circle_id.empty())
 			{
-				std::cerr<<"cant find circle_tick for row "<< i <<std::endl;
+				std::cerr<<"cant find circle_tick for row "<<std::endl;
 				continue;
 			}
 			if(all_circle_ticks.find(cur_circle_tick.circle_tick_id) != all_circle_ticks.end())
@@ -343,12 +345,13 @@ namespace
 			return;
 		}
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
-		for (std::uint32_t i = 1; i < all_row_info.size(); i++)
+		for (auto one_row_ref: all_row_info)
 		{
+			
 			model::point_link cur_point_link;
 			cur_point_link.width = 1;
 			auto[opt_link_id, opt_from_tile, opt_to_tile, opt_from_pos, opt_to_pos, opt_color, opt_ref_color, opt_opacity, opt_control] =
-				current_sheet.try_convert_row<string_view, string_view, string_view, std::uint32_t, std::uint32_t, tuple<std::uint32_t, std::uint32_t, std::uint32_t>, string_view, float, float>(i, header_indexes);
+				current_sheet.try_convert_row<string_view, string_view, string_view, std::uint32_t, std::uint32_t, tuple<std::uint32_t, std::uint32_t, std::uint32_t>, string_view, float, float>(one_row_ref.get(), header_indexes);
 			if (!(opt_link_id && opt_from_tile && opt_from_pos && opt_to_tile && opt_to_pos && opt_opacity && opt_control))
 			{
 				continue;
@@ -375,7 +378,7 @@ namespace
 			}
 			if(cur_point_link.link_id.empty())
 			{
-				std::cerr<<"cant find point link for row "<< i <<std::endl;
+				std::cerr<<"cant find point link for row "<<std::endl;
 				continue;
 			}
 			if(all_point_links.find(cur_point_link.link_id) != all_point_links.end())
@@ -429,12 +432,13 @@ namespace
 			return;
 		}
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
-		for (std::uint32_t i = 1; i < all_row_info.size(); i++)
+		for(auto one_row_ref: all_row_info)
 		{
+			
 			model::path_text cur_path_text;
 
 			auto[opt_path_id, opt_tile_id, opt_text_path_type, opt_text_align_type, opt_from_pos, opt_to_pos, opt_text, opt_font_name, opt_font_size, opt_color, opt_ref_color, opt_opacity, opt_offset] =
-				current_sheet.try_convert_row<string_view, string_view, string_view, string_view, std::uint32_t, std::uint32_t, string_view, string_view, std::uint32_t, tuple<std::uint32_t, std::uint32_t, std::uint32_t>, string_view, float, int>(i, header_indexes);
+				current_sheet.try_convert_row<string_view, string_view, string_view, string_view, std::uint32_t, std::uint32_t, string_view, string_view, std::uint32_t, tuple<std::uint32_t, std::uint32_t, std::uint32_t>, string_view, float, int>(one_row_ref.get(), header_indexes);
 			if (!(opt_path_id && opt_tile_id && opt_from_pos && opt_to_pos && opt_text&& opt_font_name && opt_font_size&& opt_opacity && opt_text_path_type && opt_text_align_type))
 			{
 				continue;
@@ -467,7 +471,7 @@ namespace
 			}
 			if (cur_path_text.path_text_id.empty())
 			{
-				std::cerr << "cant find path_text for row " << i << std::endl;
+				std::cerr << "cant find path_text for row " << std::endl;
 				continue;
 			}
 			if (all_path_texts.find(cur_path_text.path_text_id) != all_path_texts.end())
@@ -520,11 +524,11 @@ namespace
 			return;
 		}
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
-		for(std::uint32_t i = 1; i< all_row_info.size(); i++)
+		for(auto one_row_ref: all_row_info)
 		{
 			model::range_link cur_range_link;
 			auto[opt_link_id, opt_from_tile, opt_to_tile, opt_from_pos_begin, opt_to_pos_begin, opt_from_pos_end, opt_to_pos_end, opt_color, opt_ref_color, opt_opacity, opt_control, opt_cross] =
-				current_sheet.try_convert_row<string_view, string_view, string_view, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t,  tuple<std::uint32_t, std::uint32_t, std::uint32_t>, string_view, float, float, bool>(i, header_indexes);
+				current_sheet.try_convert_row<string_view, string_view, string_view, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t,  tuple<std::uint32_t, std::uint32_t, std::uint32_t>, string_view, float, float, bool>(one_row_ref.get(), header_indexes);
 			if (!(opt_link_id && opt_from_tile && opt_to_tile && opt_from_pos_begin && opt_from_pos_end && opt_to_pos_begin && opt_to_pos_end && opt_opacity && opt_opacity && opt_cross))
 			{
 				continue;
@@ -553,7 +557,7 @@ namespace
 			}
 			if(cur_range_link.link_id.empty())
 			{
-				std::cerr<<"cant find point link for row "<< i <<std::endl;
+				std::cerr<<"cant find point link for row "<<std::endl;
 				continue;
 			}
 			if(all_range_links.find(cur_range_link.link_id) != all_range_links.end())
@@ -593,10 +597,10 @@ namespace
 			return;
 		}
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
-		for (std::uint32_t i = 1; i < all_row_info.size(); i++)
+		for(auto one_row_ref: all_row_info)
 		{
 			auto[opt_data_id, opt_track_id, opt_tile_id, opt_begin_pos, opt_end_pos, opt_data_value] =
-				current_sheet.try_convert_row<string_view, string_view, string_view, std::uint32_t, std::uint32_t, float>(i, header_indexes);
+				current_sheet.try_convert_row<string_view, string_view, string_view, std::uint32_t, std::uint32_t, float>(one_row_ref.get(), header_indexes);
 			if (!(opt_data_id && opt_track_id && opt_tile_id && opt_begin_pos && opt_end_pos && opt_data_value))
 			{
 				continue;
@@ -655,10 +659,11 @@ namespace
 		uint32_t min_color_ref_idx = header_indexes[9];
 		uint32_t max_color_ref_idx = header_indexes[10];
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
-		for (std::uint32_t i = 1; i < all_row_info.size(); i++)
+		for(auto one_row_ref: all_row_info)
 		{
+			
 			auto [opt_track_id, opt_circle_id, opt_draw_type, opt_min_value, opt_max_value,opt_radius_offset_min, opt_radius_offset_max, opt_min_color, opt_max_color, opt_min_color_ref, opt_max_color_ref, opt_fixed_size] =
-				current_sheet.try_convert_row<string_view, string_view, string_view, float, float, int, int, tuple<int, int,int>, tuple<std::uint32_t, std::uint32_t, std::uint32_t>, string_view, string_view, std::uint32_t>(i, header_indexes);
+				current_sheet.try_convert_row<string_view, string_view, string_view, float, float, int, int, tuple<int, int,int>, tuple<std::uint32_t, std::uint32_t, std::uint32_t>, string_view, string_view, std::uint32_t>(one_row_ref.get(), header_indexes);
 			if (!(opt_track_id && opt_circle_id && opt_draw_type && opt_min_value && opt_max_value && opt_radius_offset_min && opt_radius_offset_max))
 			{
 				continue;
@@ -732,12 +737,13 @@ namespace
 		
 		const vector<const typed_header*>& all_headers = config_sheet.get_typed_headers();
 		const auto& all_row_info = config_sheet.get_all_typed_row_info();
-		for(std::uint32_t i = 1; i< all_row_info.size(); i++)
+		for(auto one_row_ref: all_row_info)
 		{
 			string_view cur_config_key, cur_config_value, cur_config_value_type;
-			for(std::uint32_t j = 1; j< all_row_info[i].size(); j++)
+			auto& one_row = one_row_ref.get();
+			for(std::uint32_t j = 1; j< one_row.size(); j++)
 			{
-				auto cur_cell_value = all_row_info[i][j];
+				auto cur_cell_value = one_row[j];
 				uint32_t column_idx = j;
 				string_view current_header_name = all_headers[column_idx]->header_name;
 				if(current_header_name == "config_key")
@@ -829,11 +835,11 @@ namespace
 			return;
 		}
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
-		for (std::uint32_t i = 1; i < all_row_info.size(); i++)
+		for(auto one_row_ref: all_row_info)
 		{
 			model::range_link cur_range_link;
 			auto[opt_font_id, opt_font_path, opt_font_name] =
-				current_sheet.try_convert_row<string_view, string_view, string_view>(i, header_indexes);
+				current_sheet.try_convert_row<string_view, string_view, string_view>(one_row_ref.get(), header_indexes);
 			if (!opt_font_id || !opt_font_name || !opt_font_path)
 			{
 				continue;
@@ -918,11 +924,11 @@ namespace
 			return;
 		}
 		const auto& all_row_info = current_sheet.get_all_typed_row_info();
-		for (std::uint32_t i = 1; i < all_row_info.size(); i++)
+		for(auto one_row_ref: all_row_info)
 		{
-			const auto& row_value = current_sheet.get_typed_row(i);
+			
 			auto[opt_color_id, opt_red, opt_green, opt_blue] =
-				current_sheet.try_convert_row<string_view, std::uint32_t, std::uint32_t, std::uint32_t>(i, header_indexes);
+				current_sheet.try_convert_row<string_view, std::uint32_t, std::uint32_t, std::uint32_t>(one_row_ref.get() ,header_indexes);
 			if (!opt_color_id || !opt_red || !opt_green || !opt_blue)
 			{
 				continue;
@@ -987,12 +993,13 @@ namespace
 		}
 		const vector<const typed_header*>& all_headers = role_sheet.get_typed_headers();
 		const auto& all_row_info = role_sheet.get_all_typed_row_info();
-		for(std::uint32_t i = 1; i< all_row_info.size(); i++)
+		for(auto one_row_ref: all_row_info)
 		{
+			auto& one_row = one_row_ref.get();
 			string_view cur_sheet_name, cur_sheet_role;
-			for(std::uint32_t j = 1; j< all_row_info[i].size(); j++)
+			for(std::uint32_t j = 1; j< one_row.size(); j++)
 			{
-				auto cur_cell_value = all_row_info[i][j];
+				auto cur_cell_value = one_row[j];
 				
 				uint32_t column_idx = j;
 				string_view current_header_name = all_headers[column_idx]->header_name;
