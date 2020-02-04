@@ -1,6 +1,8 @@
 ﻿#include <circos/freetype_wrapper.h>
 #include <fstream>
 #include <iostream>
+#include <algorithm>
+
 using namespace std;
 using namespace spiritsaway::circos;
 namespace
@@ -81,9 +83,9 @@ namespace
 		{1, 0, 1},
 		{1, -1, 1},
 		{1, 1, 1},
-		{-1, 0, 1},
-		{-1, 1, 1},
-		{-1, -1, 1},
+		 {-1, 0, 1},
+		 {-1, 1, 1},
+		 {-1, -1, 1},
 		};
         for (auto one_data : data)
         {
@@ -96,7 +98,8 @@ namespace
 				if (new_x * ratio == (cur_x + diff_x) && new_y * ratio == (cur_y + diff_y))
 				{
 					auto cur_pair = make_pair(new_x, new_y);
-					temp_result[cur_pair] += one_data.second * weight;
+					temp_result[cur_pair] = std::max(static_cast<std::uint16_t>(one_data.second), temp_result[cur_pair]);
+					//temp_result[cur_pair] += one_data.second * one_data.second * weight;
 				}
 			}
 			
@@ -107,10 +110,11 @@ namespace
 			total_weight += weight;
 		}
 
-        for (auto& one_data : temp_result)
-        {
-            one_data.second /= total_weight;
-        }
+   //     for (auto& one_data : temp_result)
+   //     {
+			//auto pre_value = one_data.second / total_weight;
+   //         one_data.second = sqrt(pre_value);
+   //     }
         vector<pair<pair<int32_t, int32_t>, uint8_t>> result;
         result.insert(result.end(), temp_result.begin(), temp_result.end());
         return result;

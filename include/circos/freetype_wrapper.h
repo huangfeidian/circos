@@ -19,7 +19,7 @@ namespace spiritsaway::circos
 		std::vector<unsigned char> invalid_font;
         const std::unordered_map<std::string_view, std::pair<std::string_view, std::string_view>>& font_info;//所有字体相关文件的存储路径映射
         std::unordered_map<std::string_view, std::vector<unsigned char>> font_cache;//字体文件读入内存
-        std::uint8_t scale = 3;
+        std::uint8_t scale = 2;
         bool rotate_first = true;
 		FT_Library ft_library;
         
