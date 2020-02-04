@@ -197,5 +197,17 @@ namespace spiritsaway::circos
 
 			return Line(tangent_point, tangent_point + Point(new_diff_x, new_diff_y));
 		}
+		Point axis_transform(std::uint32_t diff_x, std::uint32_t diff_y)
+		{
+			// 这里的diff_x 和diff_y 是相对于当前直线的初始点为原点， 以当前直线的方向为x轴正方向来说的
+			// 结果返回在世界坐标中的点
+			double angle = atan2(to.y - from.y, to.x - from.x);
+			double cos_angle = cos(angle);
+			double sin_angle = sin(angle);
+			std::int32_t new_x = cos_angle * diff_x - sin_angle * diff_y;
+			std::int32_t new_y = cos_angle * diff_y + sin_angle * diff_x;
+			return Point(from.x + new_x, from.y + new_y);
+
+		}
 	};
 }

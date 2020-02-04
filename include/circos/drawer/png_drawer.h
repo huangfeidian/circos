@@ -24,8 +24,7 @@
 #include "../shapes/region.h"
 #include "../shapes/arc_text.h"
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
+#include "../freetype_wrapper.h"
 
 
 
@@ -48,6 +47,7 @@ namespace spiritsaway::circos
 		vector<uint8_t> flood_buffer;
 		vector<uint8_t*> flood_map;//这个按照png里的惯例 ，也弄成行指针吧
 
+		freetype_wrapper ft_wrapper;
 		string file_name;
 		int bit_depth = 8;
 		const string author = "Author:spiritsaway";
@@ -55,11 +55,6 @@ namespace spiritsaway::circos
 		const string software = "circos implemented in c++";
 		const string title = "circos.png";
 		std::unordered_map<int, vector<Point>> circle_cache;
-		const std::unordered_map<std::string_view, std::pair<std::string_view, std::string_view>>& font_info;//所有字体相关文件的存储路径映射
-		//下面是跟freetype相关的成员
-
-		std::unordered_map<std::string_view, vector<unsigned char>> font_cache;//字体文件读入内存
-		FT_Library ft_library;
 
 		PngImage(const std::unordered_map<std::string_view, std::pair<std::string_view, std::string_view>>& in_font_info,string in_file_name, int in_radius, Color back_color, int compress=8);
 		const vector<unsigned char>& get_font_mem(std::string_view font_name);
@@ -83,8 +78,9 @@ namespace spiritsaway::circos
 			
 		//这里要处理一下utf8
 		void draw_text(const Line& base_line, std::vector<std::uint32_t> text, std::string_view , int font_size, Color color, float alpha);
-			
-		void draw_bitmap(const FT_GlyphSlot& slot,Line on_line, Color color, float alpha);
+
+
+		void draw_grey_map(const std::vector<std::pair<std::pair<std::int32_t, std::int32_t>, std::uint8_t>>& grey_bitmap, Color color, float alpha);
 		// 获得某一点相对于某条线的对称点
 
 		vector<Point> path(const Line& line) const;

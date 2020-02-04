@@ -55,6 +55,7 @@ ADD_EXECUTABLE(xlsx_circos ${CIRCOS_TEST_DIR}/xlsx_circos.cpp )
 ADD_EXECUTABLE(flood_test ${CIRCOS_TEST_DIR}/flood_test.cpp)
 ADD_EXECUTABLE(track_test ${CIRCOS_TEST_DIR}/track_test.cpp)
 ADD_EXECUTABLE(text_test ${CIRCOS_TEST_DIR}/text_test.cpp)
+ADD_EXECUTABLE(freetype_test ${CIRCOS_TEST_DIR}/freetype_test.cpp)
 
 target_link_libraries(shape_test circos)
 target_link_libraries(pi_shape_test circos)
@@ -65,6 +66,7 @@ target_link_libraries(xlsx_circos circos)
 target_link_libraries(pi_excel_test circos)
 target_link_libraries(tick_test circos)
 target_link_libraries(text_test circos)
+target_link_libraries(freetype_test circos)
 
 
 ADD_EXECUTABLE("pi_csv" ${CIRCOS_TEST_DIR}/pi_csv.cpp)

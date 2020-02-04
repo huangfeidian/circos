@@ -89,6 +89,10 @@ namespace spiritsaway::circos
 		{
 			return p_a.x * p_b.y - p_a.y * p_b.x;
 		}
+		std::pair<T, T> to_pair() const
+		{
+			return std::make_pair(x, y);
+		}
 
 	};
 	using Point = basic_point<std::int32_t>;

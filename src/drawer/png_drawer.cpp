@@ -11,7 +11,7 @@ namespace spiritsaway::circos
 {
 	using namespace std;
 	PngImage::PngImage(const unordered_map<string_view, pair<string_view, string_view>>& in_font_info, string in_file_name, int in_radius, Color back_color, int compress)
-	: font_info(in_font_info)
+	: ft_wrapper(in_font_info)
 	,file_name(in_file_name)
 	, radius(in_radius)
 	, width(2*in_radius)
@@ -37,45 +37,10 @@ namespace spiritsaway::circos
 			_buffer[i]=background_color;
 		}
 
-		auto error = FT_Init_FreeType(&ft_library);
-		if (error)
-		{
-			cerr << "cant init ft_library" << endl;
-			exit(1);
-		}
+		
 	}
 
-	const vector<unsigned char>& PngImage::get_font_mem(std::string_view font_name)
-	{
-		if (font_info.find(font_name) == font_info.end())
-		{
-			cerr << "unknown font name " << font_name << endl;
-			cerr << "all avail fonts is " << endl;
-			for (const auto& i : font_info)
-			{
-				cerr << i.first << endl;
-			}
-			exit(1);
-		}
-		auto iter = font_cache.find(font_name);
-		if (iter != font_cache.end())
-		{
-			return iter->second;
-		}
-		font_cache[font_name] = vector<unsigned char>();
 
-		auto& result = font_cache[font_name];
-		auto font_iter = font_info.find(font_name);
-		if (font_iter == font_info.end())
-		{
-			std::cerr << "unknown font " << font_name << std::endl;
-			exit(1);
-		}
-		ifstream font_file(string(font_iter->second.first), ios::binary);
-		std::copy(std::istreambuf_iterator<char>(font_file), std::istreambuf_iterator<char>(), std::back_inserter(result));
-		return result;
-
-	}
 	void PngImage::plot(Colorbasic_point input, float opacity)
 	{
 		_image[input.pos.y][input.pos.x].blend(input.color, opacity);
@@ -86,6 +51,8 @@ namespace spiritsaway::circos
 	}
 	void PngImage::plot(int x, int y, Color color, float opacity)
 	{
+		x = x % width;
+		y = y % height;
 		_image[y][x].blend(color, opacity);
 	}
 	Color PngImage::read(Point pos)
@@ -347,90 +314,21 @@ namespace spiritsaway::circos
 	void PngImage::draw_text(const Line& base_line, std::vector<std::uint32_t> text, std::string_view font_name, int font_size, Color color, float alpha)
 		//这里要处理一下utf8
 	{
-		FT_Face face;
-		auto font_mem = get_font_mem(font_name);
-		FT_UInt glyph_index;
-		FT_Error error;
-		FT_Matrix matrix;
-		FT_Vector pen;
-
-		FT_Bool use_kerning;
-		FT_UInt previous = 0;
-		double angle = atan2(base_line.to.y - base_line.from.y,base_line.to.x-base_line.from.x) ;
-		double cos_angle = cos(angle);
-		double sin_angle = sin(angle);
-		matrix.xx = static_cast<FT_Fixed>(cos_angle * 65536);
-		matrix.xy = static_cast<FT_Fixed>(-sin_angle * 65536);
-		matrix.yx = static_cast<FT_Fixed>(sin_angle * 65536);
-		matrix.yy = static_cast<FT_Fixed>(cos_angle * 65536);
-		pen.x = base_line.from.x * 64;
-		pen.y = base_line.from.y * 64;
-		error = FT_New_Memory_Face(ft_library, &font_mem[0], font_mem.size(), 0, &face);
-		if (error)
-		{
-			cerr << "error loading font:" << font_name << " from memory" << endl;
-			return;
-		}
-		error = FT_Set_Pixel_Sizes(face, font_size, 0);
-		if (error)
-		{
-			cerr << "Freetype set char size error, font:" << font_name << " size:" << font_size << endl;
-			return ;
-		}
-		FT_GlyphSlot slot = face->glyph;
-		use_kerning = FT_HAS_KERNING(face);
-		for (uint32_t i : text)
-		{
-			glyph_index = FT_Get_Char_Index(face, i);
-			if (use_kerning&& previous&&glyph_index)
-			{
-				FT_Vector delta;
-				FT_Get_Kerning(face, previous, glyph_index, ft_kerning_default, &delta);
-				pen.x += static_cast<int>(delta.x*cos_angle);
-				pen.y += static_cast<int>(delta.y*sin_angle);
-			}
-			FT_Set_Transform(face, &matrix, &pen);
-			error = FT_Load_Glyph(face, glyph_index, FT_LOAD_DEFAULT);
-			if (error)
-			{
-				cerr << "freetype cant load glyph, font:" << font_name << " index:" << glyph_index << endl;
-				return;
-			}
-			error = FT_Render_Glyph(face->glyph, ft_render_mode_normal);
-			if (error)
-			{
-				cerr << "freetype cant load glyph, font:" << font_name << " index:" << glyph_index << endl;
-				return;
-			}
-			//这里应该开始画bitmap了
-			draw_bitmap(slot, base_line, color, alpha);
-			pen.x += slot->advance.x;
-			pen.y += slot->advance.y;
-			previous = glyph_index;
-		}
-		FT_Done_Face(face);
+		auto result =  ft_wrapper.draw_text_along_line(base_line.from.to_pair(), base_line.to.to_pair(), text, font_size, font_name);
+		draw_grey_map(result, color, alpha);
 	}
-	void PngImage::draw_bitmap(const FT_GlyphSlot& slot,Line on_line, Color color, float alpha)
+
+	void PngImage::draw_grey_map(const std::vector<std::pair<std::pair<std::int32_t, std::int32_t>, std::uint8_t>>& grey_bitmap, Color color, float alpha)
 	{
-		const FT_Bitmap* bitmap = &slot->bitmap;
-		int left = slot->bitmap_left;
-		int top = slot->bitmap_top;
-		float temp;
-		for (uint32_t i = 1;i < bitmap->rows;i++)
+		for (auto[pos, grey_v] : grey_bitmap)
 		{
-			for (uint32_t j = 1; j < bitmap->width;j++)
+			if (pos.first < 0 || pos.second < 0)
 			{
-				temp = static_cast<uint8_t>(bitmap->buffer[(i - 1)*bitmap->width + (j - 1)]);
-				if (temp)
-				{
-					auto sym_point = on_line.symmetric_point(Point(left + j, top - i));
-					plot(sym_point.x, sym_point.y, color, alpha*temp/255.0f);
-					//plot(left + j, top - i, color, alpha*temp / 255.0);
-				}
+				continue;
 			}
+			plot(pos.first, pos.second, color, alpha * (grey_v / 256.0));
 		}
 	}
-
 	PngImage& PngImage::operator<<(const LineText& line_text)
 	{
 
