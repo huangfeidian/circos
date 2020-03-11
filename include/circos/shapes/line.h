@@ -27,7 +27,7 @@ namespace spiritsaway::circos
 		}
 		float len() const
 		{
-			return std::sqrtf(static_cast<float>(len_square()));
+			return std::sqrt(static_cast<float>(len_square()));
 		}
 		int len_square() const
 		{
