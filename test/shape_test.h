@@ -25,7 +25,6 @@ void shape_test_1()
 	Arc arc_2(360, c_pi * 2 / 3, c_pi * 1 / 6, center, false, Color(128, 128, 128), 0, 1.0, 8);
 	Arc arc_3(360, c_pi * 5 / 6 + c_pi, c_pi, center, false, Color(128, 128, 128));
 	std::unordered_map<string_view, pair<string_view, string_view>> font_info{ {"yahei",make_pair("C:/Windows/Fonts/msyhl.ttc", "microsoft yahei")} };
-	auto sme = font_info.lower_bound("nima");
 	Bezier t_bezier_1(arc_1.to_point(), arc_3.from_point(), center, arc_1.color);
 	Bezier t_bezier_2(arc_3.to_point(), arc_1.from_point(), center, arc_1.color);
 

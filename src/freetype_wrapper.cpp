@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <algorithm>
+#include <cmath>
 
 using namespace std;
 using namespace spiritsaway::circos;
@@ -139,7 +140,7 @@ const vector<unsigned char>& freetype_wrapper::get_font_mem(std::string_view fon
 	result.insert(result.end(), std::istreambuf_iterator<char>(font_file), std::istreambuf_iterator<char>());
 	return result;
 }
-freetype_wrapper::point_grey_t freetype_wrapper::read_glyph(const const FT_GlyphSlot& slot)
+freetype_wrapper::point_grey_t freetype_wrapper::read_glyph(const FT_GlyphSlot& slot)
 {
 	const FT_Bitmap* bitmap = &slot->bitmap;
 	int left = slot->bitmap_left;

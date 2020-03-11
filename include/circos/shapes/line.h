@@ -3,7 +3,7 @@
 #include <cmath>
 #include <utility>
 #include <vector>
-
+#include <algorithm>
 #include "../basics/point.h"
 #include "../basics/color.h"
 

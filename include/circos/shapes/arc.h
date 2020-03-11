@@ -140,7 +140,8 @@ namespace spiritsaway::circos
 					Line::connect_paths(temp_result, temp_arc_path);
 					begin_idx++;
 				}
-				Line::connect_paths(temp_result, arc_path(free_angle::from_angle(begin_idx * 45.0f), end_angle, radius));
+				auto temp_arc_path = arc_path(free_angle::from_angle(begin_idx * 45.0f), end_angle, radius);
+				Line::connect_paths(temp_result, temp_arc_path);
 				result.swap(temp_result[0]);
 				for (std::uint32_t i = 1; i < temp_result.size(); i++)
 				{
