@@ -6,6 +6,7 @@
 #include "../basics/color.h"
 #include "circle.h"
 #include "line.h"
+#include <iterator>
 
 namespace spiritsaway::circos
 {

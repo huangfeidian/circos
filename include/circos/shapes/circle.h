@@ -62,7 +62,7 @@ namespace spiritsaway::circos
 			const auto& one_eight = Circle::get_circle(radius);
 			std::uint32_t point_size = one_eight.size();
 			std::vector<Point> one_four;
-			copy(one_eight.begin(), one_eight.end(), back_inserter(one_four));
+			one_four.insert(one_four.end(), one_eight.begin(), one_eight.end());
 			for (const auto& i : one_eight)
 			{
 				one_four.emplace_back(i.y, i.x);
@@ -73,7 +73,7 @@ namespace spiritsaway::circos
 			}
 			point_size *= 2;
 			std::vector<Point> one_half;
-			copy(one_four.begin(), one_four.end(), back_inserter(one_half));
+			one_half.insert(one_half.end(), one_four.begin(), one_four.end());
 			for (const auto& i : one_four)
 			{
 				one_half.emplace_back(-i.x, i.y);
@@ -84,7 +84,7 @@ namespace spiritsaway::circos
 			}
 			point_size *= 2;
 			std::vector<Point> one_total;
-			copy(one_half.begin(), one_half.end(), back_inserter(one_total));
+			one_total.insert(one_total.end(), one_half.begin(), one_half.end());
 			for (const auto& i : one_half)
 			{
 				one_total.push_back(Point(i.x, -i.y));

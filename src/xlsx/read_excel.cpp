@@ -796,7 +796,7 @@ namespace
 				cout<<"value for "<< empty_key <<" is empty"<<endl;
 				continue;
 			}
-			auto current_parsed_type = typed_string_desc::get_type_from_str(cur_config_value_type);
+			auto current_parsed_type = typed_string_desc::get_type_from_str(&temp_arena, cur_config_value_type);
 			auto current_parsed_value = temp_parser.parse_value_with_type(current_parsed_type, cur_config_value);
 			if(!current_parsed_value)
 			{
