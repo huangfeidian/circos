@@ -4,7 +4,7 @@
 #include <circos/basics/constants.h>
 #include <map>
 #include <iostream>
-#include <string_view>
+#include <string>
 using namespace spiritsaway::circos;
 using namespace std;
 
@@ -25,7 +25,7 @@ void flood_test()
 	auto temp_region = Region::make_fan(bottom_radius, cur_circle_radius, free_angle::from_angle(angle_begin), free_angle::from_angle(angle_end), center, Color(128, 128, 128));
 	string png_filename = "circos_flood_test_1.png";
 	string svg_filename = "circos_flood_test_1.svg";
-	std::unordered_map<string_view, pair<string_view, string_view>> font_info{ {"yahei",make_pair("C:/Windows/Fonts/msyhl.ttc", "microsoft yahei")} };
+	std::unordered_map<string, pair<string, string>> font_info{ {"yahei",make_pair("C:/Windows/Fonts/msyhl.ttc", "microsoft yahei")} };
 	PngImage png_image(font_info, png_filename, radius, background_color);
 	SvgGraph svg_graph(font_info, svg_filename, radius, background_color);
 	shape_collection shapes;
