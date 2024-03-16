@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 #include <string>
-#include "basics/point.h"
+#include <shape_drawer/shapes/line_text.h>
 #include "basics/color.h"
 #include "basics/constants.h"
 
@@ -14,6 +14,7 @@
 #include "shapes/tile.h"
 #include "shapes/line_text.h"
 
+using namespace spiritsaway::shape_drawer;
 
 namespace spiritsaway::circos::model
 {

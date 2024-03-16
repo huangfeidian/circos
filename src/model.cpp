@@ -5,7 +5,10 @@
 #include <unordered_set>
 #include <iostream>
 
-#include <circos/basics/utf8_util.h>
+#include <shape_drawer/basics/utf8_util.h>
+#include <shape_drawer/shapes/annulus.h>
+
+using namespace spiritsaway::shape_drawer;
 
 namespace spiritsaway::circos::model
 {

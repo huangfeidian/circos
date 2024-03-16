@@ -1,13 +1,13 @@
 ﻿#include <iostream>
 #include <vector>
 #include <unordered_map>
-#include <circos/basics/color.h>
+#include <basics/color.h>
 #include <fstream>
 #include <numeric>
 #include <string>
 
 using namespace std;
-using namespace spiritsaway::circos;
+using namespace spiritsaway::shape_drawer;
 int main()
 {
 	ifstream pi_file("../data/pi10000.txt");

@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include <string>
-#include "../model.h"
+#include "model.h"
 #include <xlsx_reader/xlsx_archive.h>
 
 namespace spiritsaway::circos

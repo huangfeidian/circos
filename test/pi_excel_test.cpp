@@ -1,8 +1,6 @@
-#include <circos/drawer/png_drawer.h>
-#include <circos/drawer/svg_drawer.h>
+
 #include <circos/shape_collection.h>
-#include <circos/basics/constants.h>
-#include <circos/xlsx/read_excel.h>
+#include <circos/read_excel.h>
 
 #include <map>
 #include <iostream>

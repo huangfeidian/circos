@@ -38,6 +38,9 @@ FIND_PACKAGE(miniz CONFIG REQUIRED)
 FIND_PACKAGE(tinyxml2 CONFIG REQUIRED)
 FIND_PACKAGE(nlohmann_json CONFIG REQUIRED)
 
+FIND_PACKAGE(shape_drawer CONFIG REQUIRED)
+
+INCLUDE_DIRECTORIES(${shape_drawer_include_dirs})
 
 SET(CIRCOS_SRC_DIR ${CMAKE_SOURCE_DIR}/src)
 SET(CIRCOS_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
@@ -47,30 +50,25 @@ SET(CIRCOS_TEST_DIR ${CMAKE_SOURCE_DIR}/test)
 
 ADD_LIBRARY(circos ${CIRCOS_SRC_LISTS})
 
-target_link_libraries(circos ${ZLIB_LIBRARIES} ${PNG_LIBRARIES} ${FREETYPE_LIBRARIES} xlsx_reader)
+target_link_libraries(circos shape_drawer xlsx_reader)
 
 INCLUDE_DIRECTORIES(${CIRCOS_INCLUDE_DIR})
 
-ADD_EXECUTABLE(shape_test  ${CIRCOS_TEST_DIR}/shape_test.cpp )
 ADD_EXECUTABLE(pi_shape_test  ${CIRCOS_TEST_DIR}/pi_shape_test.cpp )
 ADD_EXECUTABLE(pi_excel_test ${CIRCOS_TEST_DIR}/pi_excel_test.cpp )
 ADD_EXECUTABLE(tick_test ${CIRCOS_TEST_DIR}/tick_test.cpp )
 ADD_EXECUTABLE(xlsx_circos ${CIRCOS_TEST_DIR}/xlsx_circos.cpp )
-ADD_EXECUTABLE(flood_test ${CIRCOS_TEST_DIR}/flood_test.cpp)
 ADD_EXECUTABLE(track_test ${CIRCOS_TEST_DIR}/track_test.cpp)
 ADD_EXECUTABLE(text_test ${CIRCOS_TEST_DIR}/text_test.cpp)
-ADD_EXECUTABLE(freetype_test ${CIRCOS_TEST_DIR}/freetype_test.cpp)
 
-target_link_libraries(shape_test circos)
 target_link_libraries(pi_shape_test circos)
 
-target_link_libraries(flood_test circos)
 target_link_libraries(track_test circos)
 target_link_libraries(xlsx_circos circos)
 target_link_libraries(pi_excel_test circos)
 target_link_libraries(tick_test circos)
 target_link_libraries(text_test circos)
-target_link_libraries(freetype_test circos)
 
 
-ADD_EXECUTABLE("pi_csv" ${CIRCOS_TEST_DIR}/pi_csv.cpp)
+ADD_EXECUTABLE(pi_csv ${CIRCOS_TEST_DIR}/pi_csv.cpp)
+target_link_libraries(pi_csv circos)

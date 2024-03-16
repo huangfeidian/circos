@@ -1,17 +1,18 @@
 ﻿#pragma once
 #include <unordered_map>
 #include <vector>
-#include "./shapes/arc.h"
-#include "./shapes/bezier.h"
-#include "./shapes/circle.h"
-#include "./shapes/line_text.h"
-#include "./shapes/line.h"
-#include "./shapes/rectangle.h"
-#include "./shapes/tile.h"
-#include "./shapes/ribbon.h"
-#include "./shapes/annulus.h"
-#include "./shapes/region.h"
-#include "./shapes/arc_text.h"
+
+#include "shapes/arc_text.h"
+#include "shapes/bezier.h"
+
+#include "shapes/rectangle.h"
+#include "shapes/ribbon.h"
+#include "shapes/annulus.h"
+#include "shapes/region.h"
+#include "shapes/tile.h"
+#include "shapes/line_text.h"
+
+using namespace spiritsaway::shape_drawer;
 
 namespace spiritsaway::circos
 {

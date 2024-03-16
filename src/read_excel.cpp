@@ -9,13 +9,15 @@
 #include <magic_enum.hpp>
 
 #include <circos/model.h>
-#include <circos/drawer/png_drawer.h>
-#include <circos/drawer/svg_drawer.h>
-#include <circos/xlsx/read_excel.h>
+#include <circos/read_excel.h>
 
 #include <xlsx_reader/xlsx_typed_worksheet.h>
 #include <xlsx_reader/xlsx_typed_cell.h>
 #include <xlsx_reader/xlsx_workbook.h>
+
+#include "drawer/png_drawer.h"
+#include "drawer/svg_drawer.h"
+
 namespace 
 {
 	using namespace spiritsaway::xlsx_reader;

@@ -1,5 +1,5 @@
-#include <circos/drawer/png_drawer.h>
-#include <circos/drawer/svg_drawer.h>
+#include <drawer/png_drawer.h>
+#include <drawer/svg_drawer.h>
 #include <circos/model.h>
 #include <map>
 #include <vector>
@@ -7,7 +7,7 @@
 #include <streambuf>
 #include <algorithm>
 #include <numeric>
-#include <circos/basics/color.h>
+#include <basics/color.h>
 #include <random>
 #include <algorithm>
 #include <memory>
