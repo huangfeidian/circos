@@ -56,8 +56,8 @@ namespace spiritsaway::circos
 		const string title = "circos.png";
 		std::unordered_map<int, vector<Point>> circle_cache;
 
-		PngImage(const std::unordered_map<std::string_view, std::pair<std::string_view, std::string_view>>& in_font_info,string in_file_name, int in_radius, Color back_color, int compress=8);
-		const vector<unsigned char>& get_font_mem(std::string_view font_name);
+		PngImage(const std::unordered_map<std::string, std::pair<std::string, std::string>>& in_font_info,string in_file_name, int in_radius, Color back_color, int compress=8);
+		const vector<unsigned char>& get_font_mem(const std::string& font_name);
 		void plot(Colorbasic_point input, float opacity = 1.0);
 		void plot(Point pos, Color color,float opacity = 1.0);
 		void plot(int x, int y, Color color, float opacity=1.0);
@@ -77,7 +77,7 @@ namespace spiritsaway::circos
 		void flood(const vector<vector<Point>>& boundary, vector<Point> interiors, Color fill_color, float opacity =1.0);
 			
 		//这里要处理一下utf8
-		void draw_text(const Line& base_line, std::vector<std::uint32_t> text, std::string_view , int font_size, Color color, float alpha);
+		void draw_text(const Line& base_line, std::vector<std::uint32_t> text, const std::string& font_name, int font_size, Color color, float alpha);
 
 
 		void draw_grey_map(const std::vector<std::pair<std::pair<std::int32_t, std::int32_t>, std::uint8_t>>& grey_bitmap, Color color, float alpha);

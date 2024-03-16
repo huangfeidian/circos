@@ -204,8 +204,8 @@ namespace spiritsaway::circos
 			double angle = atan2(to.y - from.y, to.x - from.x);
 			double cos_angle = cos(angle);
 			double sin_angle = sin(angle);
-			std::int32_t new_x = cos_angle * diff_x - sin_angle * diff_y;
-			std::int32_t new_y = cos_angle * diff_y + sin_angle * diff_x;
+			std::int32_t new_x = int32_t(cos_angle * diff_x - sin_angle * diff_y);
+			std::int32_t new_y = int32_t(cos_angle * diff_y + sin_angle * diff_x);
 			return Point(from.x + new_x, from.y + new_y);
 
 		}

@@ -60,7 +60,7 @@ namespace spiritsaway::circos
 		std::vector<Point> path() const
 		{
 			const auto& one_eight = Circle::get_circle(radius);
-			std::uint32_t point_size = one_eight.size();
+			std::uint32_t point_size = std::uint32_t(one_eight.size());
 			std::vector<Point> one_four;
 			one_four.insert(one_four.end(), one_eight.begin(), one_eight.end());
 			for (const auto& i : one_eight)

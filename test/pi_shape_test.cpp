@@ -11,7 +11,7 @@
 #include <random>
 #include <algorithm>
 #include <memory>
-#include <string_view>
+#include <string>
 
 using namespace std;
 using namespace spiritsaway::circos;
@@ -20,7 +20,7 @@ void pi_test_1(void)
 	ifstream pi_file("../data/pi10000.txt");
 	string pi_str((istreambuf_iterator<char>(pi_file)), istreambuf_iterator<char>());
 	vector<uint8_t> pi_digits;
-	std::unordered_map<string_view, pair<string_view, string_view>> font_info{ { "yahei",make_pair("C:/Windows/Fonts/msyhl.ttc", "microsoft yahei") } };
+	std::unordered_map<string, pair<string, string>> font_info{ { "yahei",make_pair("C:/Windows/Fonts/msyhl.ttc", "microsoft yahei") } };
 	pi_digits.reserve(pi_str.size());
 	std::size_t i = 0;
 	for (; i < pi_str.size() - 1; i++)
@@ -82,7 +82,7 @@ void pi_test_1(void)
 	model::model pi_model;
 	model::circle cur_circle;
 	all_temp_string.push_back(std::make_unique<std::string>("pi"));
-	cur_circle.circle_id = std::string_view(all_temp_string.back()->data(), all_temp_string.back()->size());
+	cur_circle.circle_id = std::string(all_temp_string.back()->data(), all_temp_string.back()->size());
 	cur_circle.inner_radius = inner_radius;
 	cur_circle.outer_radius = outer_radius;
 	cur_circle.gap = pi_str.size() / 10;
@@ -99,7 +99,7 @@ void pi_test_1(void)
 	{
 		tiles[i].circle_id = cur_circle.circle_id;
 		all_temp_string.push_back(std::make_unique<std::string>(to_string(i)));
-		tiles[i].tile_id = std::string_view(all_temp_string.back()->data(), all_temp_string.back()->size());
+		tiles[i].tile_id = std::string(all_temp_string.back()->data(), all_temp_string.back()->size());
 		tiles[i].width = chunk_size[i];
 		tiles[i].fill_color = strand_color[i];
 		tiles[i].opacity = 1.0;
@@ -110,7 +110,7 @@ void pi_test_1(void)
 	}
 	for (std::size_t i = 0; i < 10; i++)
 	{
-		string_view from_tile_id = tiles[i].tile_id;
+		string from_tile_id = tiles[i].tile_id;
 		for (const auto& one_link : connections[i])
 		{
 			auto from_pos_idx = one_link.first;
@@ -118,7 +118,7 @@ void pi_test_1(void)
 			auto to_pos_idx = one_link.second.second;
 			model::point_link temp_link;
 			all_temp_string.push_back(std::make_unique<std::string>(to_string(id_count++)));
-			temp_link.link_id = std::string_view(all_temp_string.back()->data(), all_temp_string.back()->size());
+			temp_link.link_id = std::string(all_temp_string.back()->data(), all_temp_string.back()->size());
 			temp_link.from.tile_id = from_tile_id;
 			temp_link.from.pos_idx = from_pos_idx;
 			temp_link.to.tile_id = to_tile_id;

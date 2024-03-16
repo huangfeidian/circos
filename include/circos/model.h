@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <string>
-#include <string_view>
+#include <string>
 #include "basics/point.h"
 #include "basics/color.h"
 #include "basics/constants.h"
@@ -20,7 +20,7 @@ namespace spiritsaway::circos::model
 
 	struct circle
 	{
-		std::string_view circle_id;
+		std::string circle_id;
 		std::uint32_t inner_radius;
 		std::uint32_t outer_radius;
 		std::uint32_t gap;
@@ -32,8 +32,8 @@ namespace spiritsaway::circos::model
 	};
 	struct tile
 	{
-		std::string_view circle_id;
-		std::string_view tile_id;
+		std::string circle_id;
+		std::string tile_id;
 		std::uint32_t width;
 		Color fill_color;
 		float opacity;
@@ -45,8 +45,8 @@ namespace spiritsaway::circos::model
 	struct circle_tick
 	{
 		// 处理圆环上的刻度
-		std::string_view circle_tick_id;
-		std::string_view circle_id;
+		std::string circle_tick_id;
+		std::string circle_id;
 		std::uint32_t gap;
 		Color fill_color;
 		std::uint32_t width;
@@ -57,14 +57,14 @@ namespace spiritsaway::circos::model
 	struct tile_pos
 	{
 		// 贴片上的一个位置
-		std::string_view tile_id;
+		std::string tile_id;
 		std::uint32_t pos_idx;
 	};
 
 	struct tile_region
 	{
 		// 贴片上的一段区域
-		std::string_view tile_id;
+		std::string tile_id;
 		std::uint32_t begin_pos;
 		std::uint32_t end_pos;
 	};
@@ -72,7 +72,7 @@ namespace spiritsaway::circos::model
 	struct point_link
 	{
 		// 两点之间的连线 可能是贝塞尔曲线 也可能是直线
-		std::string_view link_id;
+		std::string link_id;
 		tile_pos from;
 		tile_pos to;
 		float control_radius_percent; //negative for direct link
@@ -84,10 +84,10 @@ namespace spiritsaway::circos::model
 	struct path_text
 	{
 		text_type _on_path;
-		std::string_view path_text_id;
+		std::string path_text_id;
 		tile_region _region;
-		std::string_view utf8_text;
-		std::string_view font_name;
+		std::string utf8_text;
+		std::string font_name;
 		std::uint16_t font_size;
 		Color fill_color;
 		float opacity;
@@ -98,7 +98,7 @@ namespace spiritsaway::circos::model
 	struct range_link
 	{
 		// 交叉或者不交叉的条带 
-		std::string_view link_id;
+		std::string link_id;
 		tile_region from;
 		tile_region to;
 		bool is_cross;
@@ -109,8 +109,8 @@ namespace spiritsaway::circos::model
 	};
 	struct tick_on_tile
 	{
-		std::string_view tick_tile_id;
-		std::string_view tile_id;
+		std::string tick_tile_id;
+		std::string tile_id;
 		std::uint32_t gap;
 		std::uint32_t height;
 		std::uint32_t width;
@@ -125,9 +125,9 @@ namespace spiritsaway::circos::model
 
 	struct value_on_tile
 	{
-		std::string_view data_id;
-		std::string_view track_id;
-		std::string_view tile_id;
+		std::string data_id;
+		std::string track_id;
+		std::string tile_id;
 		std::uint32_t begin_pos;
 		std::uint32_t end_pos;
 		float data_value;
@@ -137,8 +137,8 @@ namespace spiritsaway::circos::model
 	};
 	struct track_config
 	{
-		std::string_view track_id;
-		std::string_view circle_id;
+		std::string track_id;
+		std::string circle_id;
 		std::pair<Color, Color> clamp_color;
 		std::pair<float, float> clamp_data_value;
 		std::pair<std::uint32_t, std::uint32_t> radius_offset;
@@ -162,19 +162,19 @@ namespace spiritsaway::circos::model
 	public:
 		// 这些是原始的输入数据
 		model_config config;
-		std::unordered_map<std::string_view, circle> circles;
-		std::unordered_map<std::string_view, tile> tiles;
-		std::unordered_map<std::string_view, circle_tick> circle_ticks;
-		std::unordered_map<std::string_view, point_link> point_links;
-		std::unordered_map<std::string_view, range_link> range_links;
-		std::unordered_map<std::string_view, tick_on_tile> tile_ticks;
-		std::unordered_map<std::string_view, path_text> path_texts;
-		std::unordered_map<std::string_view, std::pair<std::string_view, std::string_view>> font_info;
+		std::unordered_map<std::string, circle> circles;
+		std::unordered_map<std::string, tile> tiles;
+		std::unordered_map<std::string, circle_tick> circle_ticks;
+		std::unordered_map<std::string, point_link> point_links;
+		std::unordered_map<std::string, range_link> range_links;
+		std::unordered_map<std::string, tick_on_tile> tile_ticks;
+		std::unordered_map<std::string, path_text> path_texts;
+		std::unordered_map<std::string, std::pair<std::string, std::string>> font_info;
 
-		std::unordered_map<std::string_view, std::vector<value_on_tile>> all_value_on_tile_by_track;
-		std::unordered_map<std::string_view, track_config> track_configs;
+		std::unordered_map<std::string, std::vector<value_on_tile>> all_value_on_tile_by_track;
+		std::unordered_map<std::string, track_config> track_configs;
 		void to_shapes(shape_collection& pre_collection);
-		std::unordered_map<std::string_view, std::uint32_t> circle_ranges;
+		std::unordered_map<std::string, std::uint32_t> circle_ranges;
 	private:
 
 		void to_shapes(shape_collection& pre_collection, const track_config& config, std::vector<value_on_tile>& data);

@@ -121,7 +121,7 @@ namespace
         return result;
     }
 }
-const vector<unsigned char>& freetype_wrapper::get_font_mem(std::string_view font_name)
+const vector<unsigned char>& freetype_wrapper::get_font_mem(const std::string& font_name)
 {
 	auto font_iter = font_info.find(font_name);
 	if (font_iter == font_info.end())
@@ -210,7 +210,7 @@ freetype_wrapper::point_grey_t freetype_wrapper::get_text_bitmap(double rad, std
 	FT_Done_Face(face);
 	return result;
 }
-freetype_wrapper::freetype_wrapper(const  std::unordered_map<std::string_view, std::pair<std::string_view, std::string_view>>& in_font_info)
+freetype_wrapper::freetype_wrapper(const  std::unordered_map<std::string, std::pair<std::string, std::string>>& in_font_info)
 	:font_info(in_font_info)
 {
 	auto error = FT_Init_FreeType(&ft_library);
@@ -219,7 +219,7 @@ freetype_wrapper::freetype_wrapper(const  std::unordered_map<std::string_view, s
 		std::cerr << "cant init ft_library" << endl;
 	}
 }
-freetype_wrapper::point_grey_t freetype_wrapper::draw_text_along_line(std::pair<int, int> from, std::pair<int, int> to, std::vector<std::uint32_t> text, std::uint8_t font_size, std::string_view font_name)
+freetype_wrapper::point_grey_t freetype_wrapper::draw_text_along_line(std::pair<int, int> from, std::pair<int, int> to, std::vector<std::uint32_t> text, std::uint8_t font_size, std::string font_name)
 {
 	double rad = atan2(to.second - from.second, to.first - from.first);
 	auto& font_file = get_font_mem(font_name);

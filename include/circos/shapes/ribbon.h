@@ -42,8 +42,8 @@ namespace spiritsaway::circos
 			arc_2 = Arc(radius2, span2_begin, span2_width, center, !twisted, in_color);
 			auto control_point_1 = Point::radius_point(static_cast<std::uint16_t>((radius1 + radius2) / 2 * control_radius_percent), fixed_angle::middle(arc_1.to_angle(), arc_2.from_angle()), center);
 			auto control_point_2 = Point::radius_point(static_cast<std::uint16_t>((radius1 + radius2) / 2 * control_radius_percent), fixed_angle::middle(arc_2.to_angle(), arc_1.from_angle()), center);
-			bezier_1 = Bezier(arc_1.to_point(), arc_2.from_point(), control_point_1, in_color, in_opacity);
-			bezier_2 = Bezier(arc_2.to_point(), arc_1.from_point(), control_point_2, in_color, in_opacity);
+			bezier_1 = Bezier(arc_1.to_point(), arc_2.from_point(), control_point_1, in_color, 1, in_opacity);
+			bezier_2 = Bezier(arc_2.to_point(), arc_1.from_point(), control_point_2, in_color, 1, in_opacity);
 
 		}
 	};

@@ -1,0 +1,11 @@
+tile_id, circle_id, width, sequence, is_fill, opacity, color, ref_color
+tile0,c0,968,0,1,1, ,c0
+tile1,c0,1026,1,1,1, ,c1
+tile2,c0,1021,2,1,1, ,c2
+tile3,c0,975,3,1,1, ,c3
+tile4,c0,1012,4,1,1, ,c4
+tile5,c0,1046,5,1,1, ,c5
+tile6,c0,1021,6,1,1, ,c6
+tile7,c0,970,7,1,1, ,c7
+tile8,c0,947,8,1,1, ,c8
+tile9,c0,1014,9,1,1, ,c9

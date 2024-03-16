@@ -10,7 +10,7 @@
 namespace spiritsaway::circos
 {
 	using namespace std;
-	PngImage::PngImage(const unordered_map<string_view, pair<string_view, string_view>>& in_font_info, string in_file_name, int in_radius, Color back_color, int compress)
+	PngImage::PngImage(const unordered_map<std::string, pair<std::string, std::string>>& in_font_info, string in_file_name, int in_radius, Color back_color, int compress)
 	: ft_wrapper(in_font_info)
 	,file_name(in_file_name)
 	, radius(in_radius)
@@ -311,7 +311,7 @@ namespace spiritsaway::circos
 		//cout << "flood count " << count <<" access count "<<access_count<< endl;
 	}
 
-	void PngImage::draw_text(const Line& base_line, std::vector<std::uint32_t> text, std::string_view font_name, int font_size, Color color, float alpha)
+	void PngImage::draw_text(const Line& base_line, std::vector<std::uint32_t> text, const std::string& font_name, int font_size, Color color, float alpha)
 		//这里要处理一下utf8
 	{
 		auto result =  ft_wrapper.draw_text_along_line(base_line.from.to_pair(), base_line.to.to_pair(), text, font_size, font_name);

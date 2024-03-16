@@ -21,7 +21,7 @@ int main()
 	strftime(buffer, sizeof(buffer), "%d-%m-%Y-%H-%M-%S", timeinfo);
 
 	auto text = utf8_util::utf8_to_uint("0123456789"sv);
-	std::unordered_map<string_view, pair<string_view, string_view>> font_info{ { "yahei",make_pair("C:/Windows/Fonts/msyhl.ttc", "microsoft yahei") } };
+	std::unordered_map<string, pair<string, string>> font_info{ { "yahei",make_pair("C:/Windows/Fonts/msyhl.ttc", "microsoft yahei") } };
 	Color font_color(24, 107, 178);
 	std::string png_file_name = "freetype_test_" + std::string(buffer) + ".png";
 	std::string font_name = "yahei";

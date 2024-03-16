@@ -254,7 +254,7 @@ namespace spiritsaway::circos::model
 			{
 				Arc temp_arc = Arc(cur_radius, text_begin, blank_angle, config.center, false, Color());
 
-				ArcText result = ArcText(temp_arc, one_text, cur_path_text.font_name, cur_path_text.font_size, cur_path_text.fill_color, cur_path_text.opacity);
+				ArcText result = ArcText(temp_arc, std::string(one_text), cur_path_text.font_name, cur_path_text.font_size, cur_path_text.fill_color, cur_path_text.opacity);
 				pre_collection.arc_texts.push_back(result);
 				text_begin = text_begin + text_gap;
 			}
@@ -322,7 +322,7 @@ namespace spiritsaway::circos::model
 	{
 		
 		// 分好组之后 再排序然后处理
-		unordered_map<string_view, vector<tile>> tiles_grouped_by_circle;
+		unordered_map<std::string, vector<tile>> tiles_grouped_by_circle;
 		for (const auto& i : tiles)
 		{
 			auto circle_iter = circles.find(i.second.circle_id);
@@ -381,7 +381,7 @@ namespace spiritsaway::circos::model
 
 	void model::prepare_value_on_track(const track_config& config, std::vector<value_on_tile>& one_track_data)
 	{
-		std::string_view on_circle_id = config.circle_id;
+		std::string on_circle_id = config.circle_id;
 		auto cur_circle_iter = circles.find(on_circle_id);
 		if (cur_circle_iter == circles.end())
 		{
